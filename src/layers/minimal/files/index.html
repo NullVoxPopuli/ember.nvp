@@ -2,13 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>__PROJECT_NAME__</title>
+    <title><%= namespace %></title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script type="module" src="/@embroider/virtual/app.js"></script>
-  </head>
+    <link rel="stylesheet" href="/app/styles/app.css">  
+</head>
   <body>
-  </body>
+  <script type="module">
+      import Application from './app/app';
+      import environment from './app/config/environment';
+
+      Application.create(environment.APP);
+    </script>
+</body>
 </html>
