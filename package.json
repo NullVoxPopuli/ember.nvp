@@ -1,0 +1,15 @@
+{
+    "name": "ember.nvp",
+    "version": "0.0.0",
+    "description": "ember project generator, alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints",
+    "dependencies": {
+
+    },
+    "devDependencies": {
+
+    },
+    "packageManager": "pnpm@10.28.0",
+    "engines": {
+        "node": ">= 24"
+    }
+}
