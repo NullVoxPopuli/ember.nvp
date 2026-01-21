@@ -1,0 +1,22 @@
+{
+  "solution": {
+    "ember.nvp": {
+      "impact": "minor",
+      "oldVersion": "0.0.0",
+      "newVersion": "0.1.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
+        }
+      ],
+      "pkgJSONPath": "./package.json"
+    }
+  },
+  "description": "## Release (2026-01-21)\n\n* ember.nvp 0.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#1](https://github.com/NullVoxPopuli/ember.nvp/pull/1) Implementation planning ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#2](https://github.com/NullVoxPopuli/ember.nvp/pull/2) pnpm dlx create-release-plan-setup@latest --update ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#1](https://github.com/NullVoxPopuli/ember.nvp/pull/1) Implementation planning ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+}
