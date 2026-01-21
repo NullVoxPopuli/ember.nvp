@@ -2,7 +2,6 @@
 
 _ember project generator: alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints_
 
-
 ## Reqs
 
 - node 24+
@@ -14,6 +13,7 @@ _ember project generator: alternative to the official blueprints, but more moder
   - choose your features
 
 Good for:
+
 - demos
 - reproductions
 - existing monorepos
@@ -43,7 +43,7 @@ ember.nvp
 ### Example Session
 
 ```
-┌  ember.nvp 
+┌  ember.nvp
 │
 ◆  What is your project name?
 │  my-awesome-app
@@ -75,6 +75,7 @@ ember.nvp
 ```
 
 The CLI will guide you through:
+
 1. **Project name** - Choose your project name
 2. **Feature selection** - Select which layers you want (linting, testing, formatting)
 3. **Package manager** - Choose pnpm, npm, or yarn
@@ -99,6 +100,7 @@ Perfect for demos, reproductions, and learning!
 ### 📝 ESLint (optional)
 
 Adds modern ESLint configuration with:
+
 - TypeScript support
 - Ember plugin
 - Flat config (ESLint 9+)
@@ -107,6 +109,7 @@ Adds modern ESLint configuration with:
 ### 🎨 Prettier (optional)
 
 Code formatting with:
+
 - GTS/GJS template support
 - Sensible defaults
 - Format scripts
@@ -114,6 +117,7 @@ Code formatting with:
 ### 🧪 QUnit (optional)
 
 Traditional Ember testing with:
+
 - QUnit test framework
 - @ember/test-helpers
 - Test HTML setup
@@ -122,6 +126,7 @@ Traditional Ember testing with:
 ### ⚡ Vitest (optional)
 
 Modern testing alternative:
+
 - Vitest (faster than QUnit)
 - @ember/test-helpers
 - Happy DOM
@@ -172,7 +177,7 @@ Each layer now uses **ember-apply** utilities for robust file and package.json m
 2. **Selection**: User selects which optional layers to include
 3. **Execution**: Each layer's `run()` function is called in sequence:
    ```js
-   await layer.run({ targetDir: '/path/to/project', projectName: 'my-app' });
+   await layer.run({ targetDir: "/path/to/project", projectName: "my-app" });
    ```
 4. **Layer Functions**: Inside `run()`, layers use `ember-apply` to:
    - Copy files from `files/` directory
@@ -188,35 +193,44 @@ To add a new layer, create a new directory in `src/layers/` with:
 1. **`index.js`** - Layer definition:
 
 ```js
-import { packageJson, files } from 'ember-apply';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { packageJson, files } from "ember-apply";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default {
-  label: 'My Feature',
-  description: 'What this feature does',
-  
+  label: "My Feature",
+  description: "What this feature does",
+
   async run({ targetDir, projectName }) {
     // Copy files from files/ directory
-    await files.applyFolder(join(__dirname, 'files'), targetDir);
-    
+    await files.applyFolder(join(__dirname, "files"), targetDir);
+
     // Add dependencies
-    await packageJson.addDependencies({
-      'some-package': '^1.0.0',
-    }, targetDir);
-    
+    await packageJson.addDependencies(
+      {
+        "some-package": "^1.0.0",
+      },
+      targetDir,
+    );
+
     // Add devDependencies
-    await packageJson.addDevDependencies({
-      'dev-package': '^2.0.0',
-    }, targetDir);
-    
+    await packageJson.addDevDependencies(
+      {
+        "dev-package": "^2.0.0",
+      },
+      targetDir,
+    );
+
     // Add scripts
-    await packageJson.addScripts({
-      'my-script': 'echo "Hello"',
-    }, targetDir);
-  }
+    await packageJson.addScripts(
+      {
+        "my-script": 'echo "Hello"',
+      },
+      targetDir,
+    );
+  },
 };
 ```
 

@@ -1,8 +1,8 @@
 const ENV = {
-  modulePrefix: '__PROJECT_NAME__',
-  environment: import.meta.env.DEV ? 'development' : 'production',
-  rootURL: '/',
-  locationType: 'history',
+  modulePrefix: "__PROJECT_NAME__",
+  environment: import.meta.env.DEV ? "development" : "production",
+  rootURL: "/",
+  locationType: "history",
   EmberENV: {},
   APP: {},
 } as {
@@ -10,7 +10,7 @@ const ENV = {
   modulePrefix: string;
   podModulePrefix?: string;
   rootURL: string;
-  locationType: 'history' | 'hash';
+  locationType: "history" | "hash";
   EmberENV: Record<string, unknown>;
   APP: Record<string, unknown>;
 };

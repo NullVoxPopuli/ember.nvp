@@ -1,13 +1,13 @@
-import globals from 'globals';
-import js from '@eslint/js';
-import ts from 'typescript-eslint';
-import ember from 'eslint-plugin-ember';
-import prettier from 'eslint-config-prettier';
+import globals from "globals";
+import js from "@eslint/js";
+import ts from "typescript-eslint";
+import ember from "eslint-plugin-ember";
+import prettier from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
   ...ts.configs.recommended,
-  ...ember.configs['flat/recommended'],
+  ...ember.configs["flat/recommended"],
   prettier,
   {
     languageOptions: {
@@ -15,23 +15,23 @@ export default [
         ...globals.browser,
       },
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        ecmaVersion: "latest",
+        sourceType: "module",
       },
     },
   },
   {
-    files: ['**/*.gts', '**/*.gjs'],
+    files: ["**/*.gts", "**/*.gjs"],
     languageOptions: {
       parser: ts.parser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-        extraFileExtensions: ['.gts', '.gjs'],
+        ecmaVersion: "latest",
+        sourceType: "module",
+        extraFileExtensions: [".gts", ".gjs"],
       },
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', '.vite/'],
+    ignores: ["dist/", "node_modules/", ".vite/"],
   },
 ];
