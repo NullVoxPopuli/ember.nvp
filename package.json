@@ -6,7 +6,8 @@
   "bin": "./src/cli/index.js",
   "scripts": {
     "format": "prettier . --write",
-    "lint:format": "prettier . --check"
+    "lint:format": "prettier . --check",
+    "new": "node ./src/cli/index.js"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
