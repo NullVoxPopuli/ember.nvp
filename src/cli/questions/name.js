@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 
 import packageNameRegex from "package-name-regex";
-import { answers } from "#args";
+import { answers, printArgInUse } from "#args";
 
 const DEFAULT = "my-app";
 
@@ -9,6 +9,8 @@ export async function askName() {
   if (answers.name) {
     let isValid = packageNameRegex.test(answers.name);
     if (isValid) {
+      printArgInUse("name", answers.name);
+
       return answers.name;
     }
   }

@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { answers } from "#args";
+import { answers, printArgInUse } from "#args";
 
 const SUPPORTED = new Set(["pnpm", "npm"]);
 
@@ -11,6 +11,8 @@ function isValid(selected) {
 
 export async function askPackageManager() {
   if (isValid(answers.packageManager)) {
+    printArgInUse("packageManager", answers.packageManager);
+
     return answers.packageManager;
   }
 

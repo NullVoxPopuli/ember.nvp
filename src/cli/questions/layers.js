@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { styleText } from "node:util";
-import { answers } from "#args";
+import { answers, printArgInUse } from "#args";
 
 import * as p from "@clack/prompts";
 
@@ -29,7 +29,11 @@ export async function askLayers() {
   }
 
   if (isValid(answers.layers)) {
-    return optionalLayers.filter((layer) => answers.layers.includes(layer.name));
+    let result = optionalLayers.filter((layer) => answers.layers.includes(layer.name));
+
+    printArgInUse(`layers`, result.map((layer) => layer.name).join(", "));
+
+    return result;
   }
 
   // Let user select additional features

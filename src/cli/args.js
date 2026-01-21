@@ -1,3 +1,6 @@
+import * as p from "@clack/prompts";
+import { styleText, parseArgs } from "node:util";
+
 const { values } = parseArgs({
   options: {
     name: {
@@ -24,3 +27,10 @@ const { values } = parseArgs({
 const { name, type, layers = [], packageManager } = values;
 
 export const answers = { name, type, layers, packageManager };
+
+export function printArgInUse(label, value) {
+  let l = styleText(["gray", "bold"], label);
+  let v = styleText(["yellow", "italic"], value);
+  let u = styleText("dim", "using");
+  p.log.info(`${u} ${l}: ${v}`);
+}

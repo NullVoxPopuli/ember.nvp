@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { answers } from "#args";
+import { answers, printArgInUse } from "#args";
 
 /**
  * addon is alias for library
@@ -14,6 +14,8 @@ function isValid(selected) {
 
 export async function askProjectType() {
   if (isValid(answers.type)) {
+    printArgInUse("type", answers.type);
+
     if (answers.type === "addon") return "library";
 
     return answers.type;
