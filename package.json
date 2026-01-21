@@ -1,15 +1,31 @@
 {
-    "name": "ember.nvp",
-    "version": "0.0.0",
-    "description": "ember project generator, alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints",
-    "dependencies": {
-
-    },
-    "devDependencies": {
-
-    },
-    "packageManager": "pnpm@10.28.0",
-    "engines": {
-        "node": ">= 24"
-    }
+  "name": "ember.nvp",
+  "version": "0.0.0",
+  "description": "ember project generator, alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints",
+  "type": "module",
+  "bin": "./src/cli/index.js",
+  "scripts": {
+    "format": "prettier . --write",
+    "lint:format": "prettier . --check",
+    "new": "node ./src/cli/index.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "ember-apply": "^2.16.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@ember/app-tsconfig": "^2.0.0",
+    "@ember/library-tsconfig": "^2.0.0",
+    "@glint/ember-tsc": "^1.0.9",
+    "@glint/template": "^1.7.3",
+    "@glint/tsserver-plugin": "^2.0.9",
+    "ember-source": "^6.10.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-ember-template-tag": "^2.1.2"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">= 24"
+  }
 }
