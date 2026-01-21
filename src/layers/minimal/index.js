@@ -14,7 +14,7 @@ import { readFile } from "node:fs/promises";
  * - No warp-drive (opt-in if needed)
  */
 export default {
-  label: "Minimal Base",
+  label: "Minimal App Base",
   description: "Bare minimum Ember app structure",
 
   async run({ targetDir, projectName }) {

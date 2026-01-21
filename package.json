@@ -9,6 +9,7 @@
   "type": "module",
   "bin": "./src/cli/index.js",
   "imports": {
+    "#args": "./src/cli/args.js",
     "#utils/*": "./src/utils/*"
   },
   "scripts": {

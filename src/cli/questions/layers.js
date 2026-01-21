@@ -1,12 +1,11 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { styleText } from 'node:util';
+import { styleText } from "node:util";
+import { answers } from "#args";
 
 import * as p from "@clack/prompts";
 
 export async function askLayers() {
-
-  // Discover available layers
   const layers = await discoverLayers();
 
   // Separate minimal from other layers
@@ -14,11 +13,24 @@ export async function askLayers() {
   const optionalLayers = layers.filter((l) => l.name !== "minimal");
 
   p.note(
-    `${styleText('cyan', "minimal")} layer is always included.\n` +
-    'It provides: vite app, type: "module", no compat, no testing, no linting.\n' +
-    "Perfect for demos and reproductions.",
+    `${styleText("cyan", "minimal")} layer is always included.\n` +
+      'It provides: vite app, type: "module", no compat, no testing, no linting.\n' +
+      "Perfect for demos and reproductions.",
     "Base Layer",
   );
+
+  const supported = new Set(optionalLayers.map((layer) => layer.name));
+
+  function isValid(selected) {
+    if (!selected) return false;
+    if (Array.isArray(selected) && selected.length === 0) return false;
+
+    return selected.every((name) => supported.has(name));
+  }
+
+  if (isValid(answers.layers)) {
+    return optionalLayers.filter((layer) => answers.layers.includes(layer.name));
+  }
 
   // Let user select additional features
   const selectedFeatures = await p.multiselect({
@@ -39,15 +51,14 @@ export async function askLayers() {
   // Build the final configuration
   const selectedLayers = [
     minimalLayer,
-    ...optionalLayers.filter((l) => selectedFeatures.includes(l.name)),
+    ...optionalLayers.filter((layer) => selectedFeatures.includes(layer.name)),
   ].filter(Boolean);
 
   return selectedLayers;
-
 }
 
 async function discoverLayers() {
-  const layersDir = join(import.meta.dirname, '..', "..", "layers");
+  const layersDir = join(import.meta.dirname, "..", "..", "layers");
   const entries = await readdir(layersDir, { withFileTypes: true });
 
   const layers = [];
@@ -63,14 +74,10 @@ async function discoverLayers() {
         });
       } catch (err) {
         // Skip layers that don't have proper exports
-        console.warn(
-          `Warning: Could not load layer ${entry.name}:`,
-          err.message,
-        );
+        console.warn(`Warning: Could not load layer ${entry.name}:`, err.message);
       }
     }
   }
 
   return layers;
 }
-

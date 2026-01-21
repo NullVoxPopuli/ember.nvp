@@ -1,10 +1,17 @@
 import * as p from "@clack/prompts";
 
-import packageNameRegex from 'package-name-regex'
+import packageNameRegex from "package-name-regex";
+import { answers } from "#args";
 
-const DEFAULT = 'my-app';
+const DEFAULT = "my-app";
 
 export async function askName() {
+  if (answers.name) {
+    let isValid = packageNameRegex.test(answers.name);
+    if (isValid) {
+      return answers.name;
+    }
+  }
   const projectName = await p.text({
     message: "What is your project name?",
     placeholder: DEFAULT,
