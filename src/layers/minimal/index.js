@@ -1,9 +1,6 @@
 import { packageJson, files, js } from "ember-apply";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { readFile } from "node:fs/promises";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Minimal Layer
@@ -22,7 +19,7 @@ export default {
 
   async run({ targetDir, projectName }) {
     // Apply all files from the files directory
-    await files.applyFolder(join(__dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
 
     // Replace __PROJECT_NAME__ placeholders in specific files
     const filesToUpdate = [

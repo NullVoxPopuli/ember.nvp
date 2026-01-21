@@ -194,10 +194,7 @@ To add a new layer, create a new directory in `src/layers/` with:
 
 ```js
 import { packageJson, files } from "ember-apply";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "node:path";
 
 export default {
   label: "My Feature",
@@ -205,7 +202,7 @@ export default {
 
   async run({ targetDir, projectName }) {
     // Copy files from files/ directory
-    await files.applyFolder(join(__dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
 
     // Add dependencies
     await packageJson.addDependencies(

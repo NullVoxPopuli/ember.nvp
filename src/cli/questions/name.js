@@ -1,14 +1,21 @@
 import * as p from "@clack/prompts";
 
+import packageNameRegex from 'package-name-regex'
+
+const DEFAULT = 'my-app';
+
 export async function askName() {
   const projectName = await p.text({
     message: "What is your project name?",
-    placeholder: "my-app",
-    defaultValue: 'my-app',
+    placeholder: DEFAULT,
+    defaultValue: DEFAULT,
     validate(value) {
-      if (value.length === 0) return "Project name is required";
-      if (!/^[a-z0-9-]+$/.test(value)) {
-        return "Project name must be lowercase and can only contain letters, numbers, and hyphens";
+      if (value.length === 0) return;
+
+      let isValid = packageNameRegex.test(value);
+
+      if (!isValid) {
+        return "Project name must be a valid npm package-name";
       }
     },
   });
@@ -18,5 +25,5 @@ export async function askName() {
     return process.exit(0);
   }
 
-  return projectName;
+  return projectName ?? DEFAULT;
 }

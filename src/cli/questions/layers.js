@@ -1,5 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { styleText } from 'node:util';
 
 import * as p from "@clack/prompts";
 
@@ -13,8 +14,8 @@ export async function askLayers() {
   const optionalLayers = layers.filter((l) => l.name !== "minimal");
 
   p.note(
-    `${pc.cyan("minimal")} layer is always included.\n` +
-    'It provides: type: "module", no compat, no testing, no linting.\n' +
+    `${styleText('cyan', "minimal")} layer is always included.\n` +
+    'It provides: vite app, type: "module", no compat, no testing, no linting.\n' +
     "Perfect for demos and reproductions.",
     "Base Layer",
   );

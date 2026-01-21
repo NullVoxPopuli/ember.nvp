@@ -14,9 +14,12 @@ importers:
       ember-apply:
         specifier: ^2.16.0
         version: 2.16.0(@types/node@25.0.8)(handlebars@4.7.8)(underscore@1.13.7)
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
+      latest-version:
+        specifier: ^9.0.0
+        version: 9.0.0
+      package-name-regex:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
       '@ember/app-tsconfig':
         specifier: ^2.0.0
@@ -3858,6 +3861,10 @@ packages:
   package-json@8.1.1:
     resolution: {integrity: sha512-cbH9IAIJHNj9uXi196JVsRlt7cHKak6u/e6AkL/bkRelZ7rlL3X1YKxsZwa36xipOEKAsdtmaG6aAJoM1fx2zA==}
     engines: {node: '>=14.16'}
+
+  package-name-regex@5.0.0:
+    resolution: {integrity: sha512-VTLjl9bj0CNN3V5VnR8szmF7Jbj0ZqMes4A+7sW1S/3jhsYVW6M4yE19FQFFJ4hi3ydPIX3OelfXV3eDoGmyMA==}
+    engines: {node: '>=22'}
 
   pacote@17.0.7:
     resolution: {integrity: sha512-sgvnoUMlkv9xHwDUKjKQFXVyUi8dtJGKp3vg6sYy+TxbDic5RjZCHF3ygv0EJgNRZ2GfRONjlKPUfokJ9lDpwQ==}
@@ -10018,6 +10025,8 @@ snapshots:
       registry-auth-token: 5.1.0
       registry-url: 6.0.1
       semver: 7.7.3
+
+  package-name-regex@5.0.0: {}
 
   pacote@17.0.7:
     dependencies:
