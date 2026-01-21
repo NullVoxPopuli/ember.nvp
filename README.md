@@ -2,6 +2,18 @@
 
 _ember project generator: alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints_
 
+## Usage
+
+```bash
+npx ember.nvp
+```
+
+or
+
+```bash
+pnpm dlx ember.nvp
+```
+
 ## Reqs
 
 - node 24+
@@ -9,8 +21,11 @@ _ember project generator: alternative to the official blueprints, but more moder
 ## What this does?
 
 - Always `"type": "module"`
+- Modern, incremental 
 - Interactive CLI
   - choose your features
+- The generators fro the different types of projects are never out of date from each other
+  - each feature/layer is a mini codemod that has to support working within all the other layers -- so eslint for example is always derived the same way -- no way for "app" and "library" configs to get out of sync
 
 Good for:
 
@@ -19,66 +34,6 @@ Good for:
 - existing monorepos
 - example integrations with other tools
 
-## Usage
-
-Install dependencies first:
-
-```bash
-pnpm install
-```
-
-Then run the interactive CLI:
-
-```bash
-node src/cli/index.js
-```
-
-Or link it locally for easier testing:
-
-```bash
-pnpm link --global
-ember.nvp
-```
-
-### Example Session
-
-```
-┌  ember.nvp
-│
-◆  What is your project name?
-│  my-awesome-app
-│
-◇  Base Layer
-│  minimal layer is always included.
-│  It provides: type: "module", no compat, no testing, no linting.
-│  Perfect for demos and reproductions.
-│
-◆  Select additional features: (press space to select)
-│  ◻ ESLint - Code linting with ESLint
-│  ◻ Prettier - Code formatting with Prettier
-│  ◻ QUnit - Testing with QUnit
-│  ◻ Vitest - Testing with Vitest (modern & fast)
-│
-◆  Which package manager?
-│  ● pnpm - Fast, disk space efficient
-│    npm - Node default
-│    yarn - Classic alternative
-│
-◇  Project created!
-│
-◇  Next steps
-│  cd my-awesome-app
-│  pnpm install
-│  pnpm start
-│
-└  ✓ Project ready! Happy coding!
-```
-
-The CLI will guide you through:
-
-1. **Project name** - Choose your project name
-2. **Feature selection** - Select which layers you want (linting, testing, formatting)
-3. **Package manager** - Choose pnpm, npm, or yarn
 
 ## Layers
 
