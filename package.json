@@ -13,9 +13,11 @@
     "#utils/*": "./src/utils/*"
   },
   "scripts": {
+    "lint": "pnpm lint:format",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
-    "new": "node ./src/cli/index.js"
+    "new": "node ./src/cli/index.js",
+    "test:node": "vitest run"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
@@ -32,7 +34,8 @@
     "ember-source": "^6.10.0",
     "prettier": "^3.7.4",
     "prettier-plugin-ember-template-tag": "^2.1.2",
-    "release-plan": "^0.17.4"
+    "release-plan": "^0.17.4",
+    "vitest": "^4.0.17"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {
