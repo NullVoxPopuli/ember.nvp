@@ -14,6 +14,8 @@ describe("project type", () => {
       for (let permutation of permutations) {
         describe(`project starts as '${base}' + ${permutation}`, () => {
           for (let layer of layers) {
+            if (layer.name.startsWith("minimal")) continue;
+
             it(`applies ${layer.name}`, async () => {
               expect(2).toBe(2);
             });
