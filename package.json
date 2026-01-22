@@ -20,7 +20,8 @@
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
     "new": "node ./src/cli/index.js",
-    "test:node": "vitest run"
+    "test:node": "FORCE_COLOR=1 vitest run",
+    "test:vitest": "FORCE_COLOR=1 vitest"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",

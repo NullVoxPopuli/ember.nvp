@@ -1,10 +1,12 @@
 import { test, expect as hardExpect } from "vitest";
-import { runcli } from "./test-helpers.js";
+import { cli } from "./test-helpers.js";
 
 const expect = hardExpect.soft;
 
 test("cli works", async () => {
-  let { exitCode } = await runcli();
+  let { execaPromise, output, input } = cli();
 
-  expect(exitCode).toBe(0);
+  await execaPromise;
+
+  expect(execaPromise.exitCode).toBe(0);
 });
