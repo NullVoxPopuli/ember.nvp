@@ -7,9 +7,18 @@ const { values } = parseArgs({
       type: "string",
     },
 
+    path: {
+      type: "string",
+    },
+
     type: {
       type: "string",
       choices: ["app", "addon", "library"],
+    },
+
+    confirm: {
+      type: "string",
+      choices: ["yes", "no"],
     },
 
     layers: {
@@ -24,9 +33,9 @@ const { values } = parseArgs({
   },
 });
 
-const { name, type, layers = [], packageManager } = values;
+const { name, type, layers = [], packageManager, path, confirm } = values;
 
-export const answers = { name, type, layers, packageManager };
+export const answers = { name, type, layers, confirm: packageManager, path, confirm };
 
 export function printArgInUse(label, value) {
   let l = styleText(["gray", "bold"], label);

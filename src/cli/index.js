@@ -1,35 +1,45 @@
 #!/usr/bin/env node
 
 import * as p from "@clack/prompts";
-import { join } from "node:path";
 import { generateProject } from "./generator.js";
 import { askName } from "./questions/name.js";
 import { askLayers } from "./questions/layers.js";
 import { askProjectType } from "./questions/project-type.js";
 import { askPackageManager } from "./questions/package-manager.js";
+import { askPath } from "./questions/path.js";
+import { askIfOK } from "./questions/ok.js";
 import { styleText } from "node:util";
 import { Project } from "#utils/project.js";
 
+/**
+ * This whole file's primary purpose is to be an interactive CLI
+ * for `generateProject`.
+ *
+ * Other tools can call `generateProject` themselves if they wish
+ * if they want to provide different TUI/GUIs.
+ */
 async function main() {
   console.clear();
 
   p.intro(styleText(["bgCyan", "black"], " ember.nvp "));
 
   const projectName = await askName();
+  const projectPath = await askPath(projectName);
   const projectType = await askProjectType();
   const selectedLayers = await askLayers();
   const packageManager = await askPackageManager();
 
-  const s = p.spinner();
-  s.start("Creating your Ember app...");
-
-  const projectPath = join(process.cwd(), projectName);
-
   let project = new Project(projectPath, {
     type: projectType,
+    path: projectPath,
     layers: selectedLayers,
     packageManager,
   });
+
+  await askIfOK();
+
+  const s = p.spinner();
+  s.start("Creating your Ember app...");
 
   try {
     // Generate the project

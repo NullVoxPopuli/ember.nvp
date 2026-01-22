@@ -1,9 +1,13 @@
 # ember.nvp
 
-_ember project generator: alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints, **if** all the caveats can be cleaned up_
+_ember project generator: a reenvisioning of blueprints -- hopefully one day to upstream back in to ember-cli / official blueprints, **if** all the caveats can be cleaned up_
 
 > [!NOTE]
-> **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator.  Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward.
+> **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator.  Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward.  It's possible that one day ember-cli adopts or is inspired by this project, but it's too early to tell at the moment.
+
+
+_I can't recommend using this tool unless your comfortable with the emitted caveats in the project_.
+(And being comfortable debugging build issues is recommended)
 
 ## Usage
 
@@ -16,6 +20,31 @@ or
 ```bash
 pnpm dlx ember.nvp
 ```
+
+### Wrapping
+
+The provided CLI is only a wrapper around our exported `generateProject` function.
+
+Other tools can call `generateProject` themselves if they wish to provide a different terminal or graphical UI.
+
+```js
+import { generateProject, Project } from 'ember.nvp';
+
+
+await generateProject(new Project(
+    directoryToGenerateIn
+    // desires
+    {
+        name,
+        path,
+        type,
+        layers,
+        packageManager,
+    }
+));
+```
+
+All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
 
 ## Reqs
 

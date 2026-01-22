@@ -8,6 +8,7 @@
   },
   "type": "module",
   "bin": "./src/cli/index.js",
+  "exports": "./src/index.js",
   "imports": {
     "#args": "./src/cli/args.js",
     "#layers": "./src/layers/index.js",
