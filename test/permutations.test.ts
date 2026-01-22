@@ -13,8 +13,8 @@ describe("project type", () => {
     describe(base, () => {
       for (let permutation of permutations) {
         describe(`project starts as '${base}' + ${permutation}`, () => {
-          for (let permutation of permutations) {
-            it(`applies ${permutation}`, async () => {
+          for (let layer of layers) {
+            it(`applies ${layer.name}`, async () => {
               expect(2).toBe(2);
             });
           }
