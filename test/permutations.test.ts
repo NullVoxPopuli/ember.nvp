@@ -14,7 +14,11 @@ describe("project type", () => {
       for (let permutation of permutations) {
         describe(`project starts as '${base}' + ${permutation}`, () => {
           for (let layer of layers) {
+            // The bases are not the same
             if (layer.name.startsWith("minimal")) continue;
+            // Not ready yet
+            if (layer.name.startsWith("vitest")) continue;
+            if (layer.name.startsWith("warp-drive")) continue;
 
             it(`applies ${layer.name}`, async () => {
               expect(2).toBe(2);

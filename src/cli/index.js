@@ -8,6 +8,7 @@ import { askLayers } from "./questions/layers.js";
 import { askProjectType } from "./questions/project-type.js";
 import { askPackageManager } from "./questions/package-manager.js";
 import { styleText } from "node:util";
+import { Project } from "#utils/project.js";
 
 async function main() {
   console.clear();
@@ -22,15 +23,17 @@ async function main() {
   const s = p.spinner();
   s.start("Creating your Ember app...");
 
+  const projectPath = join(process.cwd(), projectName);
+
+  let project = new Project(projectPath, {
+    type: projectType,
+    layers: selectedLayers,
+    packageManager,
+  });
+
   try {
     // Generate the project
-    const projectPath = join(process.cwd(), projectName);
-    await generateProject({
-      projectType,
-      projectPath,
-      projectName,
-      selectedLayers,
-    });
+    await generateProject(project);
 
     s.stop("Project created!");
 

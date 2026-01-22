@@ -19,7 +19,7 @@ const { values } = parseArgs({
 
     packageManager: {
       type: "string",
-      choices: ["npm", "pnpm", "yarn", "bun"],
+      choices: ["npm", "pnpm"],
     },
   },
 });
