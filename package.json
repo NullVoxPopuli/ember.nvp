@@ -10,6 +10,7 @@
   "bin": "./src/cli/index.js",
   "imports": {
     "#args": "./src/cli/args.js",
+    "#layers": "./src/layers/index.js",
     "#utils/*": "./src/utils/*"
   },
   "scripts": {

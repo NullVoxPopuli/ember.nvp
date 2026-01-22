@@ -1,7 +1,6 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
 import { styleText } from "node:util";
 import { answers, printArgInUse } from "#args";
+import { discoverLayers } from "#layers";
 
 import * as p from "@clack/prompts";
 
@@ -59,29 +58,4 @@ export async function askLayers() {
   ].filter(Boolean);
 
   return selectedLayers;
-}
-
-async function discoverLayers() {
-  const layersDir = join(import.meta.dirname, "..", "..", "layers");
-  const entries = await readdir(layersDir, { withFileTypes: true });
-
-  const layers = [];
-
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const layerPath = join(layersDir, entry.name, "index.js");
-      try {
-        const layer = await import(layerPath);
-        layers.push({
-          name: entry.name,
-          ...layer.default,
-        });
-      } catch (err) {
-        // Skip layers that don't have proper exports
-        console.warn(`Warning: Could not load layer ${entry.name}:`, err.message);
-      }
-    }
-  }
-
-  return layers;
 }
