@@ -10,10 +10,10 @@ function isValid(selected) {
 }
 
 export async function askPackageManager() {
-  if (isValid(answers.packageManager)) {
-    printArgInUse("packageManager", answers.packageManager);
+  if (isValid(answers.confirm)) {
+    printArgInUse("packageManager", answers.confirm);
 
-    return answers.packageManager;
+    return answers.confirm;
   }
 
   const packageManager = await p.select({

@@ -39,6 +39,9 @@ importers:
       ember-source:
         specifier: ^6.10.0
         version: 6.10.0(@glimmer/component@2.0.0)(rsvp@4.8.5)
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
       prettier:
         specifier: ^3.7.4
         version: 3.7.4
