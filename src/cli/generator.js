@@ -1,17 +1,28 @@
 import { mkdir } from "node:fs/promises";
 
+import baseApp from "#bases/minimal-app";
+import baseLibrary from "#bases/minimal-library";
 /**
  * Generate project files by running layer functions
+ *
+ * @param {import('#utils/project.js').Project} project
  */
-export async function generateProject(projectPath, projectName, layers) {
-  // Create project directory
-  await mkdir(projectPath, { recursive: true });
+export async function generateProject(project) {
+  await mkdir(project.directory, { recursive: true });
 
-  // Run each layer's run function in sequence
-  for (const layer of layers) {
+  switch (project.desires.type) {
+    case "app":
+      await baseApp.run();
+      break;
+    case "library":
+      await baseLibrary.run();
+      break;
+  }
+
+  for (const layer of project.desires.layers) {
     if (typeof layer.run === "function") {
       await layer.run({
-        targetDir: projectPath,
+        targetDir: project.directory,
         projectName,
       });
     }

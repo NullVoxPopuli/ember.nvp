@@ -1,5 +1,6 @@
-import { $ } from "execa";
+import { execa } from "execa";
 import { join } from "node:path";
+import { styleText } from "node:util";
 
 const minimalApp = "minimal-app";
 const minimalAddon = "minimal-library";
@@ -37,5 +38,9 @@ export function permutate(toPermutate: string[]): string[][] {
 const cliPath = join(import.meta.dirname, "../src/cli/index.js");
 
 export function runcli(args: string[] = []) {
-  return $`node ${cliPath} ${args.join(" ")}`;
+  let cmd = `node ${cliPath} ${args.join(" ")}`;
+
+  console.log(`Running '${styleText("cyan", cmd)}'`);
+
+  return execa(cmd, { shell: true, stdout: "inherit", stdin: "/dev/null" });
 }
