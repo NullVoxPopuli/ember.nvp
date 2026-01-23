@@ -26,7 +26,6 @@ export async function removeTypes(extension, code) {
  *
  */
 
-
 const preprocessor = new Preprocessor();
 async function wrappedRemoveTypes(code, callback) {
   // Strip template tags

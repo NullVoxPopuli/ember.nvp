@@ -40,7 +40,7 @@ export default {
  */
 async function applyFiles(project) {
   let filePath = fileURLToPath(new URL("files", import.meta.url));
-  
+
   await files.applyFolder(filePath, {
     to: project.directory,
     async transform({ filePath, contents }) {
