@@ -20,6 +20,11 @@ export async function generateProject(project) {
   }
 
   for (const layer of project.desires.layers) {
+    if (typeof layer.run !== "funcition") {
+      console.warn(`${layer.name} is not implemented`);
+      continue;
+    }
+
     await layer.run(project);
   }
 }
