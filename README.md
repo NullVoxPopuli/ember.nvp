@@ -3,12 +3,10 @@
 _ember project generator: a reenvisioning of blueprints -- hopefully one day to upstream back in to ember-cli / official blueprints, **if** all the caveats can be cleaned up_
 
 > [!NOTE]
-> **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator.  Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward.  It's possible that one day ember-cli adopts or is inspired by this project, but it's too early to tell at the moment.
-
+> **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator. Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward. It's possible that one day ember-cli adopts or is inspired by this project, but it's too early to tell at the moment.
 
 _I can't recommend using this tool unless your comfortable with the emitted caveats in the project_.
 (And being comfortable debugging build issues is recommended)
-
 
 But I'm very excited about this tool, because it's everything I've ever wanted from a project generator. Each layer is idempotent, and knows about the other layers. So if, for example, you omit eslint when setting up your project, but do have github-actions, when you do add eslint, your github-actions will be updated as well. And this works in any order.
 
@@ -56,7 +54,7 @@ All parts of the generator are idempotent, so running generators on existing pro
 ## What this does?
 
 - Always `"type": "module"`
-- Modern, incremental 
+- Modern, incremental
 - Interactive CLI
   - choose your features
 - The generators fro the different types of projects are never out of date from each other
@@ -68,7 +66,6 @@ Good for:
 - reproductions
 - existing monorepos
 - example integrations with other tools
-
 
 ## Layers
 
@@ -152,15 +149,9 @@ export default {
     // Copy files from files/ directory
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    await packageJson.addDependencies(
-      { "some-package": "^1.0.0" },
-      project.directory,
-    );
+    await packageJson.addDependencies({ "some-package": "^1.0.0" }, project.directory);
 
-    await packageJson.addScripts(
-      { "my-script": 'echo "Hello"' },
-      project.directory,
-    );
+    await packageJson.addScripts({ "my-script": 'echo "Hello"' }, project.directory);
   },
 };
 ```
