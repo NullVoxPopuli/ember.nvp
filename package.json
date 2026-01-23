@@ -11,7 +11,7 @@
   "exports": "./src/index.js",
   "imports": {
     "#args": "./src/cli/args.js",
-    "#bases/*": "./src/layer-base/*/index.js",
+    "#bases/*": "./src/bases/*/index.js",
     "#layers": "./src/layers/index.js",
     "#utils/*": "./src/utils/*"
   },
@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "babel-remove-types": "^1.1.0",
+    "content-tag": "^4.1.0",
     "ember-apply": "^2.16.0",
     "latest-version": "^9.0.0",
     "package-name-regex": "^5.0.0"

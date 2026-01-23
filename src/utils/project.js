@@ -3,15 +3,11 @@
  *
  * May eventually include information for discovering existing state
  * about a project.
+ *
+ * @implements {import('./types.ts').Project}
  */
 export class Project {
-  /**
-   * @type {string}
-   */
   #directory;
-  /**
-   * @type {Answers}
-   */
   #desires;
 
   constructor(atDirectory, desires) {
@@ -25,5 +21,9 @@ export class Project {
 
   get desires() {
     return this.#desires;
+  }
+
+  get wantsTypeScript() {
+    return this.desires.layers.some((layer) => layer.name === "TypeScript");
   }
 }

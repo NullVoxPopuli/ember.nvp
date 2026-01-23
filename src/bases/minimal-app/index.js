@@ -1,6 +1,7 @@
 import { packageJson, files, js } from "ember-apply";
-import { join } from "node:path";
+import { join, parse as parsePath } from "node:path";
 import { readFile } from "node:fs/promises";
+import { removeTypes } from "babel-remove-types";
 
 /**
  * Minimal Layer
@@ -17,22 +18,28 @@ export default {
   label: "Minimal App Base",
   description: "Bare minimum Ember app structure",
 
-  async run({ targetDir, projectName }) {
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async run(project) {
     // Apply all files from the files directory
-    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), {
+      to: project.directory,
+      async transform({ filePath, contents }) {
+        /**
+         * TODO: handle conflicts if files already exists
+         *
+         *       (I believe we can do interactive here)
+         */
+        let pathInfo = parsePath(filePath);
+        let ext = pathInfo.ext;
+        if (!project.wantsTypeScript) {
+          await removeTypes(ext, contents);
+        }
 
-    // Replace __PROJECT_NAME__ placeholders in specific files
-    const filesToUpdate = [
-      join(targetDir, "app", "config.ts"),
-      join(targetDir, "app", "templates", "application.gts"),
-      join(targetDir, "index.html"),
-    ];
-
-    for (const filePath of filesToUpdate) {
-      const content = await readFile(filePath, "utf-8");
-      const updated = content.replaceAll("__PROJECT_NAME__", projectName);
-      await files.copyFileTo(filePath, { content: updated });
-    }
+        return contents;
+      },
+    });
 
     // Add dependencies
     await packageJson.addDependencies(

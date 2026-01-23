@@ -1,0 +1,8 @@
+packages:
+  - "."
+  # Each base layer is runnable
+  # This is important so we can correctly:
+  # - format
+  # - test
+  # - verify the "workingness" of the base without additions
+  - "src/bases/*/files"

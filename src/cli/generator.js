@@ -12,19 +12,14 @@ export async function generateProject(project) {
 
   switch (project.desires.type) {
     case "app":
-      await baseApp.run();
+      await baseApp.run(project);
       break;
     case "library":
-      await baseLibrary.run();
+      await baseLibrary.run(project);
       break;
   }
 
   for (const layer of project.desires.layers) {
-    if (typeof layer.run === "function") {
-      await layer.run({
-        targetDir: project.directory,
-        projectName,
-      });
-    }
+    await layer.run(project);
   }
 }

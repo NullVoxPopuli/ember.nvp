@@ -103,60 +103,13 @@ Code formatting with:
 
 ### 🧪 QUnit (optional)
 
-Traditional Ember testing with:
-
-- QUnit test framework
-- @ember/test-helpers
-- Test HTML setup
-- Playwright for CI
+Both co-located tests as well as traditionally located tests with QUnit.
 
 ### ⚡ Vitest (optional)
 
-Modern testing alternative:
-
-- Vitest (faster than QUnit)
-- @ember/test-helpers
-- Happy DOM
-- Watch mode & UI
+Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
 
 ## Architecture
-
-```
-src/
-├── cli/          # Interactive CLI entry point
-│   └── index.js  # Main CLI with prompts
-├── layers/       # Feature layers (auto-discovered)
-│   ├── minimal/  # Base layer (always included)
-│   │   ├── index.js    # Layer definition with run function
-│   │   └── files/      # Template files to copy
-│   ├── eslint/
-│   │   ├── index.js
-│   │   └── files/
-│   ├── prettier/
-│   │   ├── index.js
-│   │   └── files/
-│   ├── qunit/
-│   │   ├── index.js
-│   │   └── files/
-│   └── vitest/
-│       ├── index.js
-│       └── files/
-└── lib/          # Shared utilities
-    └── generator.js  # Project generation orchestration
-```
-
-### Layer Architecture
-
-Each layer now uses **ember-apply** utilities for robust file and package.json manipulation:
-
-- **`index.js`** - Exports an object with:
-  - `label` - Display name
-  - `description` - Short description
-  - `run({ targetDir, projectName })` - Async function that applies the layer
-
-- **`files/`** - Directory containing template files to copy to the target project
-  - Use `__PROJECT_NAME__` placeholder for project name substitution
-  - Files are copied using `ember-apply`'s `files.applyFolder()`
 
 ### How Layers Work
 
@@ -164,14 +117,14 @@ Each layer now uses **ember-apply** utilities for robust file and package.json m
 2. **Selection**: User selects which optional layers to include
 3. **Execution**: Each layer's `run()` function is called in sequence:
    ```js
-   await layer.run({ targetDir: "/path/to/project", projectName: "my-app" });
+   await layer.run(project);
    ```
-4. **Layer Functions**: Inside `run()`, layers use `ember-apply` to:
+4. **Layer Functions**: Inside `run()`, layers use [`ember-apply`](https://ember-apply.pages.dev/) to apply codemods in order to:
    - Copy files from `files/` directory
    - Add dependencies/devDependencies to package.json
    - Add npm scripts
    - Modify package.json metadata
-   - Transform existing files (e.g., replace placeholders)
+   - etc
 
 ### Adding New Layers
 
@@ -187,39 +140,24 @@ export default {
   label: "My Feature",
   description: "What this feature does",
 
-  async run({ targetDir, projectName }) {
+  async run(project) {
     // Copy files from files/ directory
-    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    // Add dependencies
     await packageJson.addDependencies(
-      {
-        "some-package": "^1.0.0",
-      },
-      targetDir,
+      { "some-package": "^1.0.0" },
+      project.directory,
     );
 
-    // Add devDependencies
-    await packageJson.addDevDependencies(
-      {
-        "dev-package": "^2.0.0",
-      },
-      targetDir,
-    );
-
-    // Add scripts
     await packageJson.addScripts(
-      {
-        "my-script": 'echo "Hello"',
-      },
-      targetDir,
+      { "my-script": 'echo "Hello"' },
+      project.directory,
     );
   },
 };
 ```
 
 2. **`files/`** directory - Template files to copy:
-   - Use `__PROJECT_NAME__` as a placeholder for the project name
    - Files will be copied to the target directory maintaining structure
 
 The CLI will automatically discover and offer it as an option!
