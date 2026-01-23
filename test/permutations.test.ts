@@ -72,12 +72,20 @@ for (let base of bases) {
           }
         });
 
+        /**
+         * Simulates running the CLI again with different options selected
+         * on the same project
+         */
         for (let layer of layers) {
           if (TODO.has(layer.name)) {
             continue;
           }
 
-          describe(`(re)applying ${layer}`, () => {
+          describe(`(re)applying ${layer.name}`, () => {
+            beforeAll(async () => {
+              await layer.run(project);
+            });
+
             it("applies correctly", async () => {
               let result = await layer.isSetup(project);
 
