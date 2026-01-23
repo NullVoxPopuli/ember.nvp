@@ -48,8 +48,10 @@ async function applyFiles(project) {
        */
       let pathInfo = parsePath(filePath);
       let ext = pathInfo.ext;
-      if (!project.wantsTypeScript) {
-        await removeTypes(ext, contents);
+      if (ext === ".gts" || ext === ".ts") {
+        if (!project.wantsTypeScript) {
+          await removeTypes(ext, contents);
+        }
       }
 
       return contents;
