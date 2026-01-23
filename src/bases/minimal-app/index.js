@@ -1,7 +1,8 @@
 import { packageJson, files } from "ember-apply";
-import { join, parse as parsePath } from "node:path";
-import { removeTypes } from "babel-remove-types";
+import { parse as parsePath } from "node:path";
+import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
+import { fileURLToPath } from "node:url";
 
 /**
  * Minimal Layer
@@ -38,7 +39,9 @@ export default {
  * @param {import('#utils/project.js').Project} project
  */
 async function applyFiles(project) {
-  await files.applyFolder(join(import.meta.dirname, "files"), {
+  let filePath = fileURLToPath(new URL("files", import.meta.url));
+  
+  await files.applyFolder(filePath, {
     to: project.directory,
     async transform({ filePath, contents }) {
       /**

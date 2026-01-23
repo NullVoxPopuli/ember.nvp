@@ -59,7 +59,10 @@ async function main() {
   } catch (err) {
     s.stop("Failed to create project");
     p.cancel(`Error: ${err.message}`);
-    throw err;
+    if (err.stack) {
+      console.error(err.stack);
+    }
+    process.exit(1);
   }
 }
 

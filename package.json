@@ -27,7 +27,7 @@
     "@clack/prompts": "^0.11.0",
     "babel-remove-types": "^1.1.0",
     "content-tag": "^4.1.0",
-    "ember-apply": "^2.16.0",
+    "ember-apply": "^2.17.0",
     "latest-version": "^9.0.0",
     "package-name-regex": "^5.0.0"
   },

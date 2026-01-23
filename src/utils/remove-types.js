@@ -1,4 +1,5 @@
-import { removeTypes } from "babel-remove-types";
+import { Preprocessor } from "content-tag";
+import { removeTypes as babelRemoveTypes } from "babel-remove-types";
 import { substringBytes } from "./buffer.js";
 
 /**
@@ -9,10 +10,14 @@ import { substringBytes } from "./buffer.js";
  */
 export async function removeTypes(extension, code) {
   if (extension === ".gts") {
-    return await wrappedRemoveTypes(code, (strippedCode) => removeTypes(strippedCode));
+    return await wrappedRemoveTypes(code, (strippedCode) => babelRemoveTypes(strippedCode));
   }
 
-  return await removeTypes(code);
+  if (extension === ".ts") {
+    return await babelRemoveTypes(code);
+  }
+
+  return code;
 }
 
 /**
@@ -21,78 +26,8 @@ export async function removeTypes(extension, code) {
  *
  */
 
-import { Preprocessor } from "content-tag";
-import { substringBytes } from "./buffer.js";
-
-const VIRTUAL_IMPORTS = new Set([
-  "@ember/application",
-  "@ember/application/instance",
-  "@ember/array",
-  "@ember/component",
-  "@ember/component/helper",
-  "@ember/component/template-only",
-  "@ember/debug",
-  "@ember/destroyable",
-  "@ember/helper",
-  "@ember/modifier",
-  "@ember/object",
-  "@ember/object/internals",
-  "@ember/object/observers",
-  "@ember/owner",
-  "@ember/reactive",
-  "@ember/reactive/collections",
-  "@ember/renderer",
-  "@ember/routing",
-  "@ember/routing/route",
-  "@ember/routing/router",
-  "@ember/runloop",
-  "@ember/service",
-  "@ember/template",
-  "@ember/template-compilation",
-  "@ember/template-factory",
-  "@ember/test-helpers",
-  "@ember/test-waiters",
-  "@ember/test",
-  "@ember/utils",
-  "@ember/version",
-  "@glimmer/destroyable",
-  "@glimmer/manager",
-  "@glimmer/validator",
-  "@glimmer/tracking",
-  "@glimmer/tracking/primitives/cache",
-]);
-
-function isEmberVirtual(importPath) {
-  return VIRTUAL_IMPORTS.has(importPath);
-}
 
 const preprocessor = new Preprocessor();
-
-/**
- * Maintains length of positioning of code so that es-module-lexer can provide the right character offsets for imports updating
- *
- * @param {string} code
- */
-async function prepareForImportAnalysis(code) {
-  const replacementClassMember = (i) => `template = __TEMPLATE_TAG_${i}__;`;
-  const replacementExpression = (i) => `__TEMPLATE_TAG_${i}__`;
-  const templateTagMatches = preprocessor.parse(code);
-  let strippedCode = code;
-
-  for (let i = 0; i < templateTagMatches.length; i++) {
-    const match = templateTagMatches[i];
-    const templateTag = substringBytes(code, match.range.startByte, match.range.endByte);
-
-    if (match.type === "class-member") {
-      strippedCode = strippedCode.replace(templateTag, replacementClassMember(i));
-    } else {
-      strippedCode = strippedCode.replace(templateTag, replacementExpression(i));
-    }
-  }
-
-  return strippedCode;
-}
-
 async function wrappedRemoveTypes(code, callback) {
   // Strip template tags
   const replacementClassMember = (i) => `template = __TEMPLATE_TAG_${i}__;`;
