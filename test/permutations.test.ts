@@ -66,21 +66,23 @@ for (let base of bases) {
           }
 
           for (let layer of startingLayers) {
-            if (typeof layer.isSetup === "function") {
-              let result = await layer.isSetup(project);
+            let result = await layer.isSetup(project);
 
-              expect(result, `${layer.name} is setup`).toBe(true);
-            }
+            expect(result, `${layer.name} is setup`).toBe(true);
           }
         });
 
         for (let layer of layers) {
-          if (import.meta.vitest) {
+          if (TODO.has(layer.name)) {
             continue;
           }
 
-          it("applies correctly", () => {
-            expect(layer.name).toBeTruthy();
+          describe(`(re)applying ${layer}`, () => {
+            it("applies correctly", async () => {
+              let result = await layer.isSetup(project);
+
+              expect(result, `${layer.name} is setup`).toBe(true);
+            });
           });
         }
       });
