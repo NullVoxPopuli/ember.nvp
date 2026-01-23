@@ -85,6 +85,12 @@ The base layer, matching the `--minimal` flag from [ember-cli/ember-app-blueprin
 
 Perfect for demos, reproductions, and learning!
 
+### Git
+
+Runs `git init` for you.
+
+By default this layer is enabled, _unless_ you are running the generator in a git repo already -- then you have to opt in to git.
+
 ### GitHub Actions (optional)
 
 Adds simple GitHub Actions workflow to your project
