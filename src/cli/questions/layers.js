@@ -35,9 +35,21 @@ export async function askLayers() {
     return result;
   }
 
+  // Whenever we have a yes/no option, we use string values rather than true/false
+  const defaultValues = (
+    await Promise.all(
+      optionalLayers.map(async (layer) => {
+        let result = await layer.defaultValue?.();
+
+        return result && layer.name;
+      }),
+    )
+  ).filter(Boolean);
+
   // Let user select additional features
   const selectedFeatures = await p.multiselect({
     message: "Select additional features:",
+    initialValues: defaultValues,
     options: optionalLayers.map((layer) => ({
       value: layer.name,
       label: layer.label || layer.name,
