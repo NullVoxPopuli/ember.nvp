@@ -1,0 +1,27 @@
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+
+export async function discoverLayers() {
+  const layersDir = import.meta.dirname;
+  const entries = await readdir(layersDir, { withFileTypes: true });
+
+  const layers = [];
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const layerPath = join(layersDir, entry.name, "index.js");
+      try {
+        const layer = await import(layerPath);
+        layers.push({
+          name: entry.name,
+          ...layer.default,
+        });
+      } catch (err) {
+        // Skip layers that don't have proper exports
+        console.warn(`Warning: Could not load layer ${entry.name}:`, err.message);
+      }
+    }
+  }
+
+  return layers;
+}

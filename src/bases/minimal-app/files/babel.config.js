@@ -1,5 +1,3 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { buildMacros } from "@embroider/macros/babel";
 
 const macros = buildMacros();
@@ -17,7 +15,6 @@ export default {
     [
       "babel-plugin-ember-template-compilation",
       {
-        compilerPath: "ember-source/dist/ember-template-compiler.js",
         transforms: [...macros.templateMacros],
       },
     ],
@@ -32,7 +29,7 @@ export default {
     [
       "@babel/plugin-transform-runtime",
       {
-        absoluteRuntime: dirname(fileURLToPath(import.meta.url)),
+        absoluteRuntime: import.meta.dirname,
         useESModules: true,
         regenerator: false,
       },

@@ -1,8 +1,5 @@
 import { packageJson, files } from "ember-apply";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "node:path";
 
 /**
  * Prettier Layer
@@ -15,7 +12,7 @@ export default {
 
   async run({ targetDir }) {
     // Apply config files
-    await files.applyFolder(join(__dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
 
     // Add devDependencies
     await packageJson.addDevDependencies(

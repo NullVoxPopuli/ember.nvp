@@ -1,6 +1,51 @@
 # ember.nvp
 
-_ember project generator: alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints_
+_ember project generator: a reenvisioning of blueprints -- hopefully one day to upstream back in to ember-cli / official blueprints, **if** all the caveats can be cleaned up_
+
+> [!NOTE]
+> **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator. Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward. It's possible that one day ember-cli adopts or is inspired by this project, but it's too early to tell at the moment.
+
+_I can't recommend using this tool unless your comfortable with the emitted caveats in the project_.
+(And being comfortable debugging build issues is recommended)
+
+But I'm very excited about this tool, because it's everything I've ever wanted from a project generator. Each layer is idempotent, and knows about the other layers. So if, for example, you omit eslint when setting up your project, but do have github-actions, when you do add eslint, your github-actions will be updated as well. And this works in any order.
+
+## Usage
+
+```bash
+npx ember.nvp
+```
+
+or
+
+```bash
+pnpm dlx ember.nvp
+```
+
+### Wrapping
+
+The provided CLI is only a wrapper around our exported `generateProject` function.
+
+Other tools can call `generateProject` themselves if they wish to provide a different terminal or graphical UI.
+
+```js
+import { generateProject, Project } from 'ember.nvp';
+
+
+await generateProject(new Project(
+    directoryToGenerateIn
+    // desires
+    {
+        name,
+        path,
+        type,
+        layers,
+        packageManager,
+    }
+));
+```
+
+All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
 
 ## Reqs
 
@@ -9,8 +54,11 @@ _ember project generator: alternative to the official blueprints, but more moder
 ## What this does?
 
 - Always `"type": "module"`
+- Modern, incremental
 - Interactive CLI
   - choose your features
+- The generators fro the different types of projects are never out of date from each other
+  - each feature/layer is a mini codemod that has to support working within all the other layers -- so eslint for example is always derived the same way -- no way for "app" and "library" configs to get out of sync
 
 Good for:
 
@@ -19,70 +67,10 @@ Good for:
 - existing monorepos
 - example integrations with other tools
 
-## Usage
-
-Install dependencies first:
-
-```bash
-pnpm install
-```
-
-Then run the interactive CLI:
-
-```bash
-node src/cli/index.js
-```
-
-Or link it locally for easier testing:
-
-```bash
-pnpm link --global
-ember.nvp
-```
-
-### Example Session
-
-```
-┌  ember.nvp
-│
-◆  What is your project name?
-│  my-awesome-app
-│
-◇  Base Layer
-│  minimal layer is always included.
-│  It provides: type: "module", no compat, no testing, no linting.
-│  Perfect for demos and reproductions.
-│
-◆  Select additional features: (press space to select)
-│  ◻ ESLint - Code linting with ESLint
-│  ◻ Prettier - Code formatting with Prettier
-│  ◻ QUnit - Testing with QUnit
-│  ◻ Vitest - Testing with Vitest (modern & fast)
-│
-◆  Which package manager?
-│  ● pnpm - Fast, disk space efficient
-│    npm - Node default
-│    yarn - Classic alternative
-│
-◇  Project created!
-│
-◇  Next steps
-│  cd my-awesome-app
-│  pnpm install
-│  pnpm start
-│
-└  ✓ Project ready! Happy coding!
-```
-
-The CLI will guide you through:
-
-1. **Project name** - Choose your project name
-2. **Feature selection** - Select which layers you want (linting, testing, formatting)
-3. **Package manager** - Choose pnpm, npm, or yarn
-
 ## Layers
 
-Each layer is a standalone module that can add features to your ember project:
+Each layer is a standalone module that can add features to your ember project,
+and every layer is aware of the other layers, so if, for example, you run github actions first, and then later decide to add linting, the github actions output will be updated.
 
 ### 🎯 Minimal (always included)
 
@@ -96,6 +84,10 @@ The base layer, matching the `--minimal` flag from [ember-cli/ember-app-blueprin
 - ✅ Vite-based with modern Ember
 
 Perfect for demos, reproductions, and learning!
+
+### GitHub Actions (optional)
+
+Adds simple GitHub Actions workflow to your project
 
 ### 📝 ESLint (optional)
 
@@ -116,60 +108,13 @@ Code formatting with:
 
 ### 🧪 QUnit (optional)
 
-Traditional Ember testing with:
-
-- QUnit test framework
-- @ember/test-helpers
-- Test HTML setup
-- Playwright for CI
+Both co-located tests as well as traditionally located tests with QUnit.
 
 ### ⚡ Vitest (optional)
 
-Modern testing alternative:
-
-- Vitest (faster than QUnit)
-- @ember/test-helpers
-- Happy DOM
-- Watch mode & UI
+Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
 
 ## Architecture
-
-```
-src/
-├── cli/          # Interactive CLI entry point
-│   └── index.js  # Main CLI with prompts
-├── layers/       # Feature layers (auto-discovered)
-│   ├── minimal/  # Base layer (always included)
-│   │   ├── index.js    # Layer definition with run function
-│   │   └── files/      # Template files to copy
-│   ├── eslint/
-│   │   ├── index.js
-│   │   └── files/
-│   ├── prettier/
-│   │   ├── index.js
-│   │   └── files/
-│   ├── qunit/
-│   │   ├── index.js
-│   │   └── files/
-│   └── vitest/
-│       ├── index.js
-│       └── files/
-└── lib/          # Shared utilities
-    └── generator.js  # Project generation orchestration
-```
-
-### Layer Architecture
-
-Each layer now uses **ember-apply** utilities for robust file and package.json manipulation:
-
-- **`index.js`** - Exports an object with:
-  - `label` - Display name
-  - `description` - Short description
-  - `run({ targetDir, projectName })` - Async function that applies the layer
-
-- **`files/`** - Directory containing template files to copy to the target project
-  - Use `__PROJECT_NAME__` placeholder for project name substitution
-  - Files are copied using `ember-apply`'s `files.applyFolder()`
 
 ### How Layers Work
 
@@ -177,14 +122,14 @@ Each layer now uses **ember-apply** utilities for robust file and package.json m
 2. **Selection**: User selects which optional layers to include
 3. **Execution**: Each layer's `run()` function is called in sequence:
    ```js
-   await layer.run({ targetDir: "/path/to/project", projectName: "my-app" });
+   await layer.run(project);
    ```
-4. **Layer Functions**: Inside `run()`, layers use `ember-apply` to:
+4. **Layer Functions**: Inside `run()`, layers use [`ember-apply`](https://ember-apply.pages.dev/) to apply codemods in order to:
    - Copy files from `files/` directory
    - Add dependencies/devDependencies to package.json
    - Add npm scripts
    - Modify package.json metadata
-   - Transform existing files (e.g., replace placeholders)
+   - etc
 
 ### Adding New Layers
 
@@ -194,48 +139,24 @@ To add a new layer, create a new directory in `src/layers/` with:
 
 ```js
 import { packageJson, files } from "ember-apply";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "node:path";
 
 export default {
   label: "My Feature",
   description: "What this feature does",
 
-  async run({ targetDir, projectName }) {
+  async run(project) {
     // Copy files from files/ directory
-    await files.applyFolder(join(__dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    // Add dependencies
-    await packageJson.addDependencies(
-      {
-        "some-package": "^1.0.0",
-      },
-      targetDir,
-    );
+    await packageJson.addDependencies({ "some-package": "^1.0.0" }, project.directory);
 
-    // Add devDependencies
-    await packageJson.addDevDependencies(
-      {
-        "dev-package": "^2.0.0",
-      },
-      targetDir,
-    );
-
-    // Add scripts
-    await packageJson.addScripts(
-      {
-        "my-script": 'echo "Hello"',
-      },
-      targetDir,
-    );
+    await packageJson.addScripts({ "my-script": 'echo "Hello"' }, project.directory);
   },
 };
 ```
 
 2. **`files/`** directory - Template files to copy:
-   - Use `__PROJECT_NAME__` as a placeholder for the project name
    - Files will be copied to the target directory maintaining structure
 
 The CLI will automatically discover and offer it as an option!

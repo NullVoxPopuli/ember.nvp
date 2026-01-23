@@ -2,16 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title><%= namespace %></title>
+    <title>Minimal App</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <link rel="stylesheet" href="/app/styles/app.css" />
   </head>
   <body>
     <script type="module">
-      import Application from "./app/app";
-      import environment from "./app/config/environment";
+      import Application from "#app/app";
+      import environment from "#config";
 
       Application.create(environment.APP);
     </script>

@@ -7,11 +7,7 @@ export default defineConfig({
     ember(),
     babel({
       babelHelpers: "runtime",
-      extensions: extensions.flatMap((extension) => [
-        extension,
-        ".gts",
-        ".gjs",
-      ]),
+      extensions: extensions.flatMap((extension) => [extension, ".gts", ".gjs"]),
     }),
   ],
   test: {

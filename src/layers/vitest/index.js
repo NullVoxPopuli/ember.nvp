@@ -1,38 +1,27 @@
 import { packageJson, files } from "ember-apply";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-/**
- * Vitest Layer
- *
- * Adds Vitest testing support (modern, fast alternative to QUnit)
- */
 export default {
   label: "Vitest",
-  description: "Testing with Vitest (modern & fast)",
+  description: "Testing with Vitest",
 
   async run({ targetDir }) {
     // Apply test files
-    await files.applyFolder(join(__dirname, "files"), targetDir);
-
-    // Add dependencies
-    await packageJson.addDependencies(
-      {
-        "@ember/test-helpers": "^4.0.4",
-      },
-      targetDir,
-    );
+    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
 
     // Add devDependencies
     await packageJson.addDevDependencies(
-      {
-        vitest: "^2.1.8",
-        "@vitest/ui": "^2.1.8",
-        "happy-dom": "^15.11.7",
-        "@ember/test-waiters": "^3.1.0",
-      },
+      await getLatest({
+        "@ember/test-helpers": "^5.4.1",
+        "@ember/test-waiters": "^4.1.1",
+        "@testing-library/dom": "^10.4.1",
+        "ember-vitest": "^0.3.3",
+        vitest: "^4.0.0",
+        "@vitest/ui": "^4.0.0",
+        "@vitest/browser": "^4.0.0",
+        "@vitest/browser-webdriverio": "^4.0.0",
+        webdriverio: "^9.23.2",
+      }),
       targetDir,
     );
 

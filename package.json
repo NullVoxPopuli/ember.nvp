@@ -8,15 +8,29 @@
   },
   "type": "module",
   "bin": "./src/cli/index.js",
+  "exports": "./src/index.js",
+  "imports": {
+    "#args": "./src/cli/args.js",
+    "#bases/*": "./src/bases/*/index.js",
+    "#layers": "./src/layers/index.js",
+    "#utils/*": "./src/utils/*"
+  },
   "scripts": {
+    "lint": "pnpm lint:format",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
-    "new": "node ./src/cli/index.js"
+    "new": "node ./src/cli/index.js",
+    "test:node": "FORCE_COLOR=1 vitest run",
+    "test:vitest": "FORCE_COLOR=1 vitest"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "ember-apply": "^2.16.0",
-    "picocolors": "^1.1.1"
+    "babel-remove-types": "^1.1.0",
+    "content-tag": "^4.1.0",
+    "ember-apply": "^2.17.0",
+    "execa": "^9.6.1",
+    "latest-version": "^9.0.0",
+    "package-name-regex": "^5.0.0"
   },
   "devDependencies": {
     "@ember/app-tsconfig": "^2.0.0",
@@ -27,7 +41,8 @@
     "ember-source": "^6.10.0",
     "prettier": "^3.7.4",
     "prettier-plugin-ember-template-tag": "^2.1.2",
-    "release-plan": "^0.17.4"
+    "release-plan": "^0.17.4",
+    "vitest": "^4.0.17"
   },
   "packageManager": "pnpm@10.28.0",
   "engines": {
