@@ -1,3 +1,5 @@
+import { $ } from "execa";
+
 /**
  * State container for the project.
  *
@@ -34,5 +36,20 @@ export class Project {
    */
   get wantsTypeScript() {
     return this.desires.layers.some((layer) => layer.name === "TypeScript");
+  }
+
+  /**
+   * @param {string} command
+   * @returns {Promise<import('execa').ResultPromise>}
+   */
+  run(command) {
+    return $(command, { cwd: this.directory, shell: true });
+  }
+
+  /**
+   * @returns {Promise<import('execa').ResultPromise>}
+   */
+  install() {
+    return this.run(`${this.desires.packageManager} install`);
   }
 }

@@ -1,9 +1,14 @@
+import type { ResultPromise } from "execa";
+
 type PackageManager = "pnpm" | "npm";
 
 interface Project {
   readonly directory: string;
   readonly desires: Answers;
   readonly wantsTypeScript: boolean;
+
+  run(command: string): Promise<ResultPromise>;
+  install(command: string): Promise<ResultPromise>;
 }
 
 export interface Layer {

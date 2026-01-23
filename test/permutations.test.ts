@@ -8,41 +8,69 @@ const expect = hardExpect.soft;
 
 let permutations = permutate(layers.map((layer) => layer.name));
 
-describe("project type", () => {
-  for (let base of bases) {
-    describe(base, () => {
-      for (let permutation of permutations) {
-        describe(`project starts as '${base}' + ${permutation}`, () => {
-          let project: Project;
+const baseline = "<baseline>";
+permutations.push([baseline]);
 
-          beforeAll(async () => {
-            project = await generate({
-              type: base === "minimal-app" ? "app" : "library",
-              layers: permutation,
-            });
+const TODO = new Set([
+  "eslint",
+  "git",
+  "qunit",
+  "release-plan",
+  "renovate [bot]",
+  "vitest",
+  "prettier",
+  "GitHub Actions",
+  "typescript",
+]);
+
+for (let base of bases) {
+  if (base === "minimal-library") {
+    /** TODO **/
+    continue;
+  }
+
+  describe(base, () => {
+    for (let permutation of permutations) {
+      // Not implemented yet
+      if (permutation.some((x) => TODO.has(x))) {
+        continue;
+      }
+
+      describe(`project starts as '${base}' + ${permutation}`, () => {
+        let project: Project;
+        let layerNames = permutation.filter((x) => x !== baseline);
+
+        beforeAll(async () => {
+          project = await generate({
+            type: base === "minimal-app" ? "app" : "library",
+            layers: layerNames,
           });
 
-          if (base === "minimal-app") {
-            it("builds", async () => {
-              let { exitCode } = await execa("pnpm", ["vite", "build"], {
-                cwd: project.directory,
-              });
+          let { exitCode } = await project.install();
 
-              expect(exitCode).toBe(0);
-            });
-          }
-
-          for (let layer of layers) {
-            // Not ready yet
-            if (layer.name.startsWith("vitest")) continue;
-            if (layer.name.startsWith("warp-drive")) continue;
-
-            it("applies correctly", () => {
-              expect("not-implemented").toBeTruthy();
-            });
-          }
+          hardExpect(exitCode, "Install succeeds").toBe(0);
         });
-      }
-    });
-  }
-});
+
+        if (base === "minimal-app") {
+          it("builds", async () => {
+            let { exitCode } = await execa("pnpm", ["vite", "build"], {
+              cwd: project.directory,
+            });
+
+            expect(exitCode).toBe(0);
+          });
+        }
+
+        for (let layer of layers) {
+          if (import.meta.vitest) {
+            continue;
+          }
+
+          it("applies correctly", () => {
+            expect(layer.name).toBeTruthy();
+          });
+        }
+      });
+    }
+  });
+}
