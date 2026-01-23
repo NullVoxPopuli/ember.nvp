@@ -13,7 +13,6 @@ permutations.push([baseline]);
 
 const TODO = new Set([
   "eslint",
-  "git",
   "qunit",
   "release-plan",
   "renovate [bot]",
@@ -39,6 +38,7 @@ for (let base of bases) {
       describe(`project starts as '${base}' + ${permutation}`, () => {
         let project: Project;
         let layerNames = permutation.filter((x) => x !== baseline);
+        let startingLayers = layers.filter((layer) => layerNames.includes(layer.name));
 
         beforeAll(async () => {
           project = await generate({
@@ -51,15 +51,28 @@ for (let base of bases) {
           hardExpect(exitCode, "Install succeeds").toBe(0);
         });
 
-        if (base === "minimal-app") {
-          it("builds", async () => {
-            let { exitCode } = await execa("pnpm", ["vite", "build"], {
-              cwd: project.directory,
-            });
-
-            expect(exitCode).toBe(0);
+        it("builds", async () => {
+          let { exitCode } = await execa("pnpm", ["vite", "build"], {
+            cwd: project.directory,
           });
-        }
+
+          expect(exitCode).toBe(0);
+        });
+
+        it("successfully setup the layers", async () => {
+          if (startingLayers.length === 0) {
+            // TODO: test baseline stuff more?
+            expect(true, "No layers to verify").toBe(true);
+          }
+
+          for (let layer of startingLayers) {
+            if (typeof layer.isSetup === "function") {
+              let result = await layer.isSetup(project);
+
+              expect(result, `${layer.name} is setup`).toBe(true);
+            }
+          }
+        });
 
         for (let layer of layers) {
           if (import.meta.vitest) {
