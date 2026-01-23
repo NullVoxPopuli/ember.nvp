@@ -9,6 +9,9 @@ _ember project generator: a reenvisioning of blueprints -- hopefully one day to 
 _I can't recommend using this tool unless your comfortable with the emitted caveats in the project_.
 (And being comfortable debugging build issues is recommended)
 
+
+But I'm very excited about this tool, because it's everything I've ever wanted from a project generator. Each layer is idempotent, and knows about the other layers. So if, for example, you omit eslint when setting up your project, but do have github-actions, when you do add eslint, your github-actions will be updated as well. And this works in any order.
+
 ## Usage
 
 ```bash
@@ -69,7 +72,8 @@ Good for:
 
 ## Layers
 
-Each layer is a standalone module that can add features to your ember project:
+Each layer is a standalone module that can add features to your ember project,
+and every layer is aware of the other layers, so if, for example, you run github actions first, and then later decide to add linting, the github actions output will be updated.
 
 ### 🎯 Minimal (always included)
 
@@ -83,6 +87,10 @@ The base layer, matching the `--minimal` flag from [ember-cli/ember-app-blueprin
 - ✅ Vite-based with modern Ember
 
 Perfect for demos, reproductions, and learning!
+
+### GitHub Actions (optional)
+
+Adds simple GitHub Actions workflow to your project
 
 ### 📝 ESLint (optional)
 

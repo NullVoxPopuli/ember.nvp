@@ -19,21 +19,15 @@ jobs:
     name: "Lint"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [install_dependencies]
 
     steps:
       - uses: wyvox/action@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - run: pnpm lint
-
-  ##############################################################
 
   node_tests:
     name: "Node Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [install_dependencies]
 
     steps:
       - uses: wyvox/action@v1
