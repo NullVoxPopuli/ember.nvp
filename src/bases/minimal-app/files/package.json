@@ -37,10 +37,15 @@
     "@babel/plugin-transform-runtime": "^7.28.5",
     "@babel/plugin-transform-typescript": "^7.28.5",
     "@babel/runtime": "^7.28.4",
+    "@ember/app-tsconfig": "^1.0.3",
     "@embroider/core": "^4.4.2",
     "@embroider/vite": "^1.5.0",
+    "@glint/ember-tsc": "^1.0.8",
+    "@glint/template": "^1.7.3",
+    "@glint/tsserver-plugin": "^2.0.8",
     "@rollup/plugin-babel": "^6.1.0",
     "babel-plugin-ember-template-compilation": "^3.0.1",
+    "typescript": "^5.9.3",
     "vite": "^7.3.0"
   },
   "engines": {

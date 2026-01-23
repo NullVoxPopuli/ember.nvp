@@ -94,18 +94,33 @@ importers:
       '@babel/runtime':
         specifier: ^7.28.4
         version: 7.28.6
+      '@ember/app-tsconfig':
+        specifier: ^1.0.3
+        version: 1.0.3
       '@embroider/core':
         specifier: ^4.4.2
         version: 4.4.2(@glint/template@1.7.3)
       '@embroider/vite':
         specifier: ^1.5.0
         version: 1.5.0(@embroider/core@4.4.2(@glint/template@1.7.3))(@glint/template@1.7.3)(rollup@4.55.3)(vite@7.3.1(@types/node@25.0.8)(jiti@2.4.2)(terser@5.46.0))
+      '@glint/ember-tsc':
+        specifier: ^1.0.8
+        version: 1.0.9(typescript@5.9.3)
+      '@glint/template':
+        specifier: ^1.7.3
+        version: 1.7.3
+      '@glint/tsserver-plugin':
+        specifier: ^2.0.8
+        version: 2.0.9
       '@rollup/plugin-babel':
         specifier: ^6.1.0
         version: 6.1.0(@babel/core@7.28.6)(rollup@4.55.3)
       babel-plugin-ember-template-compilation:
         specifier: ^3.0.1
         version: 3.1.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
       vite:
         specifier: ^7.3.0
         version: 7.3.1(@types/node@25.0.8)(jiti@2.4.2)(terser@5.46.0)
@@ -766,6 +781,9 @@ packages:
 
   '@ember/app-blueprint@6.9.1':
     resolution: {integrity: sha512-/hj8Pj+/h5x2LI1NO+lMM7cD0dolX56uC6Gb/m4SFJj10Rp6riqZYaidspMg8uCibGAN1dx/WiGxi6GDetsmeQ==}
+
+  '@ember/app-tsconfig@1.0.3':
+    resolution: {integrity: sha512-dw+/F68xvBw8JYLpyFmAcnF5d/vZqlP6GkEde+XIuPPPn6PIakrh0jtP0/tPxBw8tVuc6eD+H+8CWSsSFrGuiA==}
 
   '@ember/app-tsconfig@2.0.0':
     resolution: {integrity: sha512-NmD1OZFtCF49k4WDaPdhGP4OKoRbPaXpTBO3AsJe0okIJeCVUiEiC8YUpfTJmld9EJOEa9mW/p0tJQS70GktOA==}
@@ -6938,6 +6956,8 @@ snapshots:
       ember-cli-string-utils: 1.1.0
       lodash: 4.17.21
       walk-sync: 3.0.0
+
+  '@ember/app-tsconfig@1.0.3': {}
 
   '@ember/app-tsconfig@2.0.0': {}
 
