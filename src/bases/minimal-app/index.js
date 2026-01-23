@@ -1,6 +1,7 @@
 import { packageJson, files } from "ember-apply";
 import { join, parse as parsePath } from "node:path";
 import { removeTypes } from "babel-remove-types";
+import { getLatest } from "#utils/npm.js";
 
 /**
  * Minimal Layer

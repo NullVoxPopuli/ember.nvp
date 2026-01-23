@@ -13,30 +13,32 @@ describe("project type", () => {
     describe(base, () => {
       for (let permutation of permutations) {
         describe(`project starts as '${base}' + ${permutation}`, () => {
+          let project: Project;
+
+          beforeAll(async () => {
+            project = await generate({
+              type: base === "minimal-app" ? "app" : "library",
+              layers: permutation,
+            });
+          });
+
+          if (base === "minimal-app") {
+            it("builds", async () => {
+              let { exitCode } = await execa("pnpm", ["vite", "build"], {
+                cwd: project.directory,
+              });
+
+              expect(exitCode).toBe(0);
+            });
+          }
+
           for (let layer of layers) {
             // Not ready yet
             if (layer.name.startsWith("vitest")) continue;
             if (layer.name.startsWith("warp-drive")) continue;
 
-            describe(base, () => {
-              let project: Project;
-
-              beforeAll(async () => {
-                project = await generate({
-                  type: base === "minimal-app" ? "app" : "library",
-                  layers: permutation,
-                });
-              });
-
-              if (base === "minimal-app") {
-                it("builds", async () => {
-                  let { exitCode } = await execa("pnpm", ["vite", "build"], {
-                    cwd: project.directory,
-                  });
-
-                  expect(exitCode).toBe(0);
-                });
-              }
+            it("applies correctly", () => {
+              expect("not-implemented").toBeTruthy();
             });
           }
         });
