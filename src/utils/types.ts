@@ -14,7 +14,9 @@ interface Project {
 export interface Layer {
   label: string;
   description: string;
+  defaultValue?: () => unknown;
   run(project: Project): Promise<void>;
+  isSetup: (project: Project) => Promise<boolean>;
 }
 
 export interface Answers {

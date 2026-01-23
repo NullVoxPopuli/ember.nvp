@@ -20,6 +20,7 @@
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
     "new": "node ./src/cli/index.js",
+    "new:tmp": "./test/manual.sh",
     "test:node": "FORCE_COLOR=1 vitest run",
     "test:vitest": "FORCE_COLOR=1 vitest"
   },
