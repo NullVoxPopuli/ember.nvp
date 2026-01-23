@@ -1,6 +1,5 @@
-import { packageJson, files, js } from "ember-apply";
+import { packageJson, files } from "ember-apply";
 import { join, parse as parsePath } from "node:path";
-import { readFile } from "node:fs/promises";
 import { removeTypes } from "babel-remove-types";
 
 /**
@@ -19,75 +18,84 @@ export default {
   description: "Bare minimum Ember app structure",
 
   /**
+   * 1. Apply files
+   *   a. Remove TS if needed
+   * 2. Remove TS deps/files if needed
+   * 3. Update name(s)
+   *
    * @param {import('#utils/project.js').Project} project
    */
   async run(project) {
-    // Apply all files from the files directory
-    await files.applyFolder(join(import.meta.dirname, "files"), {
-      to: project.directory,
-      async transform({ filePath, contents }) {
-        /**
-         * TODO: handle conflicts if files already exists
-         *
-         *       (I believe we can do interactive here)
-         */
-        let pathInfo = parsePath(filePath);
-        let ext = pathInfo.ext;
-        if (!project.wantsTypeScript) {
-          await removeTypes(ext, contents);
-        }
-
-        return contents;
-      },
-    });
-
-    // Add dependencies
-    await packageJson.addDependencies(
-      {
-        "@glimmer/component": "^1.1.2",
-        "@glimmer/tracking": "^1.1.2",
-        "@embroider/core": "^3.4.16",
-        "@embroider/macros": "^1.16.7",
-        "@embroider/router": "^2.1.8",
-        "@embroider/vite": "^6.0.2",
-        "@embroider/virtual": "^3.4.16",
-        "ember-page-title": "^8.2.4",
-        "ember-resolver": "^14.0.0",
-        "ember-source": "^6.0.1",
-        vite: "^6.0.3",
-      },
-      targetDir,
-    );
-
-    // Add devDependencies
-    await packageJson.addDevDependencies(
-      {
-        "@babel/core": "^7.26.0",
-        "@babel/plugin-transform-typescript": "^7.26.3",
-        "@rollup/plugin-babel": "^6.0.4",
-        "@tsconfig/ember": "^3.0.8",
-        typescript: "^5.7.3",
-      },
-      targetDir,
-    );
-
-    // Add scripts
-    await packageJson.addScripts(
-      {
-        start: "vite",
-        build: "vite build",
-        preview: "vite preview",
-      },
-      targetDir,
-    );
-
-    // Update package.json to set type: "module" and other metadata
-    await packageJson.modify((json) => {
-      json.name = projectName;
-      json.version = "0.0.0";
-      json.private = true;
-      json.type = "module";
-      return json;
-    }, targetDir);
+    await applyFiles(project);
+    await updateName(project);
+    await makeJavaScript(project);
+    await upgradeDependencies(project);
   },
 };
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+async function applyFiles(project) {
+  await files.applyFolder(join(import.meta.dirname, "files"), {
+    to: project.directory,
+    async transform({ filePath, contents }) {
+      /**
+       * TODO: handle conflicts if files already exists
+       *
+       *       (I believe we can do interactive here)
+       */
+      let pathInfo = parsePath(filePath);
+      let ext = pathInfo.ext;
+      if (!project.wantsTypeScript) {
+        await removeTypes(ext, contents);
+      }
+
+      return contents;
+    },
+  });
+}
+
+/**
+ * Operates on known files where the name matters
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function updateName(project) {
+  await packageJson.modify((json) => {
+    json.name = project.desires.name;
+  }, project.directory);
+}
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+async function makeJavaScript(project) {
+  if (project.wantsTypeScript) return;
+
+  /**
+   * We don't actually remove anything, because we want intellisense for JS
+   */
+  // await packageJson.removeDevDependencies([
+  //   "@ember/app-tsconfig",
+  //   "@glint/ember-tsc",
+  //   "@glint/template",
+  //   "@glint/tsserver-plugin",
+  //   "typescript",
+  // ], project.directory);
+}
+
+/**
+ * Bumps in-range only.
+ * Majors will need to go through PR to this repo.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function upgradeDependencies(project) {
+  let existing = await packageJson.read(project.directory);
+
+  await packageJson.modify(async (json) => {
+    Object.assign(json.dependencies, await getLatest(existing.dependencies));
+    Object.assign(json.devDependencies, await getLatest(existing.devDependencies));
+  }, project.directory);
+}

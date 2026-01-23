@@ -15,6 +15,7 @@ export interface Layer {
 export interface Answers {
   type: string;
   path: string;
+  name: string;
   layers: Layer[];
   packageManager: PackageManager;
 }

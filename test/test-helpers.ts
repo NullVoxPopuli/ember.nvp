@@ -2,11 +2,17 @@ import { execa } from "execa";
 import { join } from "node:path";
 import { styleText } from "node:util";
 import { Readable, Writable } from "node:stream";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { generateProject, Project } from "ember.nvp";
+import { discoverLayers } from "#layers";
 
 const minimalApp = "minimal-app";
 const minimalAddon = "minimal-library";
 
 export const bases = [minimalApp, minimalAddon];
+
+export const layers = await discoverLayers();
 
 export function permutate(toPermutate: string[]): string[][] {
   const out: string[][] = [];
@@ -34,6 +40,32 @@ export function permutate(toPermutate: string[]): string[][] {
 
   backtrack(0, []);
   return out;
+}
+
+export async function generate({
+  layers: layerNames = [],
+  name = "my-app",
+  type = "app",
+  packageManager = "pnpm",
+}: {
+  layers?: string[];
+  name?: string;
+  type?: string;
+  packageManager?: string;
+}): Promise<Project> {
+  const tempDir = await mkdtemp(join(tmpdir(), `${name}-`));
+
+  let selectedLayers = layers.filter((layer) => layerNames.includes(layer.name));
+  let project = new Project(tempDir, {
+    name,
+    type,
+    layers: selectedLayers,
+    packageManager,
+  });
+
+  await generateProject(project);
+
+  return project;
 }
 
 const cliPath = join(import.meta.dirname, "../src/cli/index.js");

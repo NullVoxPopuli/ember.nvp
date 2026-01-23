@@ -15,14 +15,23 @@ export class Project {
     this.#desires = desires;
   }
 
+  /**
+   * @type {string}
+   */
   get directory() {
     return this.#directory;
   }
 
+  /**
+   * @type {import('./types.ts').Answers}
+   */
   get desires() {
     return this.#desires;
   }
 
+  /**
+   * @type {boolean}
+   */
   get wantsTypeScript() {
     return this.desires.layers.some((layer) => layer.name === "TypeScript");
   }

@@ -30,6 +30,7 @@ async function main() {
   const packageManager = await askPackageManager();
 
   let project = new Project(projectPath, {
+    name: projectName,
     type: projectType,
     path: projectPath,
     layers: selectedLayers,

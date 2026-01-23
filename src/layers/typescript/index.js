@@ -14,5 +14,14 @@ export default {
   /**
    * @param {import('#utils/project.js').Project} project
    */
-  async run() {},
+  async run(project) {
+    /**
+     * if jsconfig exists, switch to tsconfig
+     */
+
+    /**
+     * if tsconfig exists,
+     */
+    throw new Error("Not implemented");
+  },
 };
