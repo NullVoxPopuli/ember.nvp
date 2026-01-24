@@ -17,7 +17,6 @@ const TODO = new Set([
   "release-plan",
   "renovate [bot]",
   "vitest",
-  "prettier",
   "GitHub Actions",
   "typescript",
 ]);
@@ -35,7 +34,7 @@ for (let base of bases) {
         continue;
       }
 
-      describe(`project starts as '${base}' + ${permutation}`, () => {
+      describe(`layers: ${permutation}`, () => {
         let project: Project;
         let layerNames = permutation.filter((x) => x !== baseline);
         let startingLayers = layers.filter((layer) => layerNames.includes(layer.name));
@@ -76,23 +75,25 @@ for (let base of bases) {
          * Simulates running the CLI again with different options selected
          * on the same project
          */
-        for (let layer of layers) {
-          if (TODO.has(layer.name)) {
-            continue;
+        describe("(re)applying", () => {
+          for (let layer of layers) {
+            if (TODO.has(layer.name)) {
+              continue;
+            }
+
+            describe(layer.name, () => {
+              beforeAll(async () => {
+                await layer.run(project);
+              });
+
+              it("applies correctly", async () => {
+                let result = await layer.isSetup(project);
+
+                expect(result, `${layer.name} is setup`).toBe(true);
+              });
+            });
           }
-
-          describe(`(re)applying ${layer.name}`, () => {
-            beforeAll(async () => {
-              await layer.run(project);
-            });
-
-            it("applies correctly", async () => {
-              let result = await layer.isSetup(project);
-
-              expect(result, `${layer.name} is setup`).toBe(true);
-            });
-          });
-        }
+        });
       });
     }
   });
