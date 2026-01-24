@@ -1,5 +1,6 @@
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 import { getLatest } from "#utils/npm.js";
 
 /**
