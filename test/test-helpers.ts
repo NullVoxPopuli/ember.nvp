@@ -42,6 +42,10 @@ export function permutate(toPermutate: string[]): string[][] {
   return out;
 }
 
+export async function mktemp(name = "ember.nvp_test-") {
+  return await mkdtemp(join(tmpdir(), `${name}-`));
+}
+
 export async function generate({
   layers: layerNames = [],
   name = "my-app",
@@ -53,7 +57,7 @@ export async function generate({
   type?: string;
   packageManager?: string;
 }): Promise<Project> {
-  const tempDir = await mkdtemp(join(tmpdir(), `${name}-`));
+  const tempDir = await mktemp(name);
 
   let selectedLayers = layers.filter((layer) => layerNames.includes(layer.name));
   let project = new Project(tempDir, {

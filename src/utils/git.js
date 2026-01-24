@@ -3,11 +3,11 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";
 
-export function isInGit() {
+export function isInGit(directory = cwd) {
   try {
     const result = execSync("git rev-parse --is-inside-work-tree", {
       encoding: "utf-8",
-      cwd,
+      cwd: directory,
       stdio: "ignore",
     }).trim();
     return result === "true";
