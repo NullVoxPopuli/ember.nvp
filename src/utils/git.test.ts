@@ -11,7 +11,7 @@ describe("isInGit", () => {
   it("in a temp directory", async () => {
     let tmp = await mktemp();
 
-    expect(isInGit(tmp)).toBe(true);
+    expect(isInGit(tmp)).toBe(false);
   });
 });
 

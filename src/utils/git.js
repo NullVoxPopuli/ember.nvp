@@ -21,7 +21,7 @@ export function isInGit(directory = cwd) {
  */
 export function initGit(directory) {
   try {
-    execSync("git init", { cwd: directory });
+    execSync("git init --initial-branch=main", { cwd: directory });
     return true;
   } catch {
     return false;
