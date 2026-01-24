@@ -5,7 +5,9 @@ import { discoverLayers } from "#layers";
 import * as p from "@clack/prompts";
 
 export async function askLayers() {
-  const optionalLayers = await discoverLayers();
+  const optionalLayers = (await discoverLayers()).filter(
+    (layer) => typeof layer.run === "function",
+  );
 
   p.note(
     `${styleText("cyan", "minimal")} layer is always included.\n` +

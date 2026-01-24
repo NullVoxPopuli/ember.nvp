@@ -1,5 +1,6 @@
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
+import { getLatest } from "#utils/npm.js";
 
 /**
  * Prettier Layer
@@ -10,26 +11,50 @@ export default {
   label: "Prettier",
   description: "Code formatting with Prettier",
 
-  async run({ targetDir }) {
-    // Apply config files
-    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async run(project) {
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    // Add devDependencies
     await packageJson.addDevDependencies(
-      {
-        prettier: "^3.4.2",
-        "prettier-plugin-ember-template-tag": "^2.0.2",
-      },
-      targetDir,
+      await getLatest({
+        prettier: "^3.8.1",
+        "prettier-plugin-ember-template-tag": "^2.1.2",
+      }),
+      project.directory,
     );
 
-    // Add scripts
     await packageJson.addScripts(
       {
         format: "prettier --write .",
-        "format:check": "prettier --check .",
+        "lint:prettier": "prettier --check .",
       },
-      targetDir,
+      project.directory,
     );
+  },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async isSetup(project) {
+    let manifest = await packageJson.read(project.directory);
+
+    let scripts = Object.values(manifest.scripts ?? {}).filter((script) =>
+      script.includes("prettier"),
+    );
+
+    if (!scripts.some((script) => script.includes("--write"))) {
+      return false;
+    }
+    if (!scripts.some((script) => script.includes("--check"))) {
+      return false;
+    }
+
+    if (!existsSync(join(project.directory, ".prettierrc.js"))) {
+      return false;
+    }
+
+    return true;
   },
 };
