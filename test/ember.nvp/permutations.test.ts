@@ -1,8 +1,9 @@
-import { beforeAll, describe, it, expect as hardExpect } from "vitest";
+import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
 import { generate, permutate, bases, layers } from "#test-helpers";
 import { execa } from "execa";
 
 import type { Project } from "ember.nvp";
+import { rm } from "node:fs";
 
 const expect = hardExpect.soft;
 
@@ -47,6 +48,10 @@ for (let base of bases) {
           let { exitCode } = await project.install();
 
           hardExpect(exitCode, "Install succeeds").toBe(0);
+        });
+
+        afterAll(async () => {
+          await rm(project.directory, { recursive: true, force: true });
         });
 
         it("builds", async () => {
