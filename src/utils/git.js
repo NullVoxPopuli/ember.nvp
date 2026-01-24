@@ -6,11 +6,10 @@ import { cwd } from "#utils/cwd.js";
 export function isInGit(directory = cwd) {
   try {
     const result = execSync("git rev-parse --is-inside-work-tree", {
-      encoding: "utf-8",
       cwd: directory,
-      stdio: "ignore",
-    }).trim();
-    return result === "true";
+    });
+
+    return result.toString().trim() === "true";
   } catch {
     return false;
   }
@@ -22,7 +21,7 @@ export function isInGit(directory = cwd) {
  */
 export function initGit(directory) {
   try {
-    execSync("git init", { cwd: directory, stdio: "ignore" });
+    execSync("git init", { cwd: directory });
     return true;
   } catch {
     return false;

@@ -9,11 +9,7 @@ export default {
    * @param {import('#utils/project.js').Project} project
    */
   async defaultValue() {
-    if (isInGit()) {
-      return false;
-    }
-
-    return true;
+    return !isInGit();
   },
 
   /**
