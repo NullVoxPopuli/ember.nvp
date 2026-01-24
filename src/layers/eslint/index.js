@@ -1,8 +1,9 @@
 import * as p from "@clack/prompts";
 
+import { styleText } from "node:util";
 import { getLatest } from "#utils/npm.js";
 import { packageJson, files } from "ember-apply";
-import { join } from "node:path";
+import { formatLabel } from "#utils/cli.js";
 
 const configs = {
   /**
@@ -36,8 +37,7 @@ const configs = {
 };
 
 export default {
-  label: "ESLint",
-  description: "Code linting with ESLint",
+  label: formatLabel("ESLint", "linting"),
 
   /**
    * @param {import('#utils/project.js').Project} project
@@ -56,6 +56,30 @@ export default {
       project.directory,
     );
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async isSetup(project) {
+    let manifest = await packageJson.read(project.directory);
+
+    let scripts = Object.values(manifest.scripts ?? {}).filter((script) =>
+      script.includes("eslint"),
+    );
+
+    if (!scripts.some((script) => script.includes("--cache"))) {
+      return false;
+    }
+    if (!scripts.some((script) => script.includes("--fix"))) {
+      return false;
+    }
+
+    if (!existsSync(join(project.directory, "eslint.config.js"))) {
+      return false;
+    }
+
+    return true;
+  },
 };
 
 async function askVariant() {
@@ -65,10 +89,16 @@ async function askVariant() {
     options: [
       {
         value: "nvp",
-        label: `NullVoxPopuli's config (some opinions and more automatic variant support without config changes)`,
+        label: `NullVoxPopuli's config ${styleText("gray", "(some opinions and more automatic variant support without config changes)")}`,
       },
-      { value: "ember", label: "ember-eslint (encapsulateed, follows official config)" },
-      { value: "eject", label: `fully ejected (you control all config and dependency versions)` },
+      {
+        value: "ember",
+        label: `ember-eslint ${styleText("gray", "(encapsulateed, follows official config)")}`,
+      },
+      {
+        value: "eject",
+        label: `fully ejected ${styleText("gray", "(you control all config and dependency versions)")}`,
+      },
     ],
   });
 

@@ -42,8 +42,8 @@ export async function askLayers() {
     initialValues: defaultValues,
     options: optionalLayers.map((layer) => ({
       value: layer.name,
-      label: layer.label || layer.name,
-      hint: layer.description,
+      label: layer.label ?? layer.name,
+      hint: layer.hint,
     })),
     required: false,
   });
