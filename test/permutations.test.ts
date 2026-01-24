@@ -12,7 +12,6 @@ const baseline = "<baseline>";
 permutations.push([baseline]);
 
 const TODO = new Set([
-  "eslint",
   "qunit",
   "release-plan",
   "renovate [bot]",

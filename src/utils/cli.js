@@ -16,6 +16,10 @@ export function isInteractive() {
  */
 const PADDING = 10;
 
+/**
+ * @param {string} name
+ * @param {string} [subTitle]
+ */
 export function formatLabel(name, subTitle) {
   if (!subTitle) {
     return padToWidth(name, PADDING);
@@ -24,6 +28,11 @@ export function formatLabel(name, subTitle) {
   return padToWidth(name, PADDING) + styleText("magentaBright", subTitle);
 }
 
+/**
+ * @param {string} input
+ * @param {number} maxWidth
+ * @param {{ side?: 'right' | 'left' }} [options]
+ */
 function padToWidth(input, maxWidth, { side = "right" } = {}) {
   let str = String(input);
   let width = Math.max(0, maxWidth | 0);
