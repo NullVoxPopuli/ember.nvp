@@ -5,11 +5,7 @@ import { discoverLayers } from "#layers";
 import * as p from "@clack/prompts";
 
 export async function askLayers() {
-  const layers = await discoverLayers();
-
-  // Separate minimal from other layers
-  const minimalLayer = layers.find((l) => l.name === "minimal");
-  const optionalLayers = layers.filter((l) => l.name !== "minimal");
+  const optionalLayers = await discoverLayers();
 
   p.note(
     `${styleText("cyan", "minimal")} layer is always included.\n` +
@@ -64,10 +60,7 @@ export async function askLayers() {
   }
 
   // Build the final configuration
-  const selectedLayers = [
-    minimalLayer,
-    ...optionalLayers.filter((layer) => selectedFeatures.includes(layer.name)),
-  ].filter(Boolean);
+  const selectedLayers = optionalLayers.filter((layer) => selectedFeatures.includes(layer.name));
 
   return selectedLayers;
 }
