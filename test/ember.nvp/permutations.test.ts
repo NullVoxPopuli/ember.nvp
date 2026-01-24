@@ -1,5 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect } from "vitest";
-import { generate, permutate, bases, layers } from "./test-helpers.js";
+import { generate, permutate, bases, layers } from "#test-helpers";
 import { execa } from "execa";
 
 import type { Project } from "ember.nvp";

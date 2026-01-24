@@ -17,7 +17,7 @@ export const layers = await discoverLayers();
 export function permutate(toPermutate: string[]): string[][] {
   const out: string[][] = [];
 
-  function backtrack(startIndex: number, prefix: string[]) {
+  function backtrack(startIndex: number, prefix: string[], hasEslint: boolean) {
     if (prefix.length > 0) out.push(prefix.slice());
 
     for (let i = startIndex; i < toPermutate.length; i++) {
@@ -32,13 +32,19 @@ export function permutate(toPermutate: string[]): string[][] {
       // (silly TS not understanding loop bounds)
       if (!option) continue;
 
+      const isEslint = option.startsWith("eslint-");
+
+      // Skip this option if it's an eslint entry and we already have one
+      // (enforce mutual exclusivity for eslint-prefixed entries)
+      if (isEslint && hasEslint) continue;
+
       prefix.push(option);
-      backtrack(i + 1, prefix);
+      backtrack(i + 1, prefix, hasEslint || isEslint);
       prefix.pop();
     }
   }
 
-  backtrack(0, []);
+  backtrack(0, [], false);
   return out;
 }
 
