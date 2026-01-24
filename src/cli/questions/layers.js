@@ -9,13 +9,6 @@ export async function askLayers() {
     (layer) => typeof layer.run === "function",
   );
 
-  p.note(
-    `${styleText("cyan", "minimal")} layer is always included.\n` +
-      'It provides: vite app, type: "module", no compat, no testing, no linting.\n' +
-      "Perfect for demos and reproductions.",
-    "Base Layer",
-  );
-
   const supported = new Set(optionalLayers.map((layer) => layer.name));
 
   function isValid(selected) {
@@ -44,7 +37,6 @@ export async function askLayers() {
     )
   ).filter(Boolean);
 
-  // Let user select additional features
   const selectedFeatures = await p.multiselect({
     message: "Select additional features:",
     initialValues: defaultValues,

@@ -19,6 +19,14 @@ export async function generateProject(project) {
       break;
   }
 
+  /**
+   * We could run these in a loop until there is no git diff
+   */
+  await runLap(project);
+  await runLap(project);
+}
+
+async function runLap(project) {
   for (const layer of project.desires.layers) {
     if (typeof layer.run !== "function") {
       console.warn(`${layer.name} is not implemented`);

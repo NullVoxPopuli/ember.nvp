@@ -13,7 +13,8 @@
     "#args": "./src/cli/args.js",
     "#bases/*": "./src/bases/*/index.js",
     "#layers": "./src/layers/index.js",
-    "#utils/*": "./src/utils/*"
+    "#utils/*": "./src/utils/*",
+    "#test-helpers": "./test/test-helpers.ts"
   },
   "scripts": {
     "lint": "pnpm lint:format",

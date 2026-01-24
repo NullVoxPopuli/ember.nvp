@@ -3,14 +3,13 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";
 
-export function isInGit() {
+export function isInGit(directory = cwd) {
   try {
     const result = execSync("git rev-parse --is-inside-work-tree", {
-      encoding: "utf-8",
-      cwd,
-      stdio: "ignore",
-    }).trim();
-    return result === "true";
+      cwd: directory,
+    });
+
+    return result.toString().trim() === "true";
   } catch {
     return false;
   }
@@ -22,7 +21,7 @@ export function isInGit() {
  */
 export function initGit(directory) {
   try {
-    execSync("git init", { cwd: directory, stdio: "ignore" });
+    execSync("git init --initial-branch=main", { cwd: directory });
     return true;
   } catch {
     return false;
