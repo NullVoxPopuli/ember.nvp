@@ -14,6 +14,7 @@
     "#bases/*": "./src/bases/*/index.js",
     "#consolidators/*": "./src/consolidators/*",
     "#layers": "./src/layers/index.js",
+    "#types": "./src/utils/types.ts",
     "#utils/*": "./src/utils/*",
     "#test-helpers": "./test/test-helpers.ts"
   },
@@ -22,6 +23,7 @@
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
     "new": "node ./src/cli/index.js",
+    "new:again": "cd my-app; node ../src/cli/index.js",
     "new:tmp": "./test/manual.sh",
     "test:node": "FORCE_COLOR=1 vitest run",
     "test:vitest": "FORCE_COLOR=1 vitest"

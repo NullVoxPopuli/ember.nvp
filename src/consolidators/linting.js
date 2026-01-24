@@ -7,7 +7,7 @@ export async function consolidateLintingScripts(project) {
 }
 
 /**
- * @param {import('#utils/project.js').Project} project
+ * @param {import('#types').Project} project
  */
 export async function maybeLintWithConcurrently(project) {
   let linting = {

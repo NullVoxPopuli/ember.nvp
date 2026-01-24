@@ -1,8 +1,8 @@
 import type { ResultPromise } from "execa";
 
-type PackageManager = "pnpm" | "npm";
+export type PackageManager = "pnpm" | "npm";
 
-interface Project {
+export interface Project {
   readonly directory: string;
   readonly desires: Answers;
   readonly wantsTypeScript: boolean;
@@ -16,7 +16,7 @@ export interface Layer {
    * The text to show during selection
    */
   label: string;
-  hint: string;
+  hint?: string;
   defaultValue?: () => unknown;
   /**
    * The function that applies the codemod
@@ -24,7 +24,7 @@ export interface Layer {
    * run _may_ be invoked multiple times,
    * so it's important to not require interaction here
    */
-  run(project: Project): Promise<void>;
+  run: (project: Project) => Promise<void>;
   isSetup: (project: Project) => Promise<boolean>;
 }
 

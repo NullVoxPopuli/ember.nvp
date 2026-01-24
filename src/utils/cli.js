@@ -14,7 +14,7 @@ export function isInteractive() {
  * I don't think there is a way to format just that, so
  * there are a bunch of goofy spacings in the labels.
  */
-const PADDING = 0;
+const PADDING = 10;
 
 export function formatLabel(name, subTitle) {
   if (!subTitle) {
