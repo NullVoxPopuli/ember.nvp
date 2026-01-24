@@ -12,9 +12,18 @@ interface Project {
 }
 
 export interface Layer {
+  /**
+   * The text to show during selection
+   */
   label: string;
-  description: string;
+  hint: string;
   defaultValue?: () => unknown;
+  /**
+   * The function that applies the codemod
+   *
+   * run _may_ be invoked multiple times,
+   * so it's important to not require interaction here
+   */
   run(project: Project): Promise<void>;
   isSetup: (project: Project) => Promise<boolean>;
 }
