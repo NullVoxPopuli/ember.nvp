@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { getLatest } from "#utils/npm.js";
 import { formatLabel } from "#utils/cli.js";
+import { maybeLintWithConcurrently } from "#consolidators/linting.js";
 
 /**
  * Prettier Layer
@@ -34,6 +35,8 @@ export default {
       },
       project.directory,
     );
+
+    await maybeLintWithConcurrently(project);
   },
 
   /**

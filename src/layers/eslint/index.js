@@ -2,8 +2,9 @@ import * as p from "@clack/prompts";
 
 import { styleText } from "node:util";
 import { getLatest } from "#utils/npm.js";
-import { packageJson, files } from "ember-apply";
+import { packageJson } from "ember-apply";
 import { formatLabel } from "#utils/cli.js";
+import { maybeLintWithConcurrently } from "#consolidators/linting.js";
 
 const configs = {
   /**
@@ -48,13 +49,16 @@ export default {
     let deps = configs[variant].deps;
 
     await packageJson.addDevDependencies(await getLatest(deps), project.directory);
+
     await packageJson.addScripts(
       {
-        lint: "eslint . --cache",
-        "lint:fix": "eslint . --fix",
+        "lint:eslint": "eslint . --cache",
+        "lint:eslint:fix": "eslint . --fix",
       },
       project.directory,
     );
+
+    await maybeLintWithConcurrently(project);
   },
 
   /**

@@ -12,6 +12,7 @@
   "imports": {
     "#args": "./src/cli/args.js",
     "#bases/*": "./src/bases/*/index.js",
+    "#consolidators/*": "./src/consolidators/*",
     "#layers": "./src/layers/index.js",
     "#utils/*": "./src/utils/*",
     "#test-helpers": "./test/test-helpers.ts"
