@@ -34,7 +34,7 @@ for (let base of bases) {
         continue;
       }
 
-      describe(`project starts as '${base}' + ${permutation}`, () => {
+      describe(`layers: ${permutation}`, () => {
         let project: Project;
         let layerNames = permutation.filter((x) => x !== baseline);
         let startingLayers = layers.filter((layer) => layerNames.includes(layer.name));
