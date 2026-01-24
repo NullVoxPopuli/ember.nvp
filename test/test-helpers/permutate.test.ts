@@ -34,26 +34,17 @@ describe("permutate", () => {
 
     // Check that no permutation has more than one eslint-prefixed entry
     for (const permutation of result) {
-      const eslintCount = permutation.filter((item) =>
-        item.startsWith("eslint-")
-      ).length;
+      const eslintCount = permutation.filter((item) => item.startsWith("eslint-")).length;
       expect(eslintCount).toBeLessThanOrEqual(1);
     }
   });
 
   it("allows permutations with 0 or 1 eslint entry", () => {
-    const result = permutate([
-      "eslint-bundled-ember",
-      "eslint-bundled-nvp",
-      "other",
-    ]);
+    const result = permutate(["eslint-bundled-ember", "eslint-bundled-nvp", "other"]);
 
-    const hasNoEslint = result.some(
-      (perm) => !perm.some((item) => item.startsWith("eslint-"))
-    );
+    const hasNoEslint = result.some((perm) => !perm.some((item) => item.startsWith("eslint-")));
     const hasOneEslint = result.some(
-      (perm) =>
-        perm.filter((item) => item.startsWith("eslint-")).length === 1
+      (perm) => perm.filter((item) => item.startsWith("eslint-")).length === 1,
     );
 
     expect(hasNoEslint).toBe(true);
@@ -65,17 +56,14 @@ describe("permutate", () => {
 
     // Verify all permutations contain at most 1 eslint entry
     for (const permutation of result) {
-      const eslintCount = permutation.filter((item) =>
-        item.startsWith("eslint-")
-      ).length;
+      const eslintCount = permutation.filter((item) => item.startsWith("eslint-")).length;
       expect(eslintCount).toBeLessThanOrEqual(1);
     }
 
     // Should have permutations like: ["a"], ["a", "eslint-foo"], ["a", "b"], etc.
     // but NOT ["a", "eslint-foo", "eslint-bar"]
     const hasMultipleEslint = result.some(
-      (perm) =>
-        perm.filter((item) => item.startsWith("eslint-")).length > 1
+      (perm) => perm.filter((item) => item.startsWith("eslint-")).length > 1,
     );
     expect(hasMultipleEslint).toBe(false);
   });

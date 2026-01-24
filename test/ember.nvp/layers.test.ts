@@ -27,12 +27,11 @@ describe("discoverLayers", () => {
 
   describe("each layer has minimum API", () => {
     for (let layer of layers) {
-
       it(layer.name, () => {
-          const keys = Object.keys(layer);
-          expect(keys).toContain("name");
-          expect(keys).toContain("label");
-          expect(keys).toContain("run");
+        const keys = Object.keys(layer);
+        expect(keys).toContain("name");
+        expect(keys).toContain("label");
+        expect(keys).toContain("run");
       });
     }
   });
