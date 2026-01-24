@@ -25,7 +25,7 @@ export default {
    * 2. Remove TS deps/files if needed
    * 3. Update name(s)
    *
-   * @param {import('#utils/project.js').Project} project
+   * @param {import('#types').Project} project
    */
   async run(project) {
     await applyFiles(project);
@@ -36,7 +36,7 @@ export default {
 };
 
 /**
- * @param {import('#utils/project.js').Project} project
+ * @param {import('#types').Project} project
  */
 async function applyFiles(project) {
   let filePath = fileURLToPath(new URL("files", import.meta.url));
@@ -65,7 +65,7 @@ async function applyFiles(project) {
 /**
  * Operates on known files where the name matters
  *
- * @param {import('#utils/project.js').Project} project
+ * @param {import('#types').Project} project
  */
 async function updateName(project) {
   await packageJson.modify((json) => {
@@ -74,7 +74,7 @@ async function updateName(project) {
 }
 
 /**
- * @param {import('#utils/project.js').Project} project
+ * @param {import('#types').Project} project
  */
 async function makeJavaScript(project) {
   if (project.wantsTypeScript) return;
@@ -95,7 +95,7 @@ async function makeJavaScript(project) {
  * Bumps in-range only.
  * Majors will need to go through PR to this repo.
  *
- * @param {import('#utils/project.js').Project} project
+ * @param {import('#types').Project} project
  */
 async function upgradeDependencies(project) {
   let existing = await packageJson.read(project.directory);

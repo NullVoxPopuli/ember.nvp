@@ -6,7 +6,7 @@ import { $ } from "execa";
  * May eventually include information for discovering existing state
  * about a project.
  *
- * @implements {import('./types.ts').Project}
+ * @implements {import('#types.ts').Project}
  */
 export class Project {
   #directory;
