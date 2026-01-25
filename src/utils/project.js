@@ -1,4 +1,6 @@
 import { $ } from "execa";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 /**
@@ -62,11 +64,26 @@ export class Project {
 
   /**
    *
-   * @param {string} relative
+   * @param {string} relativePath
    * @returns {string}
    */
-  path(relative) {
-    return join(this.directory, relative);
+  path(relativePath) {
+    return join(this.directory, relativePath);
+  }
+
+  /**
+   *
+   * @param {string} relativePath
+   * @returns {Promise<string|undefined>}
+   */
+  read(relativePath) {
+    let path = this.path(relativePath);
+
+    if (existsSync(path)) {
+      return readFile(path, "utf-8");
+    }
+
+    return;
   }
 
   /**

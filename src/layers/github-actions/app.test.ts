@@ -27,7 +27,8 @@ for (let packageManager of ["pnpm", "npm"] as const) {
     it("did not emit a CI.yml, because it wouldn't be used", async () => {
       let result = await githubActionsLayer.isSetup(project);
 
-      expect(result).toBe(false);
+      expect(await project.read(".github/workflows/ci.yml")).toMatchInlineSnapshot(`undefined`);
+      expect(result).toBe(true);
     });
 
     it("after emitting with an eslint layer", async () => {
@@ -48,16 +49,16 @@ for (let packageManager of ["pnpm", "npm"] as const) {
       let ciYamlContent = await readFile(ciYamlPath, "utf-8");
 
       if (packageManager === "pnpm") {
-        expect(ciYamlContent).not.toContain("npm install");
-        expect(ciYamlContent).toContain("pnpm install");
+        expect(ciYamlContent).not.toContain(" npm install");
+        expect(ciYamlContent).toContain("wyvox/action-setup-pnpm");
         expect(ciYamlContent).toContain("pnpm lint");
-        expect(ciYamlContent).not.toContain("npm lint");
+        expect(ciYamlContent).not.toContain(" npm lint");
       }
 
       if (packageManager === "npm") {
-        expect(ciYamlContent).not.toContain("pnpm install");
-        expect(ciYamlContent).toContain("npm install");
-        expect(ciYamlContent).toContain("npm lint");
+        expect(ciYamlContent).not.toContain("wyvox/action-setup-pnpm");
+        expect(ciYamlContent).toContain(" npm install");
+        expect(ciYamlContent).toContain(" npm run lint");
         expect(ciYamlContent).not.toContain("pnpm lint");
       }
     });

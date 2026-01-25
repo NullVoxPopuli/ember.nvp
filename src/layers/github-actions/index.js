@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 /**
@@ -11,6 +11,7 @@ export default {
     let result = await transform(project);
 
     if (result.didChange) {
+      await mkdir(project.path(".github/workflows"), { recursive: true });
       await writeFile(result.outputPath, result.content, "utf-8");
     }
   },
