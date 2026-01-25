@@ -1,5 +1,15 @@
 // Docs:
 // https://docs.renovatebot.com/configuration-options/
+//
+// This config: https://github.com/nullVoxPopuli/renovate
+// - weekly automated updates
+// - requires that packages be released for at least 5 days before opening a PR with that dependency
+// - doesn't constantly rebase open PRs
+// - provides opinionated package rules for reduced PR spam
+// - opens a separate PR to re-roll your lockfile occasionally
+// - appropriate for npm library development
+//   (auto-updating of engines, peerDependencies, and dependencies is disabled
+//    only devDependencies get automatically upgraded in order ot keep your repo stable)
 {
   extends: ["github>NullVoxPopuli/renovate:npm.json5"],
   packageRules: [],
