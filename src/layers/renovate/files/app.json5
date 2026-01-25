@@ -1,6 +1,4 @@
 {
-  "extends": [
-    "github>NullVoxPopuli/renovate:js.json5"
-  ],
-  "packageRules": []
+  extends: ["github>NullVoxPopuli/renovate:js.json5"],
+  packageRules: [],
 }
