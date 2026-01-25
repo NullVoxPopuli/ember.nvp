@@ -1,8 +1,9 @@
-import { beforeAll, describe, it, expect as hardExpect } from "vitest";
-import { generate, permutate, bases, layers } from "./test-helpers.js";
+import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
+import { generate, permutate, bases, layers } from "#test-helpers";
 import { execa } from "execa";
 
 import type { Project } from "ember.nvp";
+import { rm } from "node:fs/promises";
 
 const expect = hardExpect.soft;
 
@@ -12,12 +13,11 @@ const baseline = "<baseline>";
 permutations.push([baseline]);
 
 const TODO = new Set([
-  "eslint",
   "qunit",
   "release-plan",
-  "renovate [bot]",
+  "renovate",
   "vitest",
-  "GitHub Actions",
+  "github-actions",
   "typescript",
 ]);
 
@@ -50,6 +50,10 @@ for (let base of bases) {
           hardExpect(exitCode, "Install succeeds").toBe(0);
         });
 
+        afterAll(async () => {
+          await rm(project.directory, { recursive: true, force: true });
+        });
+
         it("builds", async () => {
           let { exitCode } = await execa("pnpm", ["vite", "build"], {
             cwd: project.directory,
@@ -65,6 +69,8 @@ for (let base of bases) {
           }
 
           for (let layer of startingLayers) {
+            expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+
             let result = await layer.isSetup(project);
 
             expect(result, `${layer.name} is setup`).toBe(true);
@@ -87,9 +93,13 @@ for (let base of bases) {
               });
 
               it("applies correctly", async () => {
+                expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+
                 let result = await layer.isSetup(project);
 
                 expect(result, `${layer.name} is setup`).toBe(true);
+
+                return;
               });
             });
           }

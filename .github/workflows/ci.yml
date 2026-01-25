@@ -27,7 +27,7 @@ jobs:
   node_tests:
     name: "Node Tests"
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: wyvox/action@v1

@@ -1,5 +1,5 @@
 import { test, expect as hardExpect } from "vitest";
-import { cli } from "./test-helpers.js";
+import { cli } from "#test-helpers";
 
 const expect = hardExpect.soft;
 

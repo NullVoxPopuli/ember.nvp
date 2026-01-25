@@ -6,12 +6,20 @@ import { answers, printArgInUse } from "#args";
  */
 const SUPPORTED = new Set(["app", "library", "addon"]);
 
+/**
+ * @param {string | undefined} selected
+ * @returns {selected is "app" | "library" | "addon"}
+ */
 function isValid(selected) {
   if (!selected) return false;
 
   return SUPPORTED.has(selected);
 }
 
+/**
+ *
+ * @return {Promise<import('#types').ProjectType>}
+ */
 export async function askProjectType() {
   if (isValid(answers.type)) {
     printArgInUse("type", answers.type);

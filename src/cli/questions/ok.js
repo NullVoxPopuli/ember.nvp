@@ -3,6 +3,11 @@ import { answers, printArgInUse } from "#args";
 
 const SUPPORTED = new Set(["yes", "no"]);
 
+/**
+ *
+ * @param {string | undefined} selected
+ * @returns {selected is 'yes' | 'no'}
+ */
 function isValid(selected) {
   if (!selected) return false;
 
@@ -24,7 +29,7 @@ export async function askIfOK() {
     ],
   });
 
-  if (p.isCancel(answer) || p === "no") {
+  if (p.isCancel(answer) || answer === "no") {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }

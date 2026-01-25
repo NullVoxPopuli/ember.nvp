@@ -6,7 +6,7 @@ import latestVersion from "latest-version";
 export async function getLatest(deps) {
   let results = await Promise.all(
     Object.entries(deps).map(async ([dep, range]) => {
-      let version = await latestVersion(dep, range);
+      let version = await latestVersion(dep, { version: range });
 
       return [dep, version];
     }),

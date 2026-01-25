@@ -2,5 +2,9 @@ export default {
   label: "Minimal Library Base",
   description: "Bare minimum library structure",
 
-  async run({ targetDir, projectName }) {},
+  /**
+   *
+   * @param {import('#utils/project.js').Project} project
+   */
+  async run(project) {},
 };

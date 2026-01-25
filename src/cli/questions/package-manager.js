@@ -3,17 +3,26 @@ import { answers, printArgInUse } from "#args";
 
 const SUPPORTED = new Set(["pnpm", "npm"]);
 
+/**
+ *
+ * @param {string | undefined} selected
+ * @returns {selected is 'pnpm' | 'npm'}
+ */
 function isValid(selected) {
   if (!selected) return false;
 
   return SUPPORTED.has(selected);
 }
 
+/**
+ *
+ * @returns {Promise<import('#types').PackageManager>}
+ */
 export async function askPackageManager() {
-  if (isValid(answers.confirm)) {
-    printArgInUse("packageManager", answers.confirm);
+  if (isValid(answers.packageManager)) {
+    printArgInUse("packageManager", answers.packageManager);
 
-    return answers.confirm;
+    return answers.packageManager;
   }
 
   const packageManager = await p.select({

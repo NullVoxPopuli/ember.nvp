@@ -1,14 +1,15 @@
 import * as p from "@clack/prompts";
 import { hasGit, initGit, isInGit } from "#utils/git.js";
+import { formatLabel } from "#utils/cli.js";
 
 export default {
-  name: "git",
-  description: "set up this project as a fresh git repository",
+  label: formatLabel("git init"),
+  hint: "set up this project as a fresh git repository",
 
   /**
    * @param {import('#utils/project.js').Project} project
    */
-  async defaultValue() {
+  async defaultValue(project) {
     return !isInGit();
   },
 

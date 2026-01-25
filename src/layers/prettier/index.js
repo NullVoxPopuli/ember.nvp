@@ -2,6 +2,8 @@ import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
 import { getLatest } from "#utils/npm.js";
+import { formatLabel } from "#utils/cli.js";
+import { maybeLintWithConcurrently } from "#consolidators/linting.js";
 
 /**
  * Prettier Layer
@@ -9,8 +11,8 @@ import { getLatest } from "#utils/npm.js";
  * Adds Prettier for code formatting
  */
 export default {
-  label: "Prettier",
-  description: "Code formatting with Prettier",
+  label: formatLabel("Prettier", "code formatting"),
+  hint: "the defaults",
 
   /**
    * @param {import('#utils/project.js').Project} project
@@ -33,6 +35,8 @@ export default {
       },
       project.directory,
     );
+
+    await maybeLintWithConcurrently(project);
   },
 
   /**

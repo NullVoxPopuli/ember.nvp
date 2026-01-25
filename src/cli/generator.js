@@ -2,6 +2,7 @@ import { mkdir } from "node:fs/promises";
 
 import baseApp from "#bases/minimal-app";
 import baseLibrary from "#bases/minimal-library";
+import { consolidateLintingScripts } from "../consolidators/linting.js";
 /**
  * Generate project files by running layer functions
  *
@@ -26,6 +27,10 @@ export async function generateProject(project) {
   await runLap(project);
 }
 
+/**
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
 async function runLap(project) {
   for (const layer of project.desires.layers) {
     if (typeof layer.run !== "function") {
@@ -35,4 +40,6 @@ async function runLap(project) {
 
     await layer.run(project);
   }
+
+  await consolidateLintingScripts(project);
 }

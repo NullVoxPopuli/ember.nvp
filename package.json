@@ -12,17 +12,21 @@
   "imports": {
     "#args": "./src/cli/args.js",
     "#bases/*": "./src/bases/*/index.js",
+    "#consolidators/*": "./src/consolidators/*",
     "#layers": "./src/layers/index.js",
+    "#types": "./src/utils/types.ts",
     "#utils/*": "./src/utils/*",
     "#test-helpers": "./test/test-helpers.ts"
   },
   "scripts": {
-    "lint": "pnpm lint:format",
+    "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
+    "lint:types": "tsc --noEmit",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
     "new": "node ./src/cli/index.js",
+    "new:again": "cd my-app; node ../src/cli/index.js",
     "new:tmp": "./test/manual.sh",
-    "test:node": "FORCE_COLOR=1 vitest run",
+    "test:node": "FORCE_COLOR=1 vitest run --reporter=verbose --printConsoleTrace",
     "test:vitest": "FORCE_COLOR=1 vitest"
   },
   "dependencies": {
@@ -40,10 +44,12 @@
     "@glint/ember-tsc": "^1.0.9",
     "@glint/template": "^1.7.3",
     "@glint/tsserver-plugin": "^2.0.9",
+    "concurrently": "^9.2.1",
     "ember-source": "^6.10.0",
     "prettier": "^3.7.4",
     "prettier-plugin-ember-template-tag": "^2.1.2",
     "release-plan": "^0.17.4",
+    "vite": "^7.3.1",
     "vitest": "^4.0.17"
   },
   "packageManager": "pnpm@10.28.0",
