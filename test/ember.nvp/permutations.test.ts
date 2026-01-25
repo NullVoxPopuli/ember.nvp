@@ -15,9 +15,9 @@ permutations.push([baseline]);
 const TODO = new Set([
   "qunit",
   "release-plan",
-  "renovate [bot]",
+  "renovate",
   "vitest",
-  "GitHub Actions",
+  "github-actions",
   "typescript",
 ]);
 

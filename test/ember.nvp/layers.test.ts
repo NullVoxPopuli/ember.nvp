@@ -14,11 +14,11 @@ describe("discoverLayers", () => {
         "eslint-bundled-nvp",
         "eslint-ejected",
         "git",
-        "GitHub Actions",
+        "github-actions",
         "prettier",
         "qunit",
         "release-plan",
-        "renovate [bot]",
+        "renovate",
         "typescript",
         "vitest",
       ]
