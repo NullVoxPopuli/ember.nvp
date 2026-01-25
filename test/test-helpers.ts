@@ -61,7 +61,7 @@ export async function generate({
   layers?: string[];
   name?: string;
   type?: string;
-  packageManager?: string;
+  packageManager?: "pnpm" | "npm"
 }): Promise<Project> {
   const tempDir = await mktemp(name);
 
@@ -69,6 +69,7 @@ export async function generate({
   let project = new Project(tempDir, {
     name,
     type,
+    path: tempDir,
     layers: selectedLayers,
     packageManager,
   });

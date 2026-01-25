@@ -3,22 +3,19 @@ import { join } from "node:path";
 import { readFile } from "node:fs/promises";
 
 /**
- * QUnit Layer
- *
- * Adds QUnit testing support (Ember's traditional testing framework)
+ * @type {import('#types').Layer}
  */
 export default {
   label: "QUnit",
-  description: "Testing with QUnit",
 
-  async run({ targetDir, projectName }) {
+  async run(project) {
     // Apply test files
-    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
     // Replace __PROJECT_NAME__ in tests/index.html
-    const testHtmlPath = join(targetDir, "tests", "index.html");
+    const testHtmlPath = join(project.directory, "tests", "index.html");
     const content = await readFile(testHtmlPath, "utf-8");
-    const updated = content.replaceAll("__PROJECT_NAME__", projectName);
+    const updated = content.replaceAll("__PROJECT_NAME__", project.name);
     await files.copyFileTo(testHtmlPath, { content: updated });
 
     // Add dependencies
@@ -26,7 +23,7 @@ export default {
       {
         "@ember/test-helpers": "^4.0.4",
       },
-      targetDir,
+      project.directory,
     );
 
     // Add devDependencies
@@ -36,7 +33,7 @@ export default {
         "@ember/test-waiters": "^3.1.0",
         playwright: "^1.49.1",
       },
-      targetDir,
+      project.directory,
     );
 
     // Add scripts
@@ -44,7 +41,10 @@ export default {
       {
         test: "vite build && node ./run-tests.mjs",
       },
-      targetDir,
+      project.directory,
     );
   },
+  async isSetup(project) {
+    return false;
+  }
 };

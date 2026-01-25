@@ -1,6 +1,7 @@
 import type { ResultPromise } from "execa";
 
 export type PackageManager = "pnpm" | "npm";
+export type ProjectType = "app" | "library";
 
 export interface Project {
   readonly directory: string;

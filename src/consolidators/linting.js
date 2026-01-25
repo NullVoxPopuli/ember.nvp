@@ -1,7 +1,9 @@
 import { getLatest } from "#utils/npm.js";
 import { packageJson } from "ember-apply";
 
-// the inverse of maybe lint with concurrently
+/**
+ * @param {import('#types').Project} project
+ */
 export async function consolidateLintingScripts(project) {
   // todo
 }
@@ -10,6 +12,7 @@ export async function consolidateLintingScripts(project) {
  * @param {import('#types').Project} project
  */
 export async function maybeLintWithConcurrently(project) {
+  /** @type {Record<string, boolean>} */
   let linting = {
     prettier: false,
     eslint: false,
