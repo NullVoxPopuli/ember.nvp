@@ -30,7 +30,7 @@ interface DiscoveredLayer extends Layer {
 }
 
 export interface Answers {
-  type: string;
+  type: ProjectType;
   path: string;
   name: string;
   layers: DiscoveredLayer[];
