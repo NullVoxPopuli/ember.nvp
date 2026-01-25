@@ -1,5 +1,5 @@
 import { getLatest } from "#utils/npm.js";
-import { packageJson } from "ember-apply";
+import { packageJson, files } from "ember-apply";
 import { formatLabel } from "#utils/cli.js";
 import { hasDevDeps } from "#utils/manifest.js";
 import { maybeLintWithConcurrently } from "#consolidators/linting.js";
@@ -24,6 +24,8 @@ export default {
   label: formatLabel("ESLint", "fully ejected, all of the dependencies"),
 
   async run(project) {
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
+
     await packageJson.addDevDependencies(await getLatest(toInstall), project.directory);
 
     await packageJson.addScripts(

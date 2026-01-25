@@ -14,10 +14,6 @@ export default {
   hint: `Minimal dependencies added to package.json`,
 
   async run(project) {
-    if (await this.isSetup(project)) {
-      return;
-    }
-
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
     await packageJson.addDevDependencies(
