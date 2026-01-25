@@ -36,7 +36,7 @@ export async function maybeLintWithConcurrently(project) {
     await packageJson.modify((json) => {
       json.scripts ||= {};
       json.scripts.lint =
-        'concurrently "pnpm:lint:*(!fix)" --names "lint:" --prefixColors auto && pnpm format';
+        'concurrently "pnpm:lint:*(!fix)" --names "lint:" --prefixColors auto';
       json.scripts["lint:fix"] =
         'concurrently "pnpm:lint:*:fix" --names "fix:" --prefixColors auto && pnpm format';
 
