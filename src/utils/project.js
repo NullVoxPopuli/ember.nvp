@@ -1,4 +1,7 @@
 import { $ } from "execa";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 /**
  * State container for the project.
@@ -42,7 +45,45 @@ export class Project {
    * @type {boolean}
    */
   get wantsTypeScript() {
-    return this.desires.layers.some((layer) => layer.name === "TypeScript");
+    return this.desires.layers.some((layer) => layer.name === "typescript");
+  }
+
+  /**
+   * @type {boolean}
+   */
+  get wantsESLint() {
+    return this.desires.layers.some((layer) => layer.name.startsWith("eslint"));
+  }
+
+  /**
+   * @type {boolean}
+   */
+  get wantsTesting() {
+    return this.desires.layers.some((layer) => layer.name === "qunit" || layer.name === "vitest");
+  }
+
+  /**
+   *
+   * @param {string} relativePath
+   * @returns {string}
+   */
+  path(relativePath) {
+    return join(this.directory, relativePath);
+  }
+
+  /**
+   *
+   * @param {string} relativePath
+   * @returns {Promise<string|undefined>}
+   */
+  async read(relativePath) {
+    let path = this.path(relativePath);
+
+    if (existsSync(path)) {
+      return await readFile(path, "utf-8");
+    }
+
+    return;
   }
 
   /**

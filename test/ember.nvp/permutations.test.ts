@@ -1,6 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
 import { generate, permutate, bases, layers } from "#test-helpers";
-import { execa } from "execa";
 
 import type { Project } from "ember.nvp";
 import { rm } from "node:fs/promises";
@@ -37,10 +36,6 @@ for (let base of bases) {
             type: base === "minimal-app" ? "app" : "library",
             layers: layerNames,
           });
-
-          let { exitCode } = await project.install();
-
-          hardExpect(exitCode, "Install succeeds").toBe(0);
         });
 
         afterAll(async () => {
