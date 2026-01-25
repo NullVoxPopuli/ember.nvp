@@ -91,9 +91,16 @@ for (let base of bases) {
               });
 
               it("applies correctly", async () => {
-                let result = await layer.isSetup(project);
+                if (layer.setup) {
 
-                expect(result, `${layer.name} is setup`).toBe(true);
+                  let result = await layer.isSetup(project);
+  
+                  expect(result, `${layer.name} is setup`).toBe(true);
+
+                  return;
+                }
+
+                expect(typeof layer.setup).toBe('function');
               });
             });
           }
