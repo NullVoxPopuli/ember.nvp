@@ -14,10 +14,14 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  HOME: /tmp/home
+  WORKSPACE: /tmp/workspace
+
 jobs:
   lints:
     name: "Lint"
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -26,7 +30,7 @@ jobs:
 
   node_tests:
     name: "Node Tests"
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
