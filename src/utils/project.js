@@ -20,6 +20,10 @@ export class Project {
     this.#desires = desires;
   }
 
+  get type() {
+    return this.desires.type;
+  }
+
   /**
    * @type {string}
    */

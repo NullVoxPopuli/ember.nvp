@@ -12,14 +12,7 @@ let permutations = permutate(layers.map((layer) => layer.name));
 const baseline = "<baseline>";
 permutations.push([baseline]);
 
-const TODO = new Set([
-  "qunit",
-  "release-plan",
-  "renovate",
-  "vitest",
-  "github-actions",
-  "typescript",
-]);
+const TODO = new Set(["qunit", "release-plan", "vitest", "github-actions", "typescript"]);
 
 for (let base of bases) {
   if (base === "minimal-library") {
