@@ -48,11 +48,11 @@ for (let base of bases) {
         });
 
         it("builds", async () => {
-          let { exitCode } = await execa("pnpm", ["vite", "build", '--mode', 'development'], {
+          let { exitCode } = await execa("pnpm", ["vite", "build", "--mode", "development"], {
             cwd: project.directory,
             env: {
               NODE_ENV: "development",
-            }
+            },
           });
 
           expect(exitCode).toBe(0);
