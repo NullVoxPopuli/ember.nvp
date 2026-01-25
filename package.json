@@ -25,7 +25,7 @@
     "new": "node ./src/cli/index.js",
     "new:again": "cd my-app; node ../src/cli/index.js",
     "new:tmp": "./test/manual.sh",
-    "test:node": "FORCE_COLOR=1 vitest run",
+    "test:node": "FORCE_COLOR=1 vitest run --reporter=verbose --includeTaskLocation",
     "test:vitest": "FORCE_COLOR=1 vitest"
   },
   "dependencies": {
