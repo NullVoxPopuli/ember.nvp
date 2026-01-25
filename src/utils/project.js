@@ -23,8 +23,25 @@ export class Project {
     this.#desires = desires;
   }
 
+  /**
+   * @type {string}
+   */
+  get name() {
+    return this.desires.name;
+  }
+
+  /**
+   * @type {import('#types').ProjectType}
+   */
   get type() {
     return this.desires.type;
+  }
+
+  /**
+   * @type {import('#types').PackageManager}
+   */
+  get packageManager() {
+    return this.desires.packageManager;
   }
 
   /**

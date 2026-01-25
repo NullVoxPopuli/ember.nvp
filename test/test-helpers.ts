@@ -52,6 +52,16 @@ export async function mktemp(name = "ember.nvp_test-") {
   return await mkdtemp(join(tmpdir(), `${name}-`));
 }
 
+export async function reapply(project: Project, layers: string[]) {
+  return await generate({
+    directory: project.directory,
+    layers,
+    name: project.name,
+    type: project.type,
+    packageManager: project.packageManager,
+  });
+}
+
 export async function generate({
   layers: layerNames = [],
   name = "my-app",
