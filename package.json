@@ -19,7 +19,7 @@
     "#test-helpers": "./test/test-helpers.ts"
   },
   "scripts": {
-    "lint": "pnpm lint:format",
+    "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
     "lint:types": "tsc --noEmit",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
@@ -44,6 +44,7 @@
     "@glint/ember-tsc": "^1.0.9",
     "@glint/template": "^1.7.3",
     "@glint/tsserver-plugin": "^2.0.9",
+    "concurrently": "^9.2.1",
     "ember-source": "^6.10.0",
     "prettier": "^3.7.4",
     "prettier-plugin-ember-template-tag": "^2.1.2",
