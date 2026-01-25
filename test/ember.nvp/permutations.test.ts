@@ -69,6 +69,8 @@ for (let base of bases) {
           }
 
           for (let layer of startingLayers) {
+            expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+
             let result = await layer.isSetup(project);
 
             expect(result, `${layer.name} is setup`).toBe(true);
@@ -91,16 +93,13 @@ for (let base of bases) {
               });
 
               it("applies correctly", async () => {
-                if (layer.setup) {
+                expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
-                  let result = await layer.isSetup(project);
-  
-                  expect(result, `${layer.name} is setup`).toBe(true);
+                let result = await layer.isSetup(project);
 
-                  return;
-                }
+                expect(result, `${layer.name} is setup`).toBe(true);
 
-                expect(typeof layer.setup).toBe('function');
+                return;
               });
             });
           }
