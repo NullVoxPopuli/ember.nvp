@@ -2,7 +2,7 @@ import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest"
 import { generate, permutate, bases, layers, build } from "#test-helpers";
 
 import type { Project } from "ember.nvp";
-import { rm } from "node:fs/promises";
+import { rm, readFile } from "node:fs/promises";
 
 const expect = hardExpect.soft;
 
@@ -30,7 +30,7 @@ for (let packageManager of ["pnpm", "npm"] as const) {
       expect(result).toBe(false);
     });
 
-    describe("after emitting with an eslint layer", async () => {
+    it("after emitting with an eslint layer", async () => {
       await generate({
         directory: project.directory,
         type: "app",
@@ -41,6 +41,25 @@ for (let packageManager of ["pnpm", "npm"] as const) {
       let result = await githubActionsLayer.isSetup(project);
 
       expect(result).toBe(true);
+    });
+
+    it("does not have commands for the 'other' packageManager(s)", async () => {
+      let ciYamlPath = project.path(".github/workflows/ci.yml");
+      let ciYamlContent = await readFile(ciYamlPath, "utf-8");
+
+      if (packageManager === "pnpm") {
+        expect(ciYamlContent).not.toContain("npm install");
+        expect(ciYamlContent).toContain("pnpm install");
+        expect(ciYamlContent).toContain("pnpm lint");
+        expect(ciYamlContent).not.toContain("npm lint");
+      }
+
+      if (packageManager === "npm") {
+        expect(ciYamlContent).not.toContain("pnpm install");
+        expect(ciYamlContent).toContain("npm install");
+        expect(ciYamlContent).toContain("npm lint");
+        expect(ciYamlContent).not.toContain("pnpm lint");
+      }
     });
   });
 }

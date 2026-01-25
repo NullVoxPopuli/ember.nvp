@@ -1,4 +1,5 @@
 import { $ } from "execa";
+import { join } from "node:path";
 
 /**
  * State container for the project.
@@ -57,6 +58,15 @@ export class Project {
    */
   get wantsTesting() {
     return this.desires.layers.some((layer) => layer.name === "qunit" || layer.name === "vitest");
+  }
+
+  /**
+   *
+   * @param {string} relative
+   * @returns {string}
+   */
+  path(relative) {
+    return join(this.directory, relative);
   }
 
   /**
