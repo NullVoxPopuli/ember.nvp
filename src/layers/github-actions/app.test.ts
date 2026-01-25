@@ -4,13 +4,14 @@ import { generate, permutate, bases, layers, build } from "#test-helpers";
 import type { Project } from "ember.nvp";
 import { rm } from "node:fs/promises";
 
-let project: Project;
 const expect = hardExpect.soft;
 
 let githubActionsLayer = layers.find((layer) => layer.name === "github-actions");
 
 for (let packageManager of ["pnpm", "npm"] as const) {
   describe(packageManager, () => {
+    let project: Project;
+
     beforeAll(async () => {
       project = await generate({
         type: "app",
