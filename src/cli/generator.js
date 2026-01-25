@@ -29,15 +29,6 @@ export async function generateProject(project) {
 
 async function runLap(project) {
   for (const layer of project.desires.layers) {
-    if (typeof layer.isSetup === "function") {
-      let isSetup = await layer.isSetup(project);
-
-      if (typeof isSetup === "boolean") {
-        if (isSetup) {
-          continue;
-        }
-      }
-    }
     if (typeof layer.run !== "function") {
       console.warn(`${layer.name} is not implemented`);
       continue;

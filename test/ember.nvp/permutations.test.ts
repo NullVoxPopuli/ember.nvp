@@ -3,7 +3,7 @@ import { generate, permutate, bases, layers } from "#test-helpers";
 import { execa } from "execa";
 
 import type { Project } from "ember.nvp";
-import { rm } from "node:fs";
+import { rm } from "node:fs/promises";
 
 const expect = hardExpect.soft;
 
