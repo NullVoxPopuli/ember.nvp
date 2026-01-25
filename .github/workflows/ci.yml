@@ -25,7 +25,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - run: sudo mount -t tmpfs -o size=5G tmpfs none /home/runner/work
       - uses: wyvox/action@v1
       - run: pnpm lint
 
@@ -35,6 +34,5 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - run: sudo mount -t tmpfs -o size=5G tmpfs none /home/runner/work
       - uses: wyvox/action@v1
       - run: pnpm test:node
