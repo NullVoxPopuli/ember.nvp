@@ -76,11 +76,11 @@ export class Project {
    * @param {string} relativePath
    * @returns {Promise<string|undefined>}
    */
-  read(relativePath) {
+  async read(relativePath) {
     let path = this.path(relativePath);
 
     if (existsSync(path)) {
-      return readFile(path, "utf-8");
+      return await readFile(path, "utf-8");
     }
 
     return;
