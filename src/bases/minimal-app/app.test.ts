@@ -1,6 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, build } from "#test-helpers";
-import { execa } from "execa";
 
 import type { Project } from "ember.nvp";
 import { rm } from "node:fs/promises";
