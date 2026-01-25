@@ -138,3 +138,12 @@ export class MockReadable extends Readable {
     this._buffer = null;
   }
 }
+
+export async function build(project: Project, mode = "development") {
+  return await execa("pnpm", ["vite", "build", "--mode", mode], {
+    cwd: project.directory,
+    env: {
+      NODE_ENV: mode,
+    },
+  });
+}

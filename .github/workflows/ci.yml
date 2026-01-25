@@ -14,6 +14,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  HOME: /tmp/home
+  WORKSPACE: /tmp/workspace
+
 jobs:
   lints:
     name: "Lint"

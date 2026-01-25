@@ -47,14 +47,6 @@ for (let base of bases) {
           await rm(project.directory, { recursive: true, force: true });
         });
 
-        it("builds", async () => {
-          let { exitCode } = await execa("pnpm", ["vite", "build"], {
-            cwd: project.directory,
-          });
-
-          expect(exitCode).toBe(0);
-        });
-
         it("successfully setup the layers", async () => {
           if (startingLayers.length === 0) {
             // TODO: test baseline stuff more?
