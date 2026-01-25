@@ -1,5 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
-import { generate, permutate, bases, layers, build } from "#test-helpers";
+import { generate, permutate, bases, layers, reapply } from "#test-helpers";
 
 import type { Project } from "ember.nvp";
 import { rm, readFile } from "node:fs/promises";
@@ -32,12 +32,7 @@ for (let packageManager of ["pnpm", "npm"] as const) {
     });
 
     it("after emitting with an eslint layer", async () => {
-      await generate({
-        directory: project.directory,
-        type: "app",
-        packageManager,
-        layers: ["eslint-bundled-nvp", "github-actions"],
-      });
+      await reapply(project, ["eslint-bundled-nvp", "github-actions"]);
 
       let result = await githubActionsLayer.isSetup(project);
 
