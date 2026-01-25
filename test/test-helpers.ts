@@ -60,7 +60,7 @@ export async function generate({
 }: {
   layers?: string[];
   name?: string;
-  type?: string;
+  type?: "app" | "library";
   packageManager?: "pnpm" | "npm";
 }): Promise<Project> {
   const tempDir = await mktemp(name);
