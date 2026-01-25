@@ -10,7 +10,7 @@ import { substringBytes } from "./buffer.js";
  */
 export async function removeTypes(extension, code) {
   if (extension === ".gts") {
-    return await wrappedRemoveTypes(code, (strippedCode) => babelRemoveTypes(strippedCode));
+    return await wrappedRemoveTypes(code, babelRemoveTypes);
   }
 
   if (extension === ".ts") {
@@ -27,15 +27,28 @@ export async function removeTypes(extension, code) {
  */
 
 const preprocessor = new Preprocessor();
-async function wrappedRemoveTypes(code, callback) {
+/**
+ * Builds a class field placeholder for a template block.
+ * @param {number} i index of the template occurrence
+ */
+function replacementClassMember(i = 0) {
+  return `template = __TEMPLATE_TAG_${i}__;`;
+}
+
+/**
+ * Builds an expression placeholder for a template block.
+ * @param {number} i index of the template occurrence
+ */
+function replacementExpression(i = 0) {
+  return `__TEMPLATE_TAG_${i}__`;
+}
+
+async function wrappedRemoveTypes(code = "", callback = babelRemoveTypes) {
   // Strip template tags
-  const replacementClassMember = (i) => `template = __TEMPLATE_TAG_${i}__;`;
-  const replacementExpression = (i) => `__TEMPLATE_TAG_${i}__`;
   const templateTagMatches = preprocessor.parse(code);
   let strippedCode = code;
 
-  for (let i = 0; i < templateTagMatches.length; i++) {
-    const match = templateTagMatches[i];
+  for (const [i, match] of templateTagMatches.entries()) {
     const templateTag = substringBytes(code, match.range.startByte, match.range.endByte);
 
     if (match.type === "class-member") {
@@ -51,8 +64,7 @@ async function wrappedRemoveTypes(code, callback) {
   // Readd stripped template tags
   let transformedWithTemplateTag = transformed;
 
-  for (let i = 0; i < templateTagMatches.length; i++) {
-    const match = templateTagMatches[i];
+  for (const [i, match] of templateTagMatches.entries()) {
     const templateTag = substringBytes(code, match.range.startByte, match.range.endByte);
 
     if (match.type === "class-member") {

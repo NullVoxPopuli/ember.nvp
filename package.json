@@ -20,6 +20,7 @@
   },
   "scripts": {
     "lint": "pnpm lint:format",
+    "lint:types": "tsc --noEmit",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
     "new": "node ./src/cli/index.js",

@@ -1,3 +1,4 @@
+import { getLatest } from "#utils/npm.js";
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
 
@@ -5,9 +6,9 @@ export default {
   label: "Vitest",
   description: "Testing with Vitest",
 
-  async run({ targetDir }) {
+  async run(project) {
     // Apply test files
-    await files.applyFolder(join(import.meta.dirname, "files"), targetDir);
+    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
     // Add devDependencies
     await packageJson.addDevDependencies(
@@ -22,7 +23,7 @@ export default {
         "@vitest/browser-webdriverio": "^4.0.0",
         webdriverio: "^9.23.2",
       }),
-      targetDir,
+      project.directory,
     );
 
     // Add scripts
@@ -32,7 +33,7 @@ export default {
         "test:watch": "vitest",
         "test:ui": "vitest --ui",
       },
-      targetDir,
+      project.directory,
     );
   },
 };
