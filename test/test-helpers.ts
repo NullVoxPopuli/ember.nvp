@@ -57,7 +57,7 @@ export async function generate({
   name = "my-app",
   type = "app",
   packageManager = "pnpm",
-  directory
+  directory,
 }: {
   directory?: string;
   layers?: string[];
@@ -65,7 +65,7 @@ export async function generate({
   type?: "app" | "library";
   packageManager?: "pnpm" | "npm";
 }): Promise<Project> {
-  const tempDir = directory ?? await mktemp(name);
+  const tempDir = directory ?? (await mktemp(name));
 
   let selectedLayers = layers.filter((layer) => layerNames.includes(layer.name));
   let project = new Project(tempDir, {
