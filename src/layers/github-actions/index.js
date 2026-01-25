@@ -55,7 +55,8 @@ const lint = {
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm lint`};
+      - run: pnpm lint`,
+};
 
 const test = {
   npm: `test:
@@ -74,7 +75,7 @@ const test = {
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm test`
+      - run: pnpm test`,
 };
 
 /**
@@ -110,13 +111,12 @@ async function transform(project) {
 }
 
 /**
- * 
- * @param {import('#utils/project.js').Project} project 
- * @param {string} file 
+ *
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} file
  */
 async function addOrUpdateBase(project, file) {
-  if (file.includes('jobs:')) {
-
+  if (file.includes("jobs:")) {
     if (file.includes(preamble)) {
       return file;
     }
@@ -127,45 +127,44 @@ async function addOrUpdateBase(project, file) {
   return file;
 }
 
-
 /**
- * 
- * @param {import('#utils/project.js').Project} project 
- * @param {string} file 
+ *
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} file
  */
 async function addOrUpdateLints(project, file) {
   if (project.wantsESLint === false) {
     return file;
   }
 
-  if (file.includes('lint:')) {
+  if (file.includes("lint:")) {
     return file;
   }
 
-  if (!file.includes('jobs:')) {
-    file+= '\n\njobs:\n';
+  if (!file.includes("jobs:")) {
+    file += "\n\njobs:\n";
   }
 
-  return file + '\n' + lint[project.desires.packageManager];
+  return file + "\n" + lint[project.desires.packageManager];
 }
 
 /**
- * 
- * @param {import('#utils/project.js').Project} project 
- * @param {string} file 
+ *
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} file
  */
 async function addOrUpdateTests(project, file) {
   if (project.wantsTesting === false) {
     return file;
   }
 
-  if (file.includes('test:')) {
+  if (file.includes("test:")) {
     return file;
   }
-  
-  if (!file.includes('jobs:')) {
-    file+= '\n\njobs:\n';
+
+  if (!file.includes("jobs:")) {
+    file += "\n\njobs:\n";
   }
 
-  return file + '\n' + test[project.desires.packageManager];
+  return file + "\n" + test[project.desires.packageManager];
 }

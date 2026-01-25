@@ -49,14 +49,14 @@ export class Project {
    * @type {boolean}
    */
   get wantsESLint() {
-    return this.desires.layers.some((layer) => layer.name.startsWith('eslint'));
+    return this.desires.layers.some((layer) => layer.name.startsWith("eslint"));
   }
 
   /**
    * @type {boolean}
    */
   get wantsTesting() {
-    return this.desires.layers.some((layer) => layer.name === 'qunit' || layer.name === 'vitest');
+    return this.desires.layers.some((layer) => layer.name === "qunit" || layer.name === "vitest");
   }
 
   /**
