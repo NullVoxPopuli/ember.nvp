@@ -7,7 +7,7 @@ import { answers, printArgInUse } from "#args";
 const SUPPORTED = new Set(["app", "library", "addon"]);
 
 /**
- * @param {string | undefined} selected 
+ * @param {string | undefined} selected
  * @returns {selected is "app" | "library" | "addon"}
  */
 function isValid(selected) {
@@ -17,7 +17,7 @@ function isValid(selected) {
 }
 
 /**
- * 
+ *
  * @return {Promise<import('#types').ProjectType>}
  */
 export async function askProjectType() {

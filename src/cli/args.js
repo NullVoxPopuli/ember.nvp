@@ -35,8 +35,20 @@ const { values } = parseArgs({
 
 const { name, type, layers = [], packageManager, path, confirm } = values;
 
-export const answers = { name, type, layers, confirm: packageManager, path, confirm };
+export const answers = {
+  name,
+  type,
+  layers,
+  packageManager,
+  path,
+  confirm,
+};
 
+/**
+ *
+ * @param {string} label
+ * @param {string} value
+ */
 export function printArgInUse(label, value) {
   let l = styleText(["gray", "bold"], label);
   let v = styleText(["yellow", "italic"], value);

@@ -58,10 +58,17 @@ async function main() {
     p.outro(styleText("green", "✓") + " Project ready! " + styleText("dim", "Happy coding!"));
   } catch (err) {
     s.stop("Failed to create project");
-    p.cancel(`Error: ${err.message}`);
-    if (err.stack) {
-      console.error(err.stack);
+
+    if (err instanceof Error) {
+      p.cancel(`Error: ${err.message}`);
+      if (err.stack) {
+        console.error(err.stack);
+      }
+
+      process.exit(1);
     }
+
+    p.cancel(`Error: ${String(err)}`);
     process.exit(1);
   }
 }

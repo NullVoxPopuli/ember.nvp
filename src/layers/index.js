@@ -16,9 +16,14 @@ export async function discoverLayers() {
           name: entry.name,
           ...layer.default,
         });
-      } catch (err) {
-        // Skip layers that don't have proper exports
-        console.warn(`Warning: Could not load layer ${entry.name}:`, err.message);
+      } catch (error) {
+        if (typeof error !== "object" || error === null) {
+          console.warn(`Warning: Could not load layer ${entry.name}:`, error);
+          continue;
+        }
+        if ("message" in error) {
+          console.warn(`Warning: Could not load layer ${entry.name}:`, error.message);
+        }
       }
     }
   }

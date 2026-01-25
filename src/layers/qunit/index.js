@@ -12,12 +12,6 @@ export default {
     // Apply test files
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    // Replace __PROJECT_NAME__ in tests/index.html
-    const testHtmlPath = join(project.directory, "tests", "index.html");
-    const content = await readFile(testHtmlPath, "utf-8");
-    const updated = content.replaceAll("__PROJECT_NAME__", project.name);
-    await files.copyFileTo(testHtmlPath, { content: updated });
-
     // Add dependencies
     await packageJson.addDependencies(
       {
@@ -46,5 +40,5 @@ export default {
   },
   async isSetup(project) {
     return false;
-  }
+  },
 };

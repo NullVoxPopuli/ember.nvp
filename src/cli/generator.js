@@ -6,7 +6,7 @@ import { consolidateLintingScripts } from "../consolidators/linting.js";
 /**
  * Generate project files by running layer functions
  *
- * @param {import('#types').Project} project
+ * @param {import('#utils/project.js').Project} project
  */
 export async function generateProject(project) {
   await mkdir(project.directory, { recursive: true });
@@ -27,6 +27,10 @@ export async function generateProject(project) {
   await runLap(project);
 }
 
+/**
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
 async function runLap(project) {
   for (const layer of project.desires.layers) {
     if (typeof layer.run !== "function") {

@@ -1,16 +1,6 @@
-import type { ResultPromise } from "execa";
-
+import { Project } from "./project.js";
 export type PackageManager = "pnpm" | "npm";
 export type ProjectType = "app" | "library";
-
-export interface Project {
-  readonly directory: string;
-  readonly desires: Answers;
-  readonly wantsTypeScript: boolean;
-
-  run(command: string): Promise<ResultPromise>;
-  install(command: string): Promise<ResultPromise>;
-}
 
 export interface Layer {
   /**
@@ -29,10 +19,20 @@ export interface Layer {
   isSetup: (project: Project) => Promise<boolean>;
 }
 
+interface DiscoveredLayer extends Layer {
+  /**
+   * The unique name of the layer
+   * (exact match of the folder name
+   *   not provided by the layer
+   * )
+   */
+  name: string;
+}
+
 export interface Answers {
   type: string;
   path: string;
   name: string;
-  layers: Layer[];
+  layers: DiscoveredLayer[];
   packageManager: PackageManager;
 }

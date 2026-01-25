@@ -11,6 +11,11 @@ export async function askLayers() {
 
   const supported = new Set(optionalLayers.map((layer) => layer.name));
 
+  /**
+   *
+   * @param {string[] | undefined} selected
+   * @returns {selected is string[]}
+   */
   function isValid(selected) {
     if (!selected) return false;
     if (Array.isArray(selected) && selected.length === 0) return false;

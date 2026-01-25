@@ -5,17 +5,15 @@ import { $ } from "execa";
  *
  * May eventually include information for discovering existing state
  * about a project.
- *
- * @implement {import('#types.ts').Project}
  */
 export class Project {
   #directory;
   #desires;
 
   /**
-   * 
-   * @param {string} atDirectory 
-   * @param {import('./types.ts').Answers} desires 
+   *
+   * @param {string} atDirectory
+   * @param {import('./types.ts').Answers} desires
    */
   constructor(atDirectory, desires) {
     this.#directory = atDirectory;
@@ -45,14 +43,14 @@ export class Project {
 
   /**
    * @param {string} command
-   * @returns {Promise<import('execa').ResultPromise>}
+   * @returns {import('execa').ResultPromise}
    */
   run(command) {
     return $(command, { cwd: this.directory, shell: true });
   }
 
   /**
-   * @returns {Promise<import('execa').ResultPromise>}
+   * @returns {import('execa').ResultPromise}
    */
   install() {
     return this.run(`${this.desires.packageManager} install`);

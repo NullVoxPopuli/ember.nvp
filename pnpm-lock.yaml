@@ -57,6 +57,9 @@ importers:
       release-plan:
         specifier: ^0.17.4
         version: 0.17.4
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@25.0.8)(jiti@2.4.2)(terser@5.46.0)
       vitest:
         specifier: ^4.0.17
         version: 4.0.17(@types/node@25.0.8)(jiti@2.4.2)(jsdom@25.0.1)(terser@5.46.0)

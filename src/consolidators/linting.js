@@ -2,14 +2,14 @@ import { getLatest } from "#utils/npm.js";
 import { packageJson } from "ember-apply";
 
 /**
- * @param {import('#types').Project} project
+ * @param {import('#utils/project.js').Project} project
  */
 export async function consolidateLintingScripts(project) {
   // todo
 }
 
 /**
- * @param {import('#types').Project} project
+ * @param {import('#utils/project.js').Project} project
  */
 export async function maybeLintWithConcurrently(project) {
   /** @type {Record<string, boolean>} */

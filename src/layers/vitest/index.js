@@ -2,9 +2,11 @@ import { getLatest } from "#utils/npm.js";
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
 
+/**
+ * @type {import('#types').Layer}
+ */
 export default {
   label: "Vitest",
-  description: "Testing with Vitest",
 
   async run(project) {
     // Apply test files
@@ -35,5 +37,9 @@ export default {
       },
       project.directory,
     );
+  },
+
+  async isSetup(project) {
+    return false;
   },
 };

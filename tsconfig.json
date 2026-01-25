@@ -4,6 +4,12 @@
     "allowJs": true,
     "checkJs": true
   },
-  "types": ["ember-source/types", "@glint/ember-tsc/types", "vitest/importMeta"],
-  "exclude": ["node_modules", "dist", "**/layers/*/files"]
+  "types": ["ember-source/types", "@glint/ember-tsc/types", "vite/client", "vitest/importMeta"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/layers/*/files/**",
+    "src/**/bases/*/files/**",
+    "my-app"
+  ]
 }

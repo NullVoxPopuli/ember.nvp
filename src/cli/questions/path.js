@@ -4,7 +4,14 @@ import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
 import { cwd } from "#utils/cwd.js";
 
+/**
+ *
+ * @param {string | undefined} value
+ * @returns
+ */
 function isValid(value) {
+  if (!value) return false;
+
   return value.startsWith(".") || value.startsWith("/");
 }
 
