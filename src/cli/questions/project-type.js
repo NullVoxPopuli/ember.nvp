@@ -29,7 +29,7 @@ export async function askProjectType() {
     return answers.type;
   }
 
-  const packageManager = await p.select({
+  const answer = await p.select({
     message: "Which type of project?",
     options: [
       { value: "app", label: "web app", hint: "generates html, js, and css to deploy to the web" },
@@ -41,10 +41,15 @@ export async function askProjectType() {
     ],
   });
 
-  if (p.isCancel(packageManager)) {
+  if (answer === "library") {
+    p.cancel("Not implemented yet, apologies!");
+    return process.exit(0);
+  }
+
+  if (p.isCancel(answer)) {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  return packageManager;
+  return answer;
 }

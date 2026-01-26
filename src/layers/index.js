@@ -1,6 +1,8 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+const TODO = new Set(["qunit", "vitest", "release-plan"]);
+
 export async function discoverLayers() {
   const layersDir = import.meta.dirname;
   const entries = await readdir(layersDir, { withFileTypes: true });
@@ -8,6 +10,10 @@ export async function discoverLayers() {
   const layers = [];
 
   for (const entry of entries) {
+    if (TODO.has(entry.name)) {
+      continue;
+    }
+
     if (entry.isDirectory()) {
       const layerPath = join(layersDir, entry.name, "index.js");
       try {
