@@ -92,6 +92,17 @@ export class Project {
   /**
    *
    * @param {string} relativePath
+   * @returns {boolean}
+   */
+  hasFile(relativePath) {
+    let path = this.path(relativePath);
+
+    return existsSync(path);
+  }
+
+  /**
+   *
+   * @param {string} relativePath
    * @returns {Promise<string|undefined>}
    */
   async read(relativePath) {
