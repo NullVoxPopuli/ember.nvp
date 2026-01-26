@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const TODO = new Set(["qunit", "vitest", "release-plan", "typescript", "eslint-ejected"]);
+const TODO = new Set(["qunit", "vitest", "release-plan", "eslint-ejected"]);
 
 export async function discoverLayers() {
   const layersDir = import.meta.dirname;
