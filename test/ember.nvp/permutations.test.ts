@@ -85,7 +85,7 @@ for (let base of bases) {
               it("applies correctly", async () => {
                 expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
-                let result = await layer.isSetup(project);
+                let result = await layer.isSetup(project, true);
 
                 expect(result, `${layer.name} is setup`).toBe(true);
 

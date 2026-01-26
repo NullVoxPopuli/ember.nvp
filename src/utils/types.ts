@@ -16,7 +16,17 @@ export interface Layer {
    * so it's important to not require interaction here
    */
   run: (project: Project) => Promise<void>;
-  isSetup: (project: Project) => Promise<boolean>;
+  isSetup: <Explain extends boolean = false>(
+    project: Project,
+    explain?: Explain,
+  ) => Promise<
+    Explain extends true
+      ? {
+          isSetup: boolean;
+          reasons: string[];
+        }
+      : boolean
+  >;
 }
 
 interface DiscoveredLayer extends Layer {
