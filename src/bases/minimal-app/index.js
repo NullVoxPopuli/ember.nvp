@@ -45,16 +45,21 @@ export default {
 async function updateBabelConfig(project) {
   if (project.wantsTypeScript) return;
 
-  await js.transform(project.path("babel.config.js"), ({ root, j }) => {
+  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
     root
       .find(j.ArrayExpression, {
         elements: {
           0: { value: "@babel/plugin-transform-typescript" },
         },
       })
-      .forEach((path) => {
-        j(path).remove();
-      });
+      .forEach(
+        /**
+         * @param {unknown} path
+         */
+        (path) => {
+          j(path).remove();
+        },
+      );
   });
 }
 
