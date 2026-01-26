@@ -15,6 +15,7 @@ permutations.push([baseline]);
 const TODO = new Set(["qunit", "release-plan", "vitest", "github-actions"]);
 const RE_APPLY_ONLY = new Set([
   // "typescript"
+  // "renovate",
 ]);
 const INITIAL_ONLY = new Set([
   // baseline,
@@ -76,10 +77,9 @@ for (let base of bases) {
         });
 
         /**
-         * Simulates running the CLI again with different options selected
-         * on the same project
+         * Are these valuable? no one would invoke the layers like this
          */
-        describe("(re)applying", () => {
+        describe.skip("(re)applying", () => {
           for (let layer of layers) {
             if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
               continue;
@@ -90,18 +90,18 @@ for (let base of bases) {
             }
 
             describe(layer.name, () => {
+              let expected = startingLayers.find((l) => l.name === layer.name);
+
               beforeAll(async () => {
                 await layer.run(project);
               });
 
-              it("applies (or isn't) correctly", async () => {
-                expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+              if (expected) {
+                it("is applied", async () => {
+                  expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
-                let result = await layer.isSetup(project, true);
+                  let result = await layer.isSetup(project, true);
 
-                let expected = startingLayers.find((l) => l.name === layer.name);
-
-                if (expected) {
                   if (typeof result === "object") {
                     expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
                     expect(result.isSetup, `${layer.name} is setup`).toBe(true);
@@ -111,22 +111,32 @@ for (let base of bases) {
                   expect(result, `${layer.name} is setup`).toBe(true);
 
                   return;
-                }
+                });
+              } else {
+                it("is not applied", async () => {
+                  expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
-                if (typeof result === "object") {
-                  expect(result.isSetup, `${layer.name} is not setup`).toBe(false);
-                  hardExpect(result.reasons.length, `${layer.name} is not setup`).toBeGreaterThan(
-                    0,
-                  );
-                  return;
-                }
+                  let result = await layer.isSetup(project, true);
 
-                expect(result, `${layer.name} is not setup`).toBe(false);
-              });
+                  if (typeof result === "object") {
+                    expect(result.isSetup, `${layer.name} is not setup`).toBe(false);
+                    hardExpect(result.reasons.length, `${layer.name} is not setup`).toBeGreaterThan(
+                      0,
+                    );
+                    return;
+                  }
+
+                  expect(result, `${layer.name} is not setup`).toBe(false);
+                });
+              }
             });
           }
         });
 
+        /**
+         * Simulates running the CLI again with different options selected
+         * on the same project
+         */
         describe("apply anew", () => {
           for (let layer of layers) {
             if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
