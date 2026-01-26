@@ -16,6 +16,7 @@ describe("discoverLayers", () => {
         "github-actions",
         "prettier",
         "renovate",
+        "typescript",
       ]
     `);
   });
