@@ -1,5 +1,6 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
 import { generate, build } from "#test-helpers";
+import { packageJson } from "ember-apply";
 
 import type { Project } from "ember.nvp";
 import { rm } from "node:fs/promises";
@@ -96,6 +97,21 @@ describe("javascript", () => {
     let content = await project.read("babel.config.js");
 
     expect(content).not.toContain("@babel/plugin-transform-typescript");
+  });
+
+  it("updated the sub-path imports to not have ts extensions", async () => {
+    let manifest = await packageJson.read(project.directory);
+
+    expect(manifest.imports).toMatchInlineSnapshot(`
+      {
+        "#app/*": "./app/*",
+        "#components/*": "./app/components/*",
+        "#config": "./app/config.js",
+        "#services/*": "./app/services/*",
+        "#test-helpers/*": "./tests/helpers/*",
+        "#utils/*": "./app/utils/*",
+      }
+    `);
   });
 
   it("build for development (testing, etc)", async () => {

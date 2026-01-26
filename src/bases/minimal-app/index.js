@@ -1,10 +1,11 @@
-import { packageJson, files } from "ember-apply";
+import { packageJson, js } from "ember-apply";
 import { parse as parsePath } from "node:path";
 import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
 import { fileURLToPath } from "node:url";
 import { applyFolder } from "#utils/fs.js";
 import { writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 /**
  * Minimal Layer
@@ -47,10 +48,12 @@ async function updateBabelConfig(project) {
   await js.transform(project.path("babel.config.js"), ({ root, j }) => {
     root
       .find(j.ArrayExpression, {
-        0: { value: "@babel/plugin-transform-typescript" },
+        elements: {
+          0: { value: "@babel/plugin-transform-typescript" },
+        },
       })
       .forEach((path) => {
-        path.remove();
+        j(path).remove();
       });
   });
 }
@@ -120,8 +123,10 @@ async function makeJavaScript(project) {
     project.directory,
   );
 
+  await project.removeFile("tsconfig.json");
+
   await packageJson.modify((json) => {
-    json.scripts["#config"] = "./app/config.js";
+    json.imports["#config"] = "./app/config.js";
   }, project.directory);
 }
 
