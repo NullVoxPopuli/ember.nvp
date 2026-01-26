@@ -13,8 +13,13 @@ const baseline = "<baseline>";
 permutations.push([baseline]);
 
 const TODO = new Set(["qunit", "release-plan", "vitest", "github-actions"]);
-const RE_APPLY_ONLY = new Set(["typescript"]);
-const INITIAL_ONLY = new Set([baseline, "typescript"]);
+const RE_APPLY_ONLY = new Set([
+  // "typescript"
+]);
+const INITIAL_ONLY = new Set([
+  // baseline,
+  // "typescript"
+]);
 
 for (let base of bases) {
   if (base === "minimal-library") {
