@@ -42,7 +42,8 @@ for (let base of bases) {
         afterAll(async () => {
           if (project?.directory) {
             if (existsSync(project.directory)) {
-              await rm(project.directory, { recursive: true });
+              // Force required because the directory will not be empty
+              await rm(project.directory, { recursive: true, force: true });
             }
           }
         });
