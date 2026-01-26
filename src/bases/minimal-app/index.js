@@ -3,6 +3,8 @@ import { parse as parsePath } from "node:path";
 import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
 import { fileURLToPath } from "node:url";
+import { applyFolder } from "#utils/fs.js";
+import { writeFile } from "node:fs/promises";
 
 /**
  * Minimal Layer
@@ -41,23 +43,27 @@ export default {
 async function applyFiles(project) {
   let filePath = fileURLToPath(new URL("files", import.meta.url));
 
-  await files.applyFolder(filePath, {
-    to: project.directory,
-    async transform({ filePath, contents }) {
+  await applyFolder(filePath, {
+    to: project,
+    async process({ entry, contents }) {
       /**
        * TODO: handle conflicts if files already exists
        *
        *       (I believe we can do interactive here)
        */
-      let pathInfo = parsePath(filePath);
+      let pathInfo = parsePath(entry);
       let ext = pathInfo.ext;
       if (ext === ".gts" || ext === ".ts") {
         if (!project.wantsTypeScript) {
-          await removeTypes(ext, contents);
+          let newContents = await removeTypes(ext, contents);
+          let filePath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");
+
+          await writeFile(filePath, newContents);
+          return;
         }
       }
 
-      return contents;
+      await writeFile(entry, contents);
     },
   });
 }
