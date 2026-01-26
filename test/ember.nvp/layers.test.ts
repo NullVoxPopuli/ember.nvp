@@ -12,15 +12,10 @@ describe("discoverLayers", () => {
       [
         "eslint-bundled-ember",
         "eslint-bundled-nvp",
-        "eslint-ejected",
         "git",
         "github-actions",
         "prettier",
-        "qunit",
-        "release-plan",
         "renovate",
-        "typescript",
-        "vitest",
       ]
     `);
   });
