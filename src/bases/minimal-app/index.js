@@ -87,14 +87,24 @@ async function makeJavaScript(project) {
 
   /**
    * We don't actually remove anything, because we want intellisense for JS
+   *
+   * But perhaps for the sake of minimal, we do remoev it.
+   * And we add a layer later for JSDoc ased TS or something
    */
-  // await packageJson.removeDevDependencies([
-  //   "@ember/app-tsconfig",
-  //   "@glint/ember-tsc",
-  //   "@glint/template",
-  //   "@glint/tsserver-plugin",
-  //   "typescript",
-  // ], project.directory);
+  await packageJson.removeDevDependencies(
+    [
+      "@ember/app-tsconfig",
+      "@glint/ember-tsc",
+      "@glint/template",
+      "@glint/tsserver-plugin",
+      "typescript",
+    ],
+    project.directory,
+  );
+
+  await packageJson.modify((json) => {
+    json.scripts["#config"] = "./app/config.js";
+  }, project.directory);
 }
 
 /**
