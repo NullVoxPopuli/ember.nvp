@@ -35,4 +35,7 @@ jobs:
 
     steps:
       - uses: wyvox/action@v1
-      - run: pnpm test:node
+      - run: |
+          git config --global user.name "ci"
+          git config --global user.email "non@none.none"
+          pnpm test:node
