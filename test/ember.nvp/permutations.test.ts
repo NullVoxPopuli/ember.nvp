@@ -40,6 +40,10 @@ for (let base of bases) {
         });
 
         afterAll(async () => {
+          if (process.env.CI) {
+            return;
+          }
+
           if (project?.directory) {
             if (existsSync(project.directory)) {
               // Force required because the directory will not be empty
