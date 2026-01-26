@@ -28,9 +28,13 @@ export async function generateProject(project) {
 
   if (hasGit(project.directory)) {
     await project.gitAdd();
-    await project.gitCommit(
-      `[ember.nvp] Initial commit -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
-    );
+
+    if (await project.gitHasDiff()) {
+      let layerNames = project.desires.layers.map((l) => l.name).join(", ");
+      await project.gitCommit(
+        `[ember.nvp] Applied ${layerNames} to ${project.type}: ${project.name} -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
+      );
+    }
   }
 
   await runLap(project);

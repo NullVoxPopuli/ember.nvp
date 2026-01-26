@@ -168,6 +168,21 @@ export class Project {
   }
 
   /**
+   * @returns {Promise<string | undefined>}
+   */
+  async gitLastCommitMessage() {
+    if (!hasGit(this.directory)) return;
+
+    try {
+      const result = await this.run("git log -1 --pretty=%B");
+      const stdout = result.stdout;
+      return typeof stdout === "string" ? stdout.trim() : undefined;
+    } catch {
+      return;
+    }
+  }
+
+  /**
    * @returns {Promise<boolean>}
    */
   async gitHasDiff() {
@@ -175,6 +190,7 @@ export class Project {
 
     try {
       await this.run("git diff --exit-code");
+      await this.run("git diff --staged --exit-code");
       return false; // exit code 0 means no diff
     } catch {
       return true; // exit code 1 means there is a diff

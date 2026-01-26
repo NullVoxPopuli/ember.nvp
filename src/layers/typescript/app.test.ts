@@ -29,7 +29,9 @@ describe("starting with javascript", () => {
     let result = await githubActionsLayer.isSetup(project);
 
     expect(result).toBe(true);
-    expect(await project.gitHasDiff()).toBe(true);
+    expect(await project.gitHasDiff()).toBe(false);
+    expect(await project.hasFile("tsconfig.json")).toBe(true);
+    expect(await project.gitLastCommitMessage()).toContain("typescript");
   });
 });
 
