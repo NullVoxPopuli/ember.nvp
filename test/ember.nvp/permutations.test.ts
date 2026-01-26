@@ -87,9 +87,13 @@ for (let base of bases) {
 
                 let result = await layer.isSetup(project, true);
 
-                expect(result, `${layer.name} is setup`).toBe(true);
+                if (typeof result === 'object') {
+                  expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
+                  expect(result.isSetup, `${layer.name} is setup`).toBe(true);
+                  return;
+                }
 
-                return;
+                expect(result, `${layer.name} is setup`).toBe(true);
               });
             });
           }
