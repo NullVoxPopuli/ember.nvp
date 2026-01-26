@@ -18,7 +18,6 @@ export default {
    */
   async run(project) {
     if (hasGit(project.directory)) {
-      p.log.info(`.git directory already exists. skipping git init`);
       return;
     }
 

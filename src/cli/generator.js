@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises";
 import baseApp from "#bases/minimal-app";
 import baseLibrary from "#bases/minimal-library";
 import { consolidateLintingScripts } from "../consolidators/linting.js";
+import { hasGit } from "#utils/git.js";
 /**
  * Generate project files by running layer functions
  *
@@ -24,7 +25,22 @@ export async function generateProject(project) {
    * We could run these in a loop until there is no git diff
    */
   await runLap(project);
+
+  if (hasGit(project.directory)) {
+    await project.gitAdd();
+    await project.gitCommit(
+      `[ember.nvp] Initial commit -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
+    );
+  }
+
   await runLap(project);
+
+  if (hasGit(project.directory) && (await project.gitHasDiff())) {
+    await project.gitAdd();
+    await project.gitCommit(
+      `[ember.nvp] Consolidation commit -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
+    );
+  }
 }
 
 /**
