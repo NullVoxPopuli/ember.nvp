@@ -24,9 +24,7 @@
     "lint:types": "tsc --noEmit",
     "format": "prettier . --write",
     "lint:format": "prettier . --check",
-    "new": "node ./src/cli/index.js",
-    "new:again": "cd my-app; node ../src/cli/index.js",
-    "new:tmp": "./test/manual.sh",
+    "new": "./test/manual.sh",
     "test:node": "FORCE_COLOR=1 vitest run --reporter=verbose --printConsoleTrace",
     "test:vitest": "FORCE_COLOR=1 vitest"
   },

@@ -2,6 +2,7 @@ import { $ } from "execa";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { hasGit } from "#utils/git.js";
 
 /**
  * State container for the project.
@@ -116,5 +117,39 @@ export class Project {
    */
   install() {
     return this.run(`${this.desires.packageManager} install`);
+  }
+
+  /**
+   * @param {string} [files='.'] files to add to git, defaults to all files
+   * @returns {import('execa').ResultPromise | undefined}
+   */
+  gitAdd(files = ".") {
+    if (!hasGit(this.directory)) return;
+
+    return this.run(`git add ${files}`);
+  }
+
+  /**
+   * @param {string} message commit message
+   * @returns {import('execa').ResultPromise | undefined}
+   */
+  gitCommit(message) {
+    if (!hasGit(this.directory)) return;
+
+    return this.run(`git commit -m ${JSON.stringify(message)}`);
+  }
+
+  /**
+   * @returns {Promise<boolean>}
+   */
+  async gitHasDiff() {
+    if (!hasGit(this.directory)) return false;
+
+    try {
+      await this.run("git diff --exit-code");
+      return false; // exit code 0 means no diff
+    } catch {
+      return true; // exit code 1 means there is a diff
+    }
   }
 }

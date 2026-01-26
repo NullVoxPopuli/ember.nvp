@@ -3,6 +3,7 @@ import { generate, permutate, bases, layers } from "#test-helpers";
 
 import type { Project } from "ember.nvp";
 import { rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 const expect = hardExpect.soft;
 
@@ -39,7 +40,11 @@ for (let base of bases) {
         });
 
         afterAll(async () => {
-          await rm(project.directory, { recursive: true, force: true });
+          if (project?.directory) {
+            if (existsSync(project.directory)) {
+              await rm(project.directory, { recursive: true });
+            }
+          }
         });
 
         it("successfully setup the layers", async () => {
