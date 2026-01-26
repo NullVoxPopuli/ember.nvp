@@ -57,5 +57,6 @@ describe("starting with typescript", () => {
 
     expect(result).toBe(true);
     expect(await project.gitHasDiff()).toBe(false);
+    expect(await project.hasFile("tsconfig.json")).toBe(true);
   });
 });
