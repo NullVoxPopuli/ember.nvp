@@ -1,5 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
-import { generate, permutate, bases, layers } from "#test-helpers";
+import { generate, permutate, bases, layers, reapply } from "#test-helpers";
 
 import type { Project } from "ember.nvp";
 import { rimraf, rimrafSync, native, nativeSync } from "rimraf";
@@ -89,7 +89,7 @@ for (let base of bases) {
                 await layer.run(project);
               });
 
-              it("applies correctly", async () => {
+              it("applies (or isn't) correctly", async () => {
                 expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
                 let result = await layer.isSetup(project, true);
@@ -117,6 +117,40 @@ for (let base of bases) {
                 }
 
                 expect(result, `${layer.name} is not setup`).toBe(false);
+              });
+            });
+          }
+        });
+
+        describe("apply anew", () => {
+          for (let layer of layers) {
+            if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
+              continue;
+            }
+
+            if (TODO.has(layer.name)) {
+              continue;
+            }
+
+            describe(layer.name, () => {
+              beforeAll(async () => {
+                await reapply(project, [layer.name]);
+              });
+
+              it("is applied", async () => {
+                expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+
+                let result = await layer.isSetup(project, true);
+
+                if (typeof result === "object") {
+                  expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
+                  expect(result.isSetup, `${layer.name} is setup`).toBe(true);
+                  return;
+                }
+
+                expect(result, `${layer.name} is setup`).toBe(true);
+
+                return;
               });
             });
           }
