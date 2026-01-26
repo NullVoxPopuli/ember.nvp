@@ -34,6 +34,12 @@ describe("typescript", () => {
     expect(project.type).toBe("app");
   });
 
+  it("has the typescript babel plugin", async () => {
+    let content = await project.read("babel.config.js");
+
+    expect(content).toContain("@babel/plugin-transform-typescript");
+  });
+
   it("build for development (testing, etc)", async () => {
     let { exitCode } = await build(project);
 
@@ -76,14 +82,20 @@ describe("javascript", () => {
     hardExpect(exitCode, "Install succeeds").toBe(0);
   });
 
+  afterAll(async () => {
+    await rm(project.directory, { recursive: true, force: true });
+  });
+
   it("project check", () => {
     expect(project.desires.layers.map((layer) => layer.name)).toMatchInlineSnapshot(`[]`);
     expect(project.wantsTypeScript).toBe(false);
     expect(project.type).toBe("app");
   });
 
-  afterAll(async () => {
-    await rm(project.directory, { recursive: true, force: true });
+  it("does not have the typescript babel plugin", async () => {
+    let content = await project.read("babel.config.js");
+
+    expect(content).not.toContain("@babel/plugin-transform-typescript");
   });
 
   it("build for development (testing, etc)", async () => {

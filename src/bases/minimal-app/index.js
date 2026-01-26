@@ -34,8 +34,26 @@ export default {
     await updateName(project);
     await makeJavaScript(project);
     await upgradeDependencies(project);
+    await updateBabelConfig(project);
   },
 };
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+async function updateBabelConfig(project) {
+  if (project.wantsTypeScript) return;
+
+  await js.transform(project.path("babel.config.js"), ({ root, j }) => {
+    root
+      .find(j.ArrayExpression, {
+        0: { value: "@babel/plugin-transform-typescript" },
+      })
+      .forEach((path) => {
+        path.remove();
+      });
+  });
+}
 
 /**
  * @param {import('#utils/project.js').Project} project

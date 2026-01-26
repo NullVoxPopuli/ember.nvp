@@ -21,6 +21,7 @@ export default {
      * if tsconfig exists,
      */
     addTSConfig(project);
+    updateBabelConfig(project);
   },
 
   async isSetup(project) {
@@ -49,3 +50,8 @@ async function addTSConfig(project) {
     await cp(join(libraryBase, "tsconfig.json"), project.path("tsconfig.json"));
   }
 }
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+async function updateBabelConfig(project) {}
