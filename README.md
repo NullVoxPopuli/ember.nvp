@@ -16,10 +16,18 @@ But I'm very excited about this tool, because it's everything I've ever wanted f
 npx ember.nvp
 ```
 
-or
+or, faster:
 
 ```bash
 pnpm dlx ember.nvp
+```
+
+Using the unreleased version:
+
+```bash
+pnpm dlx NullVoxPopuli/ember.nvp
+# or, slower:
+npx NullVoxPopuli/ember.nvp
 ```
 
 ### Wrapping

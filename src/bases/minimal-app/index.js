@@ -5,7 +5,7 @@ import { getLatest } from "#utils/npm.js";
 import { fileURLToPath } from "node:url";
 import { applyFolder } from "#utils/fs.js";
 import { writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { removeConfiguredPlugin } from "#utils/babel.js";
 
 /**
  * Minimal Layer
@@ -45,22 +45,7 @@ export default {
 async function updateBabelConfig(project) {
   if (project.wantsTypeScript) return;
 
-  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
-    root
-      .find(j.ArrayExpression, {
-        elements: {
-          0: { value: "@babel/plugin-transform-typescript" },
-        },
-      })
-      .forEach(
-        /**
-         * @param {unknown} path
-         */
-        (path) => {
-          j(path).remove();
-        },
-      );
-  });
+  await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }
 
 /**

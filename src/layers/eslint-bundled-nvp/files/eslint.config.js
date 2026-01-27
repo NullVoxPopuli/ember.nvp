@@ -3,6 +3,9 @@
  *
  * but in a way that abstracts the dependencies and configuration
  * out of your project.
+ *
+ * Handles: (G)TS + (G)JS, QUnit, Supporting Node files
+ *          for apps and libraries
  */
 import { configs } from "@nullvoxpopuli/eslint-configs";
 
