@@ -13,15 +13,24 @@ permutations.push([baseline]);
 const RE_APPLY_ONLY = new Set<string>([
   // "typescript"
   // "renovate",
-  "github-actions",
+  // "github-actions",
 ]);
 const INITIAL_ONLY = new Set<string>([
   // baseline,
-  "eslint-bundled-nvp",
+  // "eslint-bundled-nvp",
   // "typescript"
 ]);
 
-const eachBase = bases.map((base) => ({ name: base }));
+const eachBase = bases
+  .map((base) => ({ name: base }))
+  .filter(({ name }) => {
+    if (name === "minimal-library") {
+      /** TODO **/
+      return false;
+    }
+
+    return true;
+  });
 const eachPermutation = permutations
   .filter((permutation) => {
     if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
@@ -38,11 +47,6 @@ const eachPermutation = permutations
   .map((permutation) => ({ permutation, name: permutation.join(", ") }));
 
 describe.each(eachBase)("$name", ({ name: base }) => {
-  if (base === "minimal-library") {
-    /** TODO **/
-    return;
-  }
-
   describe.concurrent.each(eachPermutation)("layers: $name", ({ permutation }) => {
     let project: Project;
     let layerNames = permutation.filter((x) => x !== baseline);
