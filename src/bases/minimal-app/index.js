@@ -43,7 +43,7 @@ export default {
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
-  if (project.wantsLayer("typescript")) return;
+  if (project.wantsTypeScript) return;
 
   await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }
