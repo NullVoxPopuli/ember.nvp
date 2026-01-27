@@ -45,6 +45,15 @@ export async function generateProject(project) {
       `[ember.nvp] Consolidation commit -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
     );
   }
+
+  await runLap(project);
+
+  if (hasGit(project.directory) && (await project.gitHasDiff())) {
+    await project.gitAdd();
+    await project.gitCommit(
+      `[ember.nvp] Consolidation commit -- Please report issues to https://github.com/NullVoxPopuli/ember.nvp/`,
+    );
+  }
 }
 
 /**
