@@ -3,6 +3,9 @@ import { join } from "node:path";
 
 const TODO = new Set(["qunit", "vitest", "release-plan", "eslint-ejected"]);
 
+/**
+ * @returns {Promise<Array<import('#types').DiscoveredLayer>>}
+ */
 export async function discoverLayers() {
   const layersDir = import.meta.dirname;
   const entries = await readdir(layersDir, { withFileTypes: true });

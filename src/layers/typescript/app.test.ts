@@ -26,7 +26,7 @@ describe("starting with javascript", () => {
   it("applying typescript causes no changes", async () => {
     await reapply(project, ["typescript"]);
 
-    let result = await githubActionsLayer.isSetup(project);
+    let result = await githubActionsLayer!.isSetup(project);
 
     expect(result).toBe(true);
     expect(await project.gitHasDiff()).toBe(false);
@@ -53,7 +53,7 @@ describe("starting with typescript", () => {
   it("reapplying typescript causes no changes", async () => {
     await reapply(project, ["typescript"]);
 
-    let result = await githubActionsLayer.isSetup(project);
+    let result = await githubActionsLayer!.isSetup(project);
 
     expect(result).toBe(true);
     expect(await project.gitHasDiff()).toBe(false);

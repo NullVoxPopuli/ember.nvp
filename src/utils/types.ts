@@ -29,7 +29,7 @@ export interface Layer {
   >;
 }
 
-interface DiscoveredLayer extends Layer {
+export interface DiscoveredLayer extends Layer {
   /**
    * The unique name of the layer
    * (exact match of the folder name

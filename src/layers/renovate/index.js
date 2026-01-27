@@ -25,8 +25,35 @@ export default {
     await files.copyFileTo(destination, { source });
   },
 
-  async isSetup(project) {
-    return hasRenovateConfig(project);
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {true} explain
+   * @returns {Promise<{ isSetup: boolean; reasons: string[] }>}
+   */
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {boolean | undefined} [explain]
+   * @returns {Promise<boolean>}
+   */
+  async isSetup(project, explain) {
+    const reasons = [];
+
+    if (!hasRenovateConfig(project)) {
+      reasons.push("renovate.json5 is missing");
+
+      if (!explain) return false;
+    }
+
+    if (explain) {
+      return {
+        isSetup: reasons.length === 0,
+        reasons,
+      };
+    }
+
+    return reasons.length === 0;
   },
 };
 
