@@ -4,6 +4,7 @@ import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { hasGit } from "#utils/git.js";
 import { assert } from "node:console";
+import { layers, layerNames } from "#layers";
 
 /**
  * State container for the project.
@@ -61,24 +62,73 @@ export class Project {
   }
 
   /**
-   * @type {boolean}
+   * @param {string} name
+   * @returns {Promise<boolean>}
+   */
+  async #hasLayer(name) {
+    let layer = layers.find((layer) => layer.name === name);
+
+    if (!layer) return false;
+
+    return layer.isSetup(this);
+  }
+
+  /**
+   * @param {string} name
+   * @returns {Promise<boolean>}
+   */
+  async hasLayer(name) {
+    switch (name) {
+      case "eslint": {
+        let eslints = layerNames.filter((name) => name.startsWith("eslint"));
+        let results = await Promise.all(eslints.map((name) => this.#hasLayer(name)));
+
+        return results.every(Boolean);
+      }
+      case "testing": {
+        let results = await Promise.all([this.#hasLayer("qunit"), this.#hasLayer("vitest")]);
+
+        return results.every(Boolean);
+      }
+      default: {
+        return this.#hasLayer(name);
+      }
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @returns {boolean}
+   */
+  wantsLayer(name) {
+    switch (name) {
+      case "eslint": {
+        return this.desires.layers.some((layer) => layer.name.startsWith("eslint"));
+      }
+      case "testing": {
+        return this.desires.layers.some(
+          (layer) => layer.name === "qunit" || layer.name === "vitest",
+        );
+      }
+      default: {
+        return this.desires.layers.some((layer) => layer.name === name);
+      }
+    }
+  }
+
+  /**
+   * @param {string} name
+   * @returns {Promise<boolean>}
+   */
+  async hasOrWantsLayer(name) {
+    return this.wantsLayer(name) || this.hasLayer(name);
+  }
+
+  /**
+   * @returns {boolean}
    */
   get wantsTypeScript() {
-    return this.desires.layers.some((layer) => layer.name === "typescript");
-  }
-
-  /**
-   * @type {boolean}
-   */
-  get wantsESLint() {
-    return this.desires.layers.some((layer) => layer.name.startsWith("eslint"));
-  }
-
-  /**
-   * @type {boolean}
-   */
-  get wantsTesting() {
-    return this.desires.layers.some((layer) => layer.name === "qunit" || layer.name === "vitest");
+    return this.wantsLayer("typescript");
   }
 
   /**
