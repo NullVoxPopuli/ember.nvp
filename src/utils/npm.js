@@ -3,9 +3,7 @@ import latestVersion from "latest-version";
 /**
  * @type {{ [name: string]: { [version: string]: string } }}
  */
-const CACHE = {
-
-}
+const CACHE = {};
 
 /**
  * @param {{ [name: string]: string }} deps map of dep name to semver range
