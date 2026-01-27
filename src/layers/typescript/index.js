@@ -2,6 +2,7 @@ import { js } from "ember-apply";
 import { join } from "node:path";
 import { cp } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { hasConfiguredTSBabel, prependPlugin } from "#utils/babel.js";
 
 const bases = join(import.meta.dirname, "../../bases");
 const appBase = join(bases, "minimal-app/files");
@@ -45,7 +46,7 @@ export default {
       reasons.push("tsconfig.json is missing");
     }
 
-    if (!(await hasTSBabelPlugin(project))) {
+    if (!(await hasConfiguredTSBabel(project))) {
       if (!explain) return false;
 
       reasons.push(`babel.config is missing @babel/plugin-transform-typescript`);
@@ -61,26 +62,6 @@ export default {
     return reasons.length === 0;
   },
 };
-
-/**
- * @param {import('#utils/project.js').Project} project
- */
-async function hasTSBabelPlugin(project) {
-  let hasPlugin = false;
-  await js.analyze(project.path("babel.config.js"), async ({ root, j }) => {
-    root
-      .find(j.ArrayExpression, {
-        elements: {
-          0: { value: "@babel/plugin-transform-typescript" },
-        },
-      })
-      .forEach(() => {
-        hasPlugin = true;
-      });
-  });
-
-  return hasPlugin;
-}
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -104,20 +85,15 @@ async function addTSConfig(project) {
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
-  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
-    root
-      .find(j.ArrayExpression, {
-        elements: {
-          0: { value: "@babel/plugin-transform-typescript" },
-        },
-      })
-      .forEach(
-        /**
-         * @param {unknown} path
-         */
-        (path) => {
-          j(path).remove();
-        },
-      );
-  });
+  await prependPlugin(
+    project,
+    `[
+      "@babel/plugin-transform-typescript",
+      {
+        allExtensions: true,
+        onlyRemoveTypeImports: true,
+        allowDeclareFields: true,
+      },
+    ]`,
+  );
 }
