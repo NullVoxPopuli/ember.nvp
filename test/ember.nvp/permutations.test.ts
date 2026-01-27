@@ -1,11 +1,9 @@
-import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
+import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, reapply } from "#test-helpers";
 import { TODO } from "#layers";
 
 import type { Project } from "ember.nvp";
 import { rimraf } from "rimraf";
-
-const expect = hardExpect.soft;
 
 let permutations = permutate(layers.map((layer) => layer.name));
 
