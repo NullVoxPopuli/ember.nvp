@@ -1,3 +1,4 @@
+import { getLatest } from "#utils/npm.js";
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
 
@@ -10,7 +11,7 @@ const deps = {
   "qunit-dom": "3.5.0",
   testem: "3.17.0",
 };
-const tsDeeps = {
+const tsDeps = {
   "@types/qunit": "^2.19.12",
 };
 
@@ -21,23 +22,12 @@ export default {
   label: "QUnit",
 
   async run(project) {
-    // Apply test files
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
-    // Add dependencies
-    await packageJson.addDependencies(
-      {
-        "@ember/test-helpers": "^4.0.4",
-      },
-      project.directory,
-    );
-
-    // Add devDependencies
     await packageJson.addDevDependencies(
       {
-        qunit: "^2.22.0",
-        "@ember/test-waiters": "^3.1.0",
-        playwright: "^1.49.1",
+        ...(await getLatest(deps)),
+        ...(project.wantsTypeScript ? await getLatest(tsDeps) : {}),
       },
       project.directory,
     );
@@ -45,7 +35,9 @@ export default {
     // Add scripts
     await packageJson.addScripts(
       {
-        test: "vite build && node ./run-tests.mjs",
+        "build:test": "vite build --mode development",
+        "test:browser": "testem --port 0",
+        test: "pnpm build:test && pnpm test:browser",
       },
       project.directory,
     );
@@ -63,15 +55,45 @@ export default {
    * @returns {Promise<boolean>}
    */
   async isSetup(project, explain) {
-    const reasons = ["QUnit setup detection not implemented"];
+    const reasons = [];
+    let depsToCheck = [Object.keys(deps), project.wantsTypeScript ? Object.keys(tsDeps) : ""]
+      .flat()
+      .filter(Boolean);
+
+    let manifest = await packageJson.read(project.directory);
+
+    if (!manifest.scripts?.["build:test"]) {
+      if (!explain) return false;
+
+      reasons.push(`package.json is missing the "build:test" script`);
+    }
+
+    if (!manifest.scripts?.["test:browser"]) {
+      if (!explain) return false;
+
+      reasons.push(`package.json is missing the "build:browser" script`);
+    }
+    if (!manifest.scripts?.["test"]) {
+      if (!explain) return false;
+
+      reasons.push(`package.json is missing the "test" script`);
+    }
+
+    for (let dep of depsToCheck) {
+      if (!manifest.devDependencies?.[dep]) {
+        if (!explain) return false;
+
+        reasons.push(`package.json is missing ${dep} in devDependencies`);
+      }
+    }
 
     if (explain) {
       return {
-        isSetup: false,
+        isSetup: reasons.length === 0,
         reasons,
       };
     }
 
-    return false;
+    return reasons.length === 0;
   },
 };

@@ -4,7 +4,7 @@ import { join } from "node:path";
 /**
  * @type {Set<string>}
  */
-export const TODO = new Set(["qunit", "vitest", "release-plan", "eslint-ejected"]);
+export const TODO = new Set(["vitest", "release-plan", "eslint-ejected"]);
 
 /**
  * @returns {Promise<Array<import('#types').DiscoveredLayer>>}
