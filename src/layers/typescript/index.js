@@ -31,9 +31,9 @@ export default {
     /**
      * if tsconfig exists,
      */
-    addTSConfig(project);
-    updatePackageJson(project);
-    updateBabelConfig(project);
+    await addTSConfig(project);
+    await updatePackageJson(project);
+    await updateBabelConfig(project);
   },
 
   /**
