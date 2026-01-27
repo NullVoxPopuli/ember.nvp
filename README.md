@@ -122,7 +122,9 @@ Code formatting with:
 
 ### 🧪 QUnit (optional)
 
-Both co-located tests as well as traditionally located tests with QUnit.
+- Both co-located tests as well as traditionally located tests with QUnit.
+- New Theme: [qunit-theme-ember](https://github.com/IgnaceMaes/qunit-theme-ember)
+- Default utilities to help you find why tests are stuck
 
 ### ⚡ Vitest (optional)
 
