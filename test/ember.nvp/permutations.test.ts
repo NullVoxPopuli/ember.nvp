@@ -12,7 +12,7 @@ let permutations = permutate(layers.map((layer) => layer.name));
 const baseline = "<baseline>";
 permutations.push([baseline]);
 
-const TODO = new Set<string>(["qunit", "release-plan", "vitest", "github-actions"]);
+const TODO = new Set<string>(["qunit", "release-plan", "vitest"]);
 const RE_APPLY_ONLY = new Set<string>([
   // "typescript"
   // "renovate",
