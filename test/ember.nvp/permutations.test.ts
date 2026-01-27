@@ -45,7 +45,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
     return;
   }
 
-  describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
+  describe.concurrent.each(eachPermutation)("layers: $name", ({ permutation }) => {
     let project: Project;
     let layerNames = permutation.filter((x) => x !== baseline);
     let startingLayers = layers.filter((layer) => layerNames.includes(layer.name));
