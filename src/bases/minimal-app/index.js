@@ -5,7 +5,6 @@ import { getLatest } from "#utils/npm.js";
 import { fileURLToPath } from "node:url";
 import { applyFolder } from "#utils/fs.js";
 import { writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 
 /**
  * Minimal Layer
