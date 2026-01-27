@@ -156,10 +156,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
 
       describe.concurrent.each(newLayers)("$name", ({ layer }) => {
         beforeAll(async () => {
-          // Simulate running the CLI again, keeping prior selections.
-          // Some layers (e.g. github-actions) compute their output based on
-          // what other layers are selected.
-          await reapply(project, [...new Set([...layerNames, layer.name])]);
+          await reapply(project, [layer.name]);
         });
 
         describe("checking prior layers still present", () => {

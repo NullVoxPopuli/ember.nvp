@@ -83,12 +83,12 @@ export class Project {
         let eslints = layerNames.filter((name) => name.startsWith("eslint"));
         let results = await Promise.all(eslints.map((name) => this.#hasLayer(name)));
 
-        return results.every(Boolean);
+        return results.some(Boolean);
       }
       case "testing": {
         let results = await Promise.all([this.#hasLayer("qunit"), this.#hasLayer("vitest")]);
 
-        return results.every(Boolean);
+        return results.some(Boolean);
       }
       default: {
         return this.#hasLayer(name);
