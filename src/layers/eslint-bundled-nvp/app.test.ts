@@ -75,17 +75,16 @@ describe("package.json scripts", () => {
     await rm(project.directory, { recursive: true, force: true });
   });
 
-  
   it("linting and fixing works", async () => {
     {
       let { exitCode } = await project.run("pnpm lint:eslint --fix");
-      
+
       expect(exitCode).toBe(0);
     }
 
     {
       let { exitCode } = await project.run("pnpm lint:eslint");
-  
+
       expect(exitCode).toBe(0);
     }
   });

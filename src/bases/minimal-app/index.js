@@ -44,7 +44,7 @@ export default {
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
-  if (await project.hasOrWantsLayer('typescript')) return;
+  if (await project.hasOrWantsLayer("typescript")) return;
 
   await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }
@@ -112,7 +112,7 @@ async function updateName(project) {
  * @param {import('#utils/project.js').Project} project
  */
 async function makeJavaScript(project) {
-  if (await project.hasOrWantsLayer('typescript')) return;
+  if (await project.hasOrWantsLayer("typescript")) return;
 
   /**
    * We don't actually remove anything, because we want intellisense for JS

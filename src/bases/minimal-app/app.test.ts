@@ -69,13 +69,17 @@ describe("typescript", () => {
     `);
   });
 
-  it('when re-applying, it no-ops correctly', async () => {
-    let files = new Set(globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }));
+  it("when re-applying, it no-ops correctly", async () => {
+    let files = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
 
     await reapply(project, []);
 
-    let filesAfter = new Set(globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"]  }));
-    
+    let filesAfter = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
     expect(filesAfter).toEqual(files);
     expect(files).toMatchInlineSnapshot(`
       Set {
@@ -168,13 +172,17 @@ describe("javascript", () => {
     `);
   });
 
-  it('when re-applying, it no-ops correctly', async () => {
-    let files = new Set(globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }));
+  it("when re-applying, it no-ops correctly", async () => {
+    let files = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
 
     await reapply(project, []);
 
-    let filesAfter = new Set(globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }));
-    
+    let filesAfter = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
     expect(filesAfter).toEqual(files);
     expect(files).toMatchInlineSnapshot(`
       Set {
