@@ -161,7 +161,7 @@ async function addOrUpdateBase(project, file) {
  * @param {string} file
  */
 async function addOrUpdateLints(project, file) {
-  if (project.wantsESLint === false) {
+  if (!(await project.hasOrWantsLayer("eslint"))) {
     return file;
   }
 
@@ -182,7 +182,7 @@ async function addOrUpdateLints(project, file) {
  * @param {string} file
  */
 async function addOrUpdateTests(project, file) {
-  if (project.wantsTesting === false) {
+  if (!(await project.hasOrWantsLayer("testing"))) {
     return file;
   }
 

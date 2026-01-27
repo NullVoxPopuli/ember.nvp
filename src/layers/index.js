@@ -39,3 +39,6 @@ export async function discoverLayers() {
 
   return layers;
 }
+
+export const layers = await discoverLayers();
+export const layerNames = layers.map((layer) => layer.name);
