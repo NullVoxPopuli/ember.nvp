@@ -15,10 +15,37 @@ export default {
       await writeFile(result.outputPath, result.content, "utf-8");
     }
   },
-  async isSetup(project) {
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {true} explain
+   * @returns {Promise<{ isSetup: boolean; reasons: string[] }>}
+   */
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {boolean | undefined} [explain]
+   * @returns {Promise<boolean>}
+   */
+  async isSetup(project, explain) {
+    const reasons = [];
+
     let result = await transform(project);
 
-    return result.didChange === false;
+    if (result.didChange) {
+      reasons.push("GitHub Actions workflow needs updates");
+
+      if (!explain) return false;
+    }
+
+    if (explain) {
+      return {
+        isSetup: reasons.length === 0,
+        reasons,
+      };
+    }
+
+    return reasons.length === 0;
   },
 };
 

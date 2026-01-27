@@ -1,8 +1,11 @@
-import { packageJson, files } from "ember-apply";
+import { packageJson, js } from "ember-apply";
 import { parse as parsePath } from "node:path";
 import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
 import { fileURLToPath } from "node:url";
+import { applyFolder } from "#utils/fs.js";
+import { writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 
 /**
  * Minimal Layer
@@ -32,8 +35,33 @@ export default {
     await updateName(project);
     await makeJavaScript(project);
     await upgradeDependencies(project);
+    await updateBabelConfig(project);
   },
 };
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+async function updateBabelConfig(project) {
+  if (project.wantsTypeScript) return;
+
+  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
+    root
+      .find(j.ArrayExpression, {
+        elements: {
+          0: { value: "@babel/plugin-transform-typescript" },
+        },
+      })
+      .forEach(
+        /**
+         * @param {unknown} path
+         */
+        (path) => {
+          j(path).remove();
+        },
+      );
+  });
+}
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -41,23 +69,27 @@ export default {
 async function applyFiles(project) {
   let filePath = fileURLToPath(new URL("files", import.meta.url));
 
-  await files.applyFolder(filePath, {
-    to: project.directory,
-    async transform({ filePath, contents }) {
+  await applyFolder(filePath, {
+    to: project,
+    async process({ entry, contents }) {
       /**
        * TODO: handle conflicts if files already exists
        *
        *       (I believe we can do interactive here)
        */
-      let pathInfo = parsePath(filePath);
+      let pathInfo = parsePath(entry);
       let ext = pathInfo.ext;
       if (ext === ".gts" || ext === ".ts") {
         if (!project.wantsTypeScript) {
-          await removeTypes(ext, contents);
+          let newContents = await removeTypes(ext, contents);
+          let filePath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");
+
+          await writeFile(filePath, newContents);
+          return;
         }
       }
 
-      return contents;
+      await writeFile(entry, contents);
     },
   });
 }
@@ -81,14 +113,26 @@ async function makeJavaScript(project) {
 
   /**
    * We don't actually remove anything, because we want intellisense for JS
+   *
+   * But perhaps for the sake of minimal, we do remoev it.
+   * And we add a layer later for JSDoc ased TS or something
    */
-  // await packageJson.removeDevDependencies([
-  //   "@ember/app-tsconfig",
-  //   "@glint/ember-tsc",
-  //   "@glint/template",
-  //   "@glint/tsserver-plugin",
-  //   "typescript",
-  // ], project.directory);
+  await packageJson.removeDevDependencies(
+    [
+      "@ember/app-tsconfig",
+      "@glint/ember-tsc",
+      "@glint/template",
+      "@glint/tsserver-plugin",
+      "typescript",
+    ],
+    project.directory,
+  );
+
+  await project.removeFile("tsconfig.json");
+
+  await packageJson.modify((json) => {
+    json.imports["#config"] = "./app/config.js";
+  }, project.directory);
 }
 
 /**

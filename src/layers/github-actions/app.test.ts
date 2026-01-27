@@ -25,7 +25,7 @@ for (let packageManager of ["pnpm", "npm"] as const) {
     });
 
     it("did not emit a CI.yml, because it wouldn't be used", async () => {
-      let result = await githubActionsLayer.isSetup(project);
+      let result = await githubActionsLayer!.isSetup(project);
 
       expect(await project.read(".github/workflows/ci.yml")).toMatchInlineSnapshot(`undefined`);
       expect(result).toBe(true);
@@ -34,7 +34,7 @@ for (let packageManager of ["pnpm", "npm"] as const) {
     it("after emitting with an eslint layer", async () => {
       await reapply(project, ["eslint-bundled-nvp", "github-actions"]);
 
-      let result = await githubActionsLayer.isSetup(project);
+      let result = await githubActionsLayer!.isSetup(project);
 
       expect(result).toBe(true);
     });

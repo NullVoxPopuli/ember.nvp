@@ -1,8 +1,9 @@
 import { $ } from "execa";
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { hasGit } from "#utils/git.js";
+import { assert } from "node:console";
 
 /**
  * State container for the project.
@@ -86,7 +87,22 @@ export class Project {
    * @returns {string}
    */
   path(relativePath) {
+    assert(typeof relativePath === "string");
+    assert(!relativePath.startsWith("/"), "relativePath must be relative");
+    assert(!relativePath.includes(".."), "relativePath must not traverse directories");
+
     return join(this.directory, relativePath);
+  }
+
+  /**
+   *
+   * @param {string} relativePath
+   * @returns {boolean}
+   */
+  hasFile(relativePath) {
+    let path = this.path(relativePath);
+
+    return existsSync(path);
   }
 
   /**
@@ -102,6 +118,18 @@ export class Project {
     }
 
     return;
+  }
+
+  /**
+   *
+   * @param {string} relativePath
+   */
+  async removeFile(relativePath) {
+    let path = this.path(relativePath);
+
+    if (existsSync(path)) {
+      await rm(path);
+    }
   }
 
   /**
@@ -140,6 +168,21 @@ export class Project {
   }
 
   /**
+   * @returns {Promise<string | undefined>}
+   */
+  async gitLastCommitMessage() {
+    if (!hasGit(this.directory)) return;
+
+    try {
+      const result = await this.run("git log -1 --pretty=%B");
+      const stdout = result.stdout;
+      return typeof stdout === "string" ? stdout.trim() : undefined;
+    } catch {
+      return;
+    }
+  }
+
+  /**
    * @returns {Promise<boolean>}
    */
   async gitHasDiff() {
@@ -147,6 +190,7 @@ export class Project {
 
     try {
       await this.run("git diff --exit-code");
+      await this.run("git diff --staged --exit-code");
       return false; // exit code 0 means no diff
     } catch {
       return true; // exit code 1 means there is a diff

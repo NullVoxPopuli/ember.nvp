@@ -35,15 +35,33 @@ export default {
     await maybeLintWithConcurrently(project);
   },
 
-  async isSetup(project) {
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {true} explain
+   * @returns {Promise<{ isSetup: boolean; reasons: string[] }>}
+   */
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {boolean | undefined} [explain]
+   * @returns {Promise<boolean>}
+   */
+  async isSetup(project, explain) {
+    const reasons = [];
+
     if (!existsSync(join(project.directory, "eslint.config.js"))) {
-      return false;
+      reasons.push("eslint.config.js is missing");
+
+      if (!explain) return false;
     }
 
     let manifest = await packageJson.read(project.directory);
 
     if (!hasDevDeps(manifest, ["ember-eslint", "eslint"])) {
-      return false;
+      reasons.push("missing required dependencies: ember-eslint, eslint");
+
+      if (!explain) return false;
     }
 
     let scripts = Object.values(manifest.scripts ?? {}).filter((script) =>
@@ -51,12 +69,23 @@ export default {
     );
 
     if (!scripts.some((script) => script.includes("--cache"))) {
-      return false;
+      reasons.push("missing eslint script with --cache flag");
+
+      if (!explain) return false;
     }
     if (!scripts.some((script) => script.includes("--fix"))) {
-      return false;
+      reasons.push("missing eslint script with --fix flag");
+
+      if (!explain) return false;
     }
 
-    return true;
+    if (explain) {
+      return {
+        isSetup: reasons.length === 0,
+        reasons,
+      };
+    }
+
+    return reasons.length === 0;
   },
 };

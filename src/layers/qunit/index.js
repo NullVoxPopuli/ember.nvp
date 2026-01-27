@@ -38,7 +38,28 @@ export default {
       project.directory,
     );
   },
-  async isSetup(project) {
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {true} explain
+   * @returns {Promise<{ isSetup: boolean; reasons: string[] }>}
+   */
+  /**
+   * @overload
+   * @param {import('#utils/project.js').Project} project
+   * @param {boolean | undefined} [explain]
+   * @returns {Promise<boolean>}
+   */
+  async isSetup(project, explain) {
+    const reasons = ["QUnit setup detection not implemented"];
+
+    if (explain) {
+      return {
+        isSetup: false,
+        reasons,
+      };
+    }
+
     return false;
   },
 };
