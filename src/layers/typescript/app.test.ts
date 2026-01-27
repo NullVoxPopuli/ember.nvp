@@ -69,6 +69,10 @@ describe("package.json scripts", () => {
       packageManager: "pnpm",
       layers: ["typescript", "git"],
     });
+
+    let { exitCode } = await project.run("pnpm install");
+
+    hardExpect(exitCode).toBe(0);
   });
 
   afterAll(async () => {
