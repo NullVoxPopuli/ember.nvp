@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { applyFolder } from "#utils/fs.js";
 import { writeFile } from "node:fs/promises";
 import { removeConfiguredPlugin } from "#utils/babel.js";
+import { existsSync } from "node:fs";
 
 /**
  * Minimal Layer
@@ -43,7 +44,7 @@ export default {
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
-  if (project.wantsTypeScript) return;
+  if (await project.hasOrWantsLayer('typescript')) return;
 
   await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }
@@ -65,15 +66,32 @@ async function applyFiles(project) {
       let pathInfo = parsePath(entry);
       let ext = pathInfo.ext;
       if (ext === ".gts" || ext === ".ts") {
-        if (!project.wantsTypeScript) {
-          let newContents = await removeTypes(ext, contents);
+        let wantsTS = await project.hasOrWantsLayer("typescript");
+
+        if (!wantsTS) {
           let filePath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");
+
+          if (existsSync(filePath)) {
+            /**
+             * Skipping due to already existing
+             * TODO: need a flag to force overwrite?
+             */
+            return;
+          }
+          let newContents = await removeTypes(ext, contents);
 
           await writeFile(filePath, newContents);
           return;
         }
       }
 
+      if (existsSync(entry)) {
+        /**
+         * Skipping due to already existing
+         * TODO: need a flag to force overwrite?
+         */
+        return;
+      }
       await writeFile(entry, contents);
     },
   });
@@ -94,7 +112,7 @@ async function updateName(project) {
  * @param {import('#utils/project.js').Project} project
  */
 async function makeJavaScript(project) {
-  if (project.wantsTypeScript) return;
+  if (await project.hasOrWantsLayer('typescript')) return;
 
   /**
    * We don't actually remove anything, because we want intellisense for JS
