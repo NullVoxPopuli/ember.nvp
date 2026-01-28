@@ -61,7 +61,7 @@ describe("package.json scripts", () => {
     project = await generate({
       type: "app",
       packageManager: "pnpm",
-      layers: ["eslint-bundled-nvp", "git"],
+      layers: ["qunit", "git"],
     });
 
     let { exitCode } = await project.run("pnpm install");

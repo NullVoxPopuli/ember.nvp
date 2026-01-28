@@ -23,12 +23,13 @@ export default {
 
   async run(project) {
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
+    let ts = await project.hasOrWantsLayer("typescript");
 
     await packageJson.addDevDependencies(
-      {
-        ...(await getLatest(deps)),
-        ...(project.wantsTypeScript ? await getLatest(tsDeps) : {}),
-      },
+      await getLatest({
+        ...deps,
+        ...(ts ? tsDeps : {}),
+      }),
       project.directory,
     );
 
