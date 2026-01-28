@@ -2,13 +2,21 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "0.0.0",
-      "newVersion": "0.1.0",
+      "oldVersion": "0.1.0",
+      "newVersion": "0.2.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :memo: Documentation"
         },
         {
           "impact": "patch",
@@ -18,5 +26,5 @@
       "pkgJSONPath": "./package.json"
     }
   },
-  "description": "## Release (2026-01-21)\n\n* ember.nvp 0.1.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#1](https://github.com/NullVoxPopuli/ember.nvp/pull/1) Implementation planning ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#2](https://github.com/NullVoxPopuli/ember.nvp/pull/2) pnpm dlx create-release-plan-setup@latest --update ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#1](https://github.com/NullVoxPopuli/ember.nvp/pull/1) Implementation planning ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-01-28)\n\n* ember.nvp 0.2.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#20](https://github.com/NullVoxPopuli/ember.nvp/pull/20) Implement idemponent and modern qunit layer ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#18](https://github.com/NullVoxPopuli/ember.nvp/pull/18) Ensure the TS utilities handle the babel plugin ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#17](https://github.com/NullVoxPopuli/ember.nvp/pull/17) Support emitting JavaScript projects ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#16](https://github.com/NullVoxPopuli/ember.nvp/pull/16) Commit changes automatically if git is in use ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#14](https://github.com/NullVoxPopuli/ember.nvp/pull/14) Add idempotent GitHub Actions ci.yml ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#11](https://github.com/NullVoxPopuli/ember.nvp/pull/11) Add idempotent renovate config generation ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#9](https://github.com/NullVoxPopuli/ember.nvp/pull/9)  Add eslint codemod/applyable, enable type checking internally on the JS ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#8](https://github.com/NullVoxPopuli/ember.nvp/pull/8) Add idempotent prettier codemod/applyable ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#6](https://github.com/NullVoxPopuli/ember.nvp/pull/6) Add git support with proper defaults (ie automatic --skip-git if you are already in a git repo) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#4](https://github.com/NullVoxPopuli/ember.nvp/pull/4) Implementation: minimal-app ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#22](https://github.com/NullVoxPopuli/ember.nvp/pull/22) Fix accidental stdoutput during git interactions ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#10](https://github.com/NullVoxPopuli/ember.nvp/pull/10) Various CLI fixes ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :memo: Documentation\n* `ember.nvp`\n  * [#12](https://github.com/NullVoxPopuli/ember.nvp/pull/12) Clarify rationale and usage caveats in README ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#19](https://github.com/NullVoxPopuli/ember.nvp/pull/19) Forgot to enable tests for GH Actions ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#21](https://github.com/NullVoxPopuli/ember.nvp/pull/21) Refactor hases and wantses ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#15](https://github.com/NullVoxPopuli/ember.nvp/pull/15) Add reapply test utility for more easily re-applying layers in the manual testing ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#13](https://github.com/NullVoxPopuli/ember.nvp/pull/13) Speed up permutations test ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#7](https://github.com/NullVoxPopuli/ember.nvp/pull/7) Implement idempotent testing for layers that may (or may not) have been applied during the initial generation of a project ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
