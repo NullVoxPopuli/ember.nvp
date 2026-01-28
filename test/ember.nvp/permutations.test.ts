@@ -165,20 +165,18 @@ describe.each(eachBase)("$name", ({ name: base }) => {
           await reapply(project, [...new Set([...layerNames, layer.name])]);
         });
 
-        describe("checking prior layers still present", () => {
-          it.for(startingLayers)("$name", async (layer) => {
-            expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
+        it.for(startingLayers)("starting layers still present: $name", async (layer) => {
+          expect(layer.isSetup, `has isSetup for ${layer.name}`).toBeInstanceOf(Function);
 
-            let result = await layer.isSetup(project, true);
+          let result = await layer.isSetup(project, true);
 
-            if (typeof result === "object") {
-              expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
-              expect(result.isSetup, `${layer.name} is setup`).toBe(true);
-              return;
-            }
+          if (typeof result === "object") {
+            expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
+            expect(result.isSetup, `${layer.name} is setup`).toBe(true);
+            return;
+          }
 
-            expect(result, `${layer.name} is setup`).toBe(true);
-          });
+          expect(result, `${layer.name} is setup`).toBe(true);
         });
 
         it("is applied", async () => {
