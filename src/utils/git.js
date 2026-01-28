@@ -7,6 +7,7 @@ export function isInGit(directory = cwd) {
   try {
     const result = execSync("git rev-parse --is-inside-work-tree", {
       cwd: directory,
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
     return result.toString().trim() === "true";
@@ -21,7 +22,10 @@ export function isInGit(directory = cwd) {
  */
 export function initGit(directory) {
   try {
-    execSync("git init --initial-branch=main", { cwd: directory });
+    execSync("git init --initial-branch=main", {
+      cwd: directory,
+      stdio: "pipe",
+    });
     return true;
   } catch {
     return false;
