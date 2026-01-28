@@ -15,6 +15,7 @@ describe("discoverLayers", () => {
         "git",
         "github-actions",
         "prettier",
+        "qunit",
         "renovate",
         "typescript",
       ]
