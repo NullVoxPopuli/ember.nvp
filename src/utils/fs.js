@@ -1,6 +1,8 @@
-import { lstatSync } from "node:fs";
-import { readFile, glob, mkdir } from "node:fs/promises";
+import { existsSync, lstatSync } from "node:fs";
+import { readFile, glob, mkdir, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
+import { parse as parsePath } from "node:path";
+import { removeTypes } from "./remove-types.js";
 
 /**
  *
@@ -33,4 +35,51 @@ export async function applyFolder(from, options) {
 
     await options.process({ entry: targetPath, contents });
   }
+}
+
+/**
+ * @param {string} from
+ * @param {import('#utils/project.js').Project} project
+ */
+export async function applyFolderTo(from, project) {
+  await applyFolder(from, {
+    to: project,
+    async process({ entry, contents }) {
+      /**
+       * TODO: handle conflicts if files already exists
+       *
+       *       (I believe we can do interactive here)
+       */
+      let pathInfo = parsePath(entry);
+      let ext = pathInfo.ext;
+      if (ext === ".gts" || ext === ".ts") {
+        let wantsTS = await project.hasOrWantsLayer("typescript");
+
+        if (!wantsTS) {
+          let filePath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");
+
+          if (existsSync(filePath)) {
+            /**
+             * Skipping due to already existing
+             * TODO: need a flag to force overwrite?
+             */
+            return;
+          }
+          let newContents = await removeTypes(ext, contents);
+
+          await writeFile(filePath, newContents);
+          return;
+        }
+      }
+
+      if (existsSync(entry)) {
+        /**
+         * Skipping due to already existing
+         * TODO: need a flag to force overwrite?
+         */
+        return;
+      }
+      await writeFile(entry, contents);
+    },
+  });
 }
