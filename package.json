@@ -1,6 +1,6 @@
 {
   "name": "ember.nvp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ember project generator, alternative to the official blueprints, but more modern -- hopefully one day to upstream back in to ember-cli / official blueprints",
   "repository": {
     "type": "git",
