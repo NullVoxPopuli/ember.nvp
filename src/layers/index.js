@@ -1,7 +1,10 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const TODO = new Set(["qunit", "vitest", "release-plan", "eslint-ejected"]);
+/**
+ * @type {Set<string>}
+ */
+export const TODO = new Set(["qunit", "vitest", "release-plan", "eslint-ejected"]);
 
 /**
  * @returns {Promise<Array<import('#types').DiscoveredLayer>>}

@@ -33,7 +33,9 @@ export default {
     let result = await transform(project);
 
     if (result.didChange) {
-      reasons.push("GitHub Actions workflow needs updates");
+      reasons.push(
+        `GitHub Actions workflow needs updates. Was ${result.original}, now ${result.content}`,
+      );
 
       if (!explain) return false;
     }

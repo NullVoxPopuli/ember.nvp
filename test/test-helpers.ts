@@ -6,6 +6,8 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { generateProject, Project } from "ember.nvp";
 import { discoverLayers } from "#layers";
+import type { DiscoveredLayer } from "#types";
+import { expect } from "vitest";
 
 const minimalApp = "minimal-app";
 const minimalAddon = "minimal-library";
@@ -158,4 +160,16 @@ export async function build(project: Project, mode = "development") {
       NODE_ENV: mode,
     },
   });
+}
+
+export async function expectIsSetup(project: Project, layer: DiscoveredLayer) {
+  let result = await layer.isSetup(project, true);
+
+  if (typeof result === "object") {
+    expect(result.reasons, `${layer.name} is setup`).deep.equal([]);
+    expect(result.isSetup, `${layer.name} is setup`).toBe(true);
+    return;
+  }
+
+  expect(result, `${layer.name} is setup`).toBe(true);
 }

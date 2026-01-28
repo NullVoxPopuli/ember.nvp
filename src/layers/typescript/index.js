@@ -31,9 +31,9 @@ export default {
     /**
      * if tsconfig exists,
      */
-    addTSConfig(project);
-    updatePackageJson(project);
-    updateBabelConfig(project);
+    await addTSConfig(project);
+    await updatePackageJson(project);
+    await updateBabelConfig(project);
   },
 
   /**
@@ -101,7 +101,7 @@ async function updatePackageJson(project) {
     Object.assign(json.scripts, {
       "lint:types": "ember-tsc --noEmit",
     });
-    Object.assign(json.devDependencies, getLatest(deps));
+    Object.assign(json.devDependencies, await getLatest(deps));
   }, project.directory);
 }
 

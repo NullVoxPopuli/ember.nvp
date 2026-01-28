@@ -1,5 +1,5 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
-import { generate, build } from "#test-helpers";
+import { generate, build, reapply } from "#test-helpers";
 import { packageJson } from "ember-apply";
 
 import type { Project } from "ember.nvp";
@@ -66,6 +66,36 @@ describe("typescript", () => {
         "app/templates",
         "app/templates/application.gts",
       ]
+    `);
+  });
+
+  it("when re-applying, it no-ops correctly", async () => {
+    let files = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
+    await reapply(project, []);
+
+    let filesAfter = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
+    expect(filesAfter).toEqual(files);
+    expect(files).toMatchInlineSnapshot(`
+      Set {
+        "app",
+        "babel.config.js",
+        "index.html",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tsconfig.json",
+        "vite.config.mjs",
+        "app/app.ts",
+        "app/config.ts",
+        "app/router.ts",
+        "app/templates",
+        "app/templates/application.gts",
+      }
     `);
   });
 });
@@ -139,6 +169,35 @@ describe("javascript", () => {
         "app/templates",
         "app/templates/application.gjs",
       ]
+    `);
+  });
+
+  it("when re-applying, it no-ops correctly", async () => {
+    let files = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
+    await reapply(project, []);
+
+    let filesAfter = new Set(
+      globSync("**/*", { cwd: project.directory, exclude: ["node_modules", "dist"] }),
+    );
+
+    expect(filesAfter).toEqual(files);
+    expect(files).toMatchInlineSnapshot(`
+      Set {
+        "app",
+        "babel.config.js",
+        "index.html",
+        "package.json",
+        "pnpm-lock.yaml",
+        "vite.config.mjs",
+        "app/app.js",
+        "app/config.js",
+        "app/router.js",
+        "app/templates",
+        "app/templates/application.gjs",
+      }
     `);
   });
 });

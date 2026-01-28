@@ -33,15 +33,16 @@ export async function maybeLintWithConcurrently(project) {
   }
 
   if (count > 1) {
-    await packageJson.modify((json) => {
+    await packageJson.modify(async (json) => {
       json.scripts ||= {};
+      json.devDependencies ||= {};
       json.scripts.lint = 'concurrently "pnpm:lint:*(!fix)" --names "lint:" --prefixColors auto';
       json.scripts["lint:fix"] =
         'concurrently "pnpm:lint:*:fix" --names "fix:" --prefixColors auto && pnpm format';
 
       Object.assign(
         json.devDependencies,
-        getLatest({
+        await getLatest({
           concurrently: "^9.2.1",
         }),
       );
