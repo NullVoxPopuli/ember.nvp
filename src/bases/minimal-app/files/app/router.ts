@@ -14,30 +14,30 @@ Router.map(function () {});
  *   We don't yet have a way to do this in a nice way
  *
  */
-function bundle(name: string, loader: () => Promise<{ default: unknown }>[]) {
-  return {
-    names: [name],
-    load: async () => {
-      const [template, route, controller] = await Promise.all(loader());
-      let slashName = name.replaceAll(".", "/");
-      let results: Record<string, unknown> = {};
+// function bundle(name: string, loader: () => Promise<{ default: unknown }>[]) {
+//   return {
+//     names: [name],
+//     load: async () => {
+//       const [template, route, controller] = await Promise.all(loader());
+//       let slashName = name.replaceAll(".", "/");
+//       let results: Record<string, unknown> = {};
 
-      if (template) results[`./templates/${slashName}`] = template.default;
-      if (route) results[`./routes/${slashName}`] = route.default;
-      if (controller) results[`./controllers/${slashName}`] = controller.default;
+//       if (template) results[`./templates/${slashName}`] = template.default;
+//       if (route) results[`./routes/${slashName}`] = route.default;
+//       if (controller) results[`./controllers/${slashName}`] = controller.default;
 
-      return {
-        default: results,
-      };
-    },
-  };
-}
+//       return {
+//         default: results,
+//       };
+//     },
+//   };
+// }
 
 /**
  * Examples from:
  * - https://github.com/NullVoxPopuli/limber/blob/67e2f54bbe224052e38f9a9e566d704411e65e86/apps/repl/app/router.ts#L35
  */
-(window as any)._embroiderRouteBundles_ = [
+// (window as any)._embroiderRouteBundles_ = [
   // bundle("docs", () => [import("./templates/docs.gts")]),
   // bundle("docs.repl-sdk", () => [import("./templates/docs/repl-sdk.gts")]),
   // bundle("docs.ember-repl", () => [import("./templates/docs/ember-repl.gts")]),
@@ -48,4 +48,4 @@ function bundle(name: string, loader: () => Promise<{ default: unknown }>[]) {
   //   import("./the/route.ts"),
   //   import("./the/controller.ts"),
   // ]),
-];
+// ];
