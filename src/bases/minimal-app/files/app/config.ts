@@ -1,8 +1,5 @@
 interface Config {
-  isTesting?: boolean;
-  environment: string;
-  modulePrefix: string;
-  podModulePrefix?: string;
+  environment: "development" | "production";
   locationType: "history" | "hash" | "none" | "auto";
   rootURL: string;
   EmberENV?: Record<string, unknown>;
@@ -10,7 +7,6 @@ interface Config {
 }
 
 const ENV: Config = {
-  modulePrefix: "my-app-name",
   environment: import.meta.env.DEV ? "development" : "production",
   rootURL: "/",
   locationType: "history",
@@ -19,3 +15,16 @@ const ENV: Config = {
 };
 
 export default ENV;
+
+// @ts-expect-error: Ignoreing private API
+import { getGlobalConfig } from "@embroider/macros/src/addon/runtime";
+
+export function enterTestMode() {
+  ENV.locationType = "none";
+  ENV.APP.rootElement = "#ember-testing";
+  ENV.APP.autoboot = false;
+
+  const theMacrosGlobal = getGlobalConfig();
+  theMacrosGlobal["@embroider/macros"] ||= {};
+  theMacrosGlobal["@embroider/macros"].isTesting ||= true;
+}

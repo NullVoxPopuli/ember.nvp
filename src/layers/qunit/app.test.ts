@@ -77,7 +77,12 @@ describe("package.json scripts", () => {
 
   it("running tests works", async () => {
     {
-      let { exitCode } = await project.run("pnpm test");
+      let { exitCode, stderr, stdout } = await project.run("pnpm test");
+
+      if (exitCode !== 0) {
+        console.log(stderr);
+        console.log(stdout);
+      }
 
       expect(exitCode).toBe(0);
     }

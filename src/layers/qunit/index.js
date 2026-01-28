@@ -1,3 +1,4 @@
+import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
@@ -22,7 +23,8 @@ export default {
   label: "QUnit",
 
   async run(project) {
-    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
+    let filePath = join(import.meta.dirname, "files");
+    await applyFolderTo(filePath, project);
     let ts = await project.hasOrWantsLayer("typescript");
 
     await packageJson.addDevDependencies(
@@ -37,8 +39,8 @@ export default {
     await packageJson.addScripts(
       {
         "build:test": "vite build --mode development",
-        "test:browser": "testem --port 0",
-        test: "pnpm build:test && pnpm test:browser",
+        "test:ci": "testem ci --port 0",
+        test: "pnpm build:test && pnpm test:ci",
       },
       project.directory,
     );
@@ -69,10 +71,10 @@ export default {
       reasons.push(`package.json is missing the "build:test" script`);
     }
 
-    if (!manifest.scripts?.["test:browser"]) {
+    if (!manifest.scripts?.["test:ci"]) {
       if (!explain) return false;
 
-      reasons.push(`package.json is missing the "build:browser" script`);
+      reasons.push(`package.json is missing the "test:ci" script`);
     }
     if (!manifest.scripts?.["test"]) {
       if (!explain) return false;
