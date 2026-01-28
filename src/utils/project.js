@@ -187,7 +187,7 @@ export class Project {
    * @returns {import('execa').ResultPromise}
    */
   run(command) {
-    return $(command, { cwd: this.directory, shell: true, stdio: "inherit" });
+    return $(command, { cwd: this.directory, shell: true });
   }
 
   /**
