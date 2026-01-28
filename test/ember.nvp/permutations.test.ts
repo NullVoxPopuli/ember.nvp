@@ -47,7 +47,7 @@ const eachPermutation = permutations
   .map((permutation) => ({ permutation, name: permutation.join(", ") }));
 
 describe.each(eachBase)("$name", ({ name: base }) => {
-  describe.concurrent.each(eachPermutation)("layers: $name", ({ permutation }) => {
+  describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
     let project: Project;
     let layerNames = permutation.filter((x) => x !== baseline);
     let startingLayers = layers.filter((layer) => layerNames.includes(layer.name));
@@ -143,7 +143,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
      * Simulates running the CLI again with different options selected
      * on the same project
      */
-    describe.concurrent("apply anew", () => {
+    describe("apply anew", () => {
       let newLayers = layers
         .filter((layer) => {
           if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
@@ -158,9 +158,11 @@ describe.each(eachBase)("$name", ({ name: base }) => {
         })
         .map((layer) => ({ name: layer.name, layer }));
 
-      describe.concurrent.each(newLayers)("$name", ({ layer }) => {
+      describe.each(newLayers)("$name", ({ layer }) => {
         beforeAll(async () => {
-          await reapply(project, [layer.name]);
+          // Simulate running the CLI again, adding one more option while
+          // keeping the previously-selected layers.
+          await reapply(project, [...new Set([...layerNames, layer.name])]);
         });
 
         describe("checking prior layers still present", () => {
