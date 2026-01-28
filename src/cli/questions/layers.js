@@ -1,4 +1,3 @@
-import { styleText } from "node:util";
 import { answers, printArgInUse } from "#args";
 import { discoverLayers } from "#layers";
 
