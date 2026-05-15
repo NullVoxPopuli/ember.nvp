@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-05-15)
+
+* ember.nvp 0.2.1 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#29](https://github.com/NullVoxPopuli/ember.nvp/pull/29) Fix production vite build broken by setTesting in app/config.ts ([@Copilot](https://github.com/apps/copilot-swe-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#31](https://github.com/NullVoxPopuli/ember.nvp/pull/31) Update release-plan ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-01-28)
 
 * ember.nvp 0.2.0 (minor)
