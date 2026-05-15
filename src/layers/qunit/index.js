@@ -38,7 +38,7 @@ export default {
     // Add scripts
     await packageJson.addScripts(
       {
-        "build:test": "vite build --mode development",
+        "build:test": "EMBER_ENV=test NODE_ENV=development vite build --mode development",
         "test:ci": "testem ci --port 0",
         test: "pnpm build:test && pnpm test:ci",
       },

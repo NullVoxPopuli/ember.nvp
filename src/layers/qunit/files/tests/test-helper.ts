@@ -11,12 +11,13 @@ import { getPendingWaiterState } from "@ember/test-waiters";
 import * as QUnit from "qunit";
 import { setup } from "qunit-dom";
 import { setupEmberOnerrorValidation, start as qunitStart } from "ember-qunit";
+import { setTesting } from "@embroider/macros";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import { getGlobalConfig } from "@embroider/macros/src/addon/runtime";
 
 import Application from "#app/app";
-import config, { enterTestMode } from "#config";
+import config from "#config";
 
 Object.assign(window, {
   visit,
@@ -39,7 +40,10 @@ Object.assign(window, {
 });
 
 export function start() {
-  enterTestMode();
+  config.locationType = "none";
+  config.APP.rootElement = "#ember-testing";
+  config.APP.autoboot = false;
+  setTesting(true);
 
   const theMacrosGlobal = getGlobalConfig();
 
