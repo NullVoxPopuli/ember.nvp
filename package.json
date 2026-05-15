@@ -7,8 +7,6 @@
     "url": "git@github.com:NullVoxPopuli/ember.nvp.git"
   },
   "type": "module",
-  "bin": "./src/cli/index.js",
-  "exports": "./src/index.js",
   "imports": {
     "#args": "./src/cli/args.js",
     "#bases/*": "./src/bases/*/index.js",
@@ -18,12 +16,14 @@
     "#utils/*": "./src/utils/*",
     "#test-helpers": "./test/test-helpers.ts"
   },
+  "exports": "./src/index.js",
+  "bin": "./src/cli/index.js",
   "scripts": {
+    "format": "prettier . --write",
     "lint": "concurrently \"pnpm:lint:*(!fix)\" --names \"lint:\" --prefixColors auto",
     "lint:fix": "pnpm format",
-    "lint:types": "tsc --noEmit",
-    "format": "prettier . --write",
     "lint:format": "prettier . --check",
+    "lint:types": "tsc --noEmit",
     "new": "./test/manual.sh",
     "test:node": "FORCE_COLOR=1 vitest run --reporter=verbose --printConsoleTrace",
     "test:vitest": "FORCE_COLOR=1 vitest"
@@ -47,7 +47,7 @@
     "ember-source": "^6.10.0",
     "prettier": "^3.7.4",
     "prettier-plugin-ember-template-tag": "^2.1.2",
-    "release-plan": "^0.17.4",
+    "release-plan": "^0.18.0",
     "rimraf": "^6.1.2",
     "vite": "^7.3.1",
     "vitest": "^4.0.17"
