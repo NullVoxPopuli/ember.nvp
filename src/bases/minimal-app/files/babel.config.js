@@ -1,6 +1,12 @@
 import { buildMacros } from "@embroider/macros/babel";
 
-const macros = buildMacros();
+const macros = buildMacros({
+  configure(config) {
+    if (process.env.EMBER_ENV === "test") {
+      config.enableRuntimeMode();
+    }
+  },
+});
 
 export default {
   plugins: [

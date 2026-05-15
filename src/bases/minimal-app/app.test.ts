@@ -41,6 +41,19 @@ describe("typescript", () => {
     expect(content).toContain("@babel/plugin-transform-typescript");
   });
 
+  it("app/config.ts does not import @embroider/macros (prevents prod build MacroError)", async () => {
+    let content = await project.read("app/config.ts");
+
+    // Importing setTesting / getGlobalConfig from @embroider/macros at the
+    // top-level of #config pulls the macros plugin's compile-time checks into
+    // the production bundle and breaks `vite build`. Keep test-only macro
+    // calls inside the test helper instead.
+    expect(content).not.toContain("@embroider/macros");
+    expect(content).not.toContain("setTesting");
+    expect(content).not.toContain("getGlobalConfig");
+    expect(content).not.toContain("enterTestMode");
+  });
+
   it("build for development (testing, etc)", async () => {
     let { exitCode } = await build(project);
 

@@ -54,6 +54,46 @@ describe("starting with qunit", () => {
   });
 });
 
+describe("babel + scripts wiring for runtime macros in tests", () => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({
+      type: "app",
+      packageManager: "pnpm",
+      layers: ["qunit", "typescript", "git"],
+    });
+  });
+
+  afterAll(async () => {
+    await rm(project.directory, { recursive: true, force: true });
+  });
+
+  it("build:test script sets EMBER_ENV=test", async () => {
+    let manifest = JSON.parse((await project.read("package.json"))!);
+
+    // Without EMBER_ENV=test, the test build runs the embroider macros plugin
+    // in compile-time mode and the setTesting(true) call in tests/test-helper.ts
+    // raises a MacroError. The babel config below keys off this env var.
+    expect(manifest.scripts["build:test"]).toContain("EMBER_ENV=test");
+  });
+
+  it("babel.config.js enables runtime macros mode for EMBER_ENV=test", async () => {
+    let content = await project.read("babel.config.js");
+
+    expect(content).toContain("EMBER_ENV");
+    expect(content).toContain("enableRuntimeMode");
+  });
+
+  it("tests/test-helper.ts performs the test-mode setup (moved out of app/config.ts)", async () => {
+    let content = await project.read("tests/test-helper.ts");
+
+    expect(content).toContain("setTesting");
+    expect(content).toContain("#ember-testing");
+    expect(content).not.toContain("enterTestMode");
+  });
+});
+
 describe("package.json scripts", () => {
   let project: Project;
 
