@@ -1,4 +1,5 @@
 import latestVersion from "latest-version";
+import { join } from "node:path";
 
 /**
  * @type {{ [name: string]: { [version: string]: string } }}
@@ -16,7 +17,17 @@ export async function getLatest(deps) {
         return [dep, existing];
       }
 
-      let version = await latestVersion(dep, { version: range });
+      let version;
+
+      /**
+       * HACK FOR CI.
+       * In practice, this package will be published separately, and that version will be used.
+       */
+      if (process.env.GITHUB_REPOSITORY === "NullVoxPopuli/ember.nvp") {
+        version = "file:" + join(import.meta.dirname, "../../packages/vite");
+      } else {
+        version = await latestVersion(dep, { version: range });
+      }
 
       CACHE[dep] ||= {};
       CACHE[dep][range] = version;
