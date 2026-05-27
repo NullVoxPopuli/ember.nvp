@@ -1,6 +1,7 @@
-import * as p from "@clack/prompts";
+import { files } from "ember-apply";
 import { hasGit, initGit, isInGit } from "#utils/git.js";
 import { formatLabel } from "#utils/cli.js";
+import { join } from "node:path";
 
 export default {
   label: formatLabel("git init"),
@@ -21,7 +22,11 @@ export default {
       return;
     }
 
-    return initGit(project.directory);
+    let initOk = initGit(project.directory);
+    if (initOk) {
+      await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
+    }
+    return initOk;
   },
 
   /**
