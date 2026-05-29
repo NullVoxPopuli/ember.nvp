@@ -65,9 +65,7 @@ export function maybeBabel(options: { parallel?: boolean; configFile: string; en
       skipPreflightCheck: true,
       ...restOptions,
       configFile: babelPath,
-      // Waiting on:
-      //   https://github.com/rollup/plugins/pull/1956
-      // parallel: parallel ?? true,
+      parallel: parallel ?? true,
     });
   })();
 

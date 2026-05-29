@@ -25,7 +25,7 @@
     "start": "vite"
   },
   "dependencies": {
-    "@embroider/macros": "^1.20.2",
+    "@embroider/macros": "^1.20.3",
     "@embroider/router": "^3.0.6",
     "@glimmer/component": "^2.1.1",
     "decorator-transforms": "^2.3.2",
@@ -42,7 +42,7 @@
     "@glint/template": "^1.7.7",
     "@glint/tsserver-plugin": "^2.5.5",
     "@nullvoxpopuli/ember-vite": "workspace:*",
-    "@rollup/plugin-babel": "^7.0.0",
+    "@rollup/plugin-babel": "^7.1.0",
     "babel-plugin-ember-template-compilation": "^4.0.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"
