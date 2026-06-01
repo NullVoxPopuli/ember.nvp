@@ -11,6 +11,11 @@
   ],
   "author": "NullVoxPopuli",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NullVoxPopuli/ember.nvp",
+    "directory": "packages/vite"
+  },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "@babel/core": "^7.28.6",
