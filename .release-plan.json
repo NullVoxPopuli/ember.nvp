@@ -1,31 +1,11 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "patch",
-      "oldVersion": "0.2.1",
-      "newVersion": "0.2.2",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
-        }
-      ],
-      "pkgJSONPath": "./package.json"
+      "oldVersion": "0.2.2"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "patch",
-      "oldVersion": "1.0.0",
-      "newVersion": "1.0.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.0.1"
     }
   },
-  "description": "## Release (2026-06-01)\n\n* ember.nvp 0.2.2 (patch)\n* @nullvoxpopuli/ember-vite 1.0.1 (patch)\n\n#### :house: Internal\n* `@nullvoxpopuli/ember-vite`\n  * [#36](https://github.com/NullVoxPopuli/ember.nvp/pull/36) Fix npm provenance failure for @nullvoxpopuli/ember-vite publish ([@Copilot](https://github.com/apps/copilot-swe-agent))\n* `ember.nvp`, `@nullvoxpopuli/ember-vite`\n  * [#37](https://github.com/NullVoxPopuli/ember.nvp/pull/37) Revert \"Prepare Release\" ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "\n\n\n\n"
 }
