@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-06-01)
+
+* ember.nvp 0.2.2 (patch)
+* @nullvoxpopuli/ember-vite 1.0.1 (patch)
+
+#### :house: Internal
+* `@nullvoxpopuli/ember-vite`
+  * [#36](https://github.com/NullVoxPopuli/ember.nvp/pull/36) Fix npm provenance failure for @nullvoxpopuli/ember-vite publish ([@Copilot](https://github.com/apps/copilot-swe-agent))
+* `ember.nvp`, `@nullvoxpopuli/ember-vite`
+  * [#37](https://github.com/NullVoxPopuli/ember.nvp/pull/37) Revert "Prepare Release" ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-05-15)
 
 * ember.nvp 0.2.1 (patch)
