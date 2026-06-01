@@ -31,6 +31,12 @@ Then delete from your package.json: `@rollup/plugin-babel`, `@embroider/core`, `
 > [!NOTE]
 > babel related deps are still needed for linting, so don't delete those
 
+## Requirements
+
+- `type=module` in your ember app
+- babel config must be named `babel.config.js`
+- `@embroider/vite` is up to date~ish
+
 ## Configuration
 
 The `ember()` plugin takes the following options:
