@@ -8,6 +8,7 @@
   "exclude": [
     "node_modules",
     "dist",
+    "packages",
     "src/**/layers/*/files/**",
     "src/**/bases/*/files/**",
     "my-app"
