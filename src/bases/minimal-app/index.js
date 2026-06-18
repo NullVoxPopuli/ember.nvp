@@ -91,6 +91,7 @@ async function makeJavaScript(project) {
   await project.removeFile("tsconfig.json");
 
   await packageJson.modify((json) => {
+    json.imports ||= {};
     json.imports["#config"] = "./app/config.js";
   }, project.directory);
 }
