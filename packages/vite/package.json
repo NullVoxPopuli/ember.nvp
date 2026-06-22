@@ -18,7 +18,7 @@
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@babel/core": "^7.28.6",
+    "@babel/core": "^7.28.10",
     "@embroider/core": "^4.4.2",
     "@embroider/vite": "^1.5.0",
     "@rollup/plugin-babel": "^7.1.0",

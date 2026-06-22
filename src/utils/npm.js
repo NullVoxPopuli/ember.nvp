@@ -16,6 +16,7 @@ export async function getLatest(deps) {
   let results = await Promise.all(
     Object.entries(deps).map(async ([dep, range]) => {
       let existing = CACHE[dep]?.[range];
+
       if (existing) {
         return [dep, existing];
       }
@@ -37,6 +38,9 @@ export async function getLatest(deps) {
       if (needsLocalLink && dep === "@nullvoxpopuli/ember-vite") {
         version = "link:" + resolve(join(import.meta.dirname, "../../packages/vite"));
       } else {
+        if (range == "workspace:*") {
+          range = "latest";
+        }
         version = await latestVersion(dep, { version: range });
       }
 
