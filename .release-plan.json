@@ -1,31 +1,21 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "patch",
-      "oldVersion": "0.2.5",
-      "newVersion": "0.2.6",
+      "impact": "minor",
+      "oldVersion": "0.2.6",
+      "newVersion": "0.3.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
         }
       ],
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "patch",
-      "oldVersion": "1.0.2",
-      "newVersion": "1.0.3",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.0.3"
     }
   },
-  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.2.6 (patch)\n* @nullvoxpopuli/ember-vite 1.0.3 (patch)\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#46](https://github.com/NullVoxPopuli/ember.nvp/pull/46) compile ts authored packages ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.3.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#48](https://github.com/NullVoxPopuli/ember.nvp/pull/48) replaceOrUpdate ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

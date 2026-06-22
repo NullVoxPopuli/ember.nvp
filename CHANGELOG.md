@@ -2,6 +2,17 @@
 
 ## Release (2026-06-22)
 
+* ember.nvp 0.3.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#48](https://github.com/NullVoxPopuli/ember.nvp/pull/48) replaceOrUpdate ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-06-22)
+
 * ember.nvp 0.2.6 (patch)
 * @nullvoxpopuli/ember-vite 1.0.3 (patch)
 
