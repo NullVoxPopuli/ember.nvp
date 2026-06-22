@@ -10,6 +10,7 @@ import { askPath } from "./questions/path.js";
 import { askIfOK } from "./questions/ok.js";
 import { styleText } from "node:util";
 import { Project } from "#utils/project.js";
+import { askReplaceOrUpdate } from "./questions/replace-or-update.js";
 
 /**
  * This whole file's primary purpose is to be an interactive CLI
@@ -25,6 +26,7 @@ async function main() {
 
   const projectName = await askName();
   const projectPath = await askPath(projectName);
+  const replaceOrUpdate = await askReplaceOrUpdate(projectPath);
   const projectType = await askProjectType();
   const selectedLayers = await askLayers();
   const packageManager = await askPackageManager();
@@ -44,7 +46,7 @@ async function main() {
 
   try {
     // Generate the project
-    await generateProject(project);
+    await generateProject(project, replaceOrUpdate);
 
     s.stop("Project created!");
 
