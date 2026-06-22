@@ -2,30 +2,30 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "0.2.1",
-      "newVersion": "0.2.2",
+      "oldVersion": "0.2.2",
+      "newVersion": "0.2.3",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-vite": {
       "impact": "patch",
-      "oldVersion": "1.0.0",
-      "newVersion": "1.0.1",
+      "oldVersion": "1.0.1",
+      "newVersion": "1.0.2",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./packages/vite/package.json"
     }
   },
-  "description": "## Release (2026-06-01)\n\n* ember.nvp 0.2.2 (patch)\n* @nullvoxpopuli/ember-vite 1.0.1 (patch)\n\n#### :house: Internal\n* `@nullvoxpopuli/ember-vite`\n  * [#36](https://github.com/NullVoxPopuli/ember.nvp/pull/36) Fix npm provenance failure for @nullvoxpopuli/ember-vite publish ([@Copilot](https://github.com/apps/copilot-swe-agent))\n* `ember.nvp`, `@nullvoxpopuli/ember-vite`\n  * [#37](https://github.com/NullVoxPopuli/ember.nvp/pull/37) Revert \"Prepare Release\" ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.2.3 (patch)\n* @nullvoxpopuli/ember-vite 1.0.2 (patch)\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#41](https://github.com/NullVoxPopuli/ember.nvp/pull/41) Fix version range usage ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember.nvp`\n  * [#40](https://github.com/NullVoxPopuli/ember.nvp/pull/40) Ensure imports exist ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

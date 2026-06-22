@@ -1,6 +1,6 @@
 {
   "name": "@nullvoxpopuli/ember-vite",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Meta plugin for ember projects focusing on speed.",
   "type": "module",
   "main": "index.ts",

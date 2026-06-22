@@ -1,5 +1,19 @@
 # Changelog
 
+## Release (2026-06-22)
+
+* ember.nvp 0.2.3 (patch)
+* @nullvoxpopuli/ember-vite 1.0.2 (patch)
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#41](https://github.com/NullVoxPopuli/ember.nvp/pull/41) Fix version range usage ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember.nvp`
+  * [#40](https://github.com/NullVoxPopuli/ember.nvp/pull/40) Ensure imports exist ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-06-01)
 
 * ember.nvp 0.2.2 (patch)
