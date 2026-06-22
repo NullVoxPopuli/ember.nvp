@@ -20,7 +20,7 @@
     "directory": "packages/vite"
   },
   "scripts": {
-    "build": "rolldown index.ts --file dist/index.js",
+    "build": "rolldown --config",
     "prepack": "pnpm build"
   },
   "packageManager": "pnpm@10.28.0",
