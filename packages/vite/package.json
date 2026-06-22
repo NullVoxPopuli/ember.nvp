@@ -4,6 +4,9 @@
   "description": "Meta plugin for ember projects focusing on speed.",
   "type": "module",
   "main": "index.ts",
+  "publishConfig": {
+    "main": "dist/index.js"
+  },
   "keywords": [
     "vite",
     "ember",
@@ -15,6 +18,10 @@
     "type": "git",
     "url": "https://github.com/NullVoxPopuli/ember.nvp",
     "directory": "packages/vite"
+  },
+  "scripts": {
+    "build": "rolldown --config",
+    "prepack": "pnpm build"
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
@@ -30,6 +37,7 @@
     "node": ">= 24"
   },
   "devDependencies": {
+    "rolldown": "^1.1.2",
     "typescript": "^5.9.3",
     "vite": "^8.0.14"
   }
