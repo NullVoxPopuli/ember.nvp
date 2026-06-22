@@ -32,8 +32,6 @@ export async function askReplaceOrUpdate(projectPath) {
     }
   }
 
-  const defaultValue = "update";
-
   const answer = await p.select({
     message: "Replace or update at the selected path",
     initialValue: "update",
@@ -56,5 +54,5 @@ export async function askReplaceOrUpdate(projectPath) {
     return process.exit(0);
   }
 
-  return defaultValue;
+  return answer;
 }
