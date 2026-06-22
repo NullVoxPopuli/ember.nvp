@@ -2,6 +2,17 @@
 
 ## Release (2026-06-22)
 
+* ember.nvp 0.2.4 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#42](https://github.com/NullVoxPopuli/ember.nvp/pull/42) fix falsey depndencies ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-06-22)
+
 * ember.nvp 0.2.3 (patch)
 * @nullvoxpopuli/ember-vite 1.0.2 (patch)
 
