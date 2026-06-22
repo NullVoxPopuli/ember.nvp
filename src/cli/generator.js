@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 
 import baseApp from "#bases/minimal-app";
 import baseLibrary from "#bases/minimal-library";
@@ -8,8 +8,13 @@ import { hasGit } from "#utils/git.js";
  * Generate project files by running layer functions
  *
  * @param {import('#utils/project.js').Project} project
+ * @param {'replace' | 'update'} replaceOrUpdate
  */
-export async function generateProject(project) {
+export async function generateProject(project, replaceOrUpdate) {
+  if (replaceOrUpdate === "replace") {
+    await rm(project.directory, { recursive: true });
+  }
+
   await mkdir(project.directory, { recursive: true });
 
   switch (project.desires.type) {
