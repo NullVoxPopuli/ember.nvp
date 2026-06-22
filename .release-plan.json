@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "0.2.3",
-      "newVersion": "0.2.4",
+      "oldVersion": "0.2.4",
+      "newVersion": "0.2.5",
       "tagName": "latest",
       "constraints": [
         {
@@ -17,5 +17,5 @@
       "oldVersion": "1.0.2"
     }
   },
-  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.2.4 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#42](https://github.com/NullVoxPopuli/ember.nvp/pull/42) fix falsey depndencies ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.2.5 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#44](https://github.com/NullVoxPopuli/ember.nvp/pull/44) Fix new git ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

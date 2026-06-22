@@ -2,6 +2,17 @@
 
 ## Release (2026-06-22)
 
+* ember.nvp 0.2.5 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#44](https://github.com/NullVoxPopuli/ember.nvp/pull/44) Fix new git ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-06-22)
+
 * ember.nvp 0.2.4 (patch)
 
 #### :bug: Bug Fix
