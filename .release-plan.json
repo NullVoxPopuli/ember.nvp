@@ -2,13 +2,21 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "0.2.6",
-      "newVersion": "0.3.0",
+      "oldVersion": "0.3.0",
+      "newVersion": "0.4.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -17,5 +25,5 @@
       "oldVersion": "1.0.3"
     }
   },
-  "description": "## Release (2026-06-22)\n\n* ember.nvp 0.3.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#48](https://github.com/NullVoxPopuli/ember.nvp/pull/48) replaceOrUpdate ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-06-23)\n\n* ember.nvp 0.4.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#48](https://github.com/NullVoxPopuli/ember.nvp/pull/48) replaceOrUpdate ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#52](https://github.com/NullVoxPopuli/ember.nvp/pull/52) Fix test-helper ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#50](https://github.com/NullVoxPopuli/ember.nvp/pull/50) Tests for qunit ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n  * [#49](https://github.com/NullVoxPopuli/ember.nvp/pull/49) Prepare Release ([@github-actions[bot]](https://github.com/apps/github-actions))\n\n#### Committers: 2\n- GitHub Actions [Bot] ([@github-actions](https://github.com/apps/github-actions))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

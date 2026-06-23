@@ -1,5 +1,26 @@
 # Changelog
 
+## Release (2026-06-23)
+
+* ember.nvp 0.4.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#48](https://github.com/NullVoxPopuli/ember.nvp/pull/48) replaceOrUpdate ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#52](https://github.com/NullVoxPopuli/ember.nvp/pull/52) Fix test-helper ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#50](https://github.com/NullVoxPopuli/ember.nvp/pull/50) Tests for qunit ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#49](https://github.com/NullVoxPopuli/ember.nvp/pull/49) Prepare Release ([@github-actions[bot]](https://github.com/apps/github-actions))
+
+#### Committers: 2
+- GitHub Actions [Bot] ([@github-actions](https://github.com/apps/github-actions))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-06-22)
 
 * ember.nvp 0.3.0 (minor)
