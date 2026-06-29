@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-06-29)
+
+* ember.nvp 0.5.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#55](https://github.com/NullVoxPopuli/ember.nvp/pull/55) Upgrade @clack/prompts ([@tcjr](https://github.com/tcjr))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#53](https://github.com/NullVoxPopuli/ember.nvp/pull/53) Add typescript to root ([@tcjr](https://github.com/tcjr))
+
+#### Committers: 1
+- Tom Carter ([@tcjr](https://github.com/tcjr))
+
 ## Release (2026-06-23)
 
 * ember.nvp 0.4.0 (minor)
