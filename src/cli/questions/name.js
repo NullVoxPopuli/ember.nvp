@@ -1,5 +1,4 @@
-import * as p from "@clack/prompts";
-
+import { cancel, isCancel, text } from "@clack/prompts";
 import packageNameRegex from "package-name-regex";
 import { answers, printArgInUse } from "#args";
 
@@ -14,12 +13,12 @@ export async function askName() {
       return answers.name;
     }
   }
-  const projectName = await p.text({
+  const projectName = await text({
     message: "What is your project name?",
     placeholder: DEFAULT,
     defaultValue: DEFAULT,
     validate(value) {
-      if (value.length === 0) return;
+      if (!value || value.length === 0) return;
 
       let isValid = packageNameRegex.test(value);
 
@@ -29,8 +28,8 @@ export async function askName() {
     },
   });
 
-  if (p.isCancel(projectName)) {
-    p.cancel("Operation cancelled");
+  if (isCancel(projectName)) {
+    cancel("Operation cancelled");
     return process.exit(0);
   }
 
