@@ -30,6 +30,21 @@ pnpm dlx NullVoxPopuli/ember.nvp
 npx NullVoxPopuli/ember.nvp
 ```
 
+### Staged generation
+
+Nothing is written to your project until you say so.
+
+All generation happens in a _stage_: a copy-on-write overlay of the target directory (in the spirit of Docker's layered file systems). The target directory is the read-only lower layer; a real directory in the OS temp dir is the writable upper layer, seeded from the target's current contents. Every base and layer runs against the stage.
+
+- **New projects** (and `replace`, which you already confirmed) are written automatically -- no extra prompt.
+- **Updating an existing project** ends with a confirmation: **write the files**, **view the diff** (a unified diff of every staged change), or **cancel** (discard everything, touching nothing).
+
+Only changed paths are written on confirm -- `node_modules`, `.git`, and any unrelated files in your project are left alone. When updating a project that is already a git repo, the changes land as uncommitted working-tree edits, so you can review them with your own git tooling.
+
+For non-interactive use, `--write yes` / `--write no` answers the confirmation up front.
+
+Because the stage is a real directory (not an in-process virtual fs), layers keep full fidelity: `node:fs`, `ember-apply`, and even subprocesses like `git` and package managers just work. Authoring a layer is unchanged.
+
 ### Wrapping
 
 The provided CLI is only a wrapper around our exported `generateProject` function.
@@ -54,6 +69,23 @@ await generateProject(new Project(
 ```
 
 All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
+
+To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`:
+
+```js
+import { generateProject, Project, Stage } from "ember.nvp";
+
+const stage = await Stage.create(directoryToGenerateIn);
+
+await generateProject(new Project(stage.directory, { name, path, type, layers, packageManager }));
+
+const changes = await stage.changes(); // [{ path, status: 'added' | 'modified' | 'deleted' }]
+console.log(await stage.diff(changes)); // unified diff against the target directory
+
+await stage.commit(); // write the changes to the target directory
+// or
+await stage.discard(); // throw them away, touching nothing
+```
 
 ## Reqs
 
