@@ -37,11 +37,19 @@ async function main() {
   await askIfOK();
 
   /**
-   * Everything is generated in a stage (a copy-on-write overlay of the
-   * target directory) -- the target is not touched until stage.commit().
+   * Everything is generated in a stage: a real directory (in the OS temp
+   * dir) acting as a writable overlay of the target directory.
    *
-   * "replace" starts from an empty stage; "update" (and generating over
-   * nothing) seeds the stage with the target's current contents.
+   * When updating an existing project, the stage is seeded with a full
+   * copy of it (sans node_modules/.git), so the bases and layers run
+   * against the project's current state -- isSetup checks, package.json
+   * reads, file existence checks, etc. all see the existing files, and
+   * the codemods modify them in the stage exactly as if they were
+   * operating in place. "replace" starts from an empty stage instead.
+   *
+   * The target itself is not touched until stage.commit() below, which
+   * applies the difference between the stage and the target (or the
+   * subset of it the user accepts during review).
    */
   const stage = await Stage.create(projectPath, { seed: replaceOrUpdate !== "replace" });
 
@@ -91,11 +99,13 @@ async function main() {
   /**
    * New projects (and "replace", which was already confirmed) are written
    * without asking. Updates to an existing project must be confirmed:
-   * write / view diff / cancel.
+   * write all / review each change (accept/reject) / cancel.
    */
   const isUpdate = !stage.isNew && replaceOrUpdate !== "replace";
 
-  if (isUpdate && !(await askToWrite(stage, changes))) {
+  const toApply = isUpdate ? await askToWrite(stage, changes) : changes;
+
+  if (!toApply || toApply.length === 0) {
     await stage.discard();
 
     p.cancel("Cancelled -- no files were written");
@@ -106,9 +116,9 @@ async function main() {
     await rm(projectPath, { recursive: true, force: true });
   }
 
-  await stage.commit();
+  await stage.commit(toApply);
 
-  p.log.success(`Applied ${changes.length} change${changes.length === 1 ? "" : "s"}`);
+  p.log.success(`Applied ${toApply.length} change${toApply.length === 1 ? "" : "s"}`);
 
   p.note(
     `cd ${projectName}\n` +

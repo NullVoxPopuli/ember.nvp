@@ -179,10 +179,13 @@ export class Stage {
    * directory is carried over so a freshly generated project keeps its
    * history.
    *
+   * @param {Change[]} [changes] the changes to apply -- pass a subset of
+   *   {@link Stage#changes} to apply only some of them (e.g. the ones a
+   *   user accepted during review). Defaults to all staged changes.
    * @returns {Promise<Change[]>} the changes that were written
    */
-  async commit() {
-    const changes = await this.changes();
+  async commit(changes) {
+    changes ??= await this.changes();
 
     await mkdir(this.#target, { recursive: true });
 

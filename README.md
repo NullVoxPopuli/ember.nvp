@@ -30,20 +30,17 @@ pnpm dlx NullVoxPopuli/ember.nvp
 npx NullVoxPopuli/ember.nvp
 ```
 
-### Staged generation
+### Updating an existing project
 
-Nothing is written to your project until you say so.
+You can run `ember.nvp` on top of an existing project to add layers to it. Generation never writes directly to your project -- everything runs in a staging directory first, and before finishing you choose to:
 
-All generation happens in a _stage_: a copy-on-write overlay of the target directory (in the spirit of Docker's layered file systems). The target directory is the read-only lower layer; a real directory in the OS temp dir is the writable upper layer, seeded from the target's current contents. Every base and layer runs against the stage.
+- **write the files** -- apply all of the staged changes
+- **review the diff** -- step through each changed file's diff, accepting or rejecting it individually (or accept/reject everything remaining)
+- **cancel** -- discard everything; your project is untouched
 
-- **New projects** (and `replace`, which you already confirmed) are written automatically -- no extra prompt.
-- **Updating an existing project** ends with a confirmation: **write the files**, **view the diff** (a unified diff of every staged change), or **cancel** (discard everything, touching nothing).
+Only files that actually changed are written. `node_modules`, `.git`, and everything else in your project are left alone, and the accepted changes land as uncommitted edits for you to review with your own git tooling.
 
-Only changed paths are written on confirm -- `node_modules`, `.git`, and any unrelated files in your project are left alone. When updating a project that is already a git repo, the changes land as uncommitted working-tree edits, so you can review them with your own git tooling.
-
-For non-interactive use, `--write yes` / `--write no` answers the confirmation up front.
-
-Because the stage is a real directory (not an in-process virtual fs), layers keep full fidelity: `node:fs`, `ember-apply`, and even subprocesses like `git` and package managers just work. Authoring a layer is unchanged.
+New projects skip the confirmation and are written as soon as generation succeeds. For scripting, `--write yes` / `--write no` answers the confirmation up front.
 
 ### Wrapping
 
@@ -70,7 +67,7 @@ await generateProject(new Project(
 
 All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
 
-To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`:
+To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`. A stage is a real directory in the OS temp dir, seeded with a copy of the target directory's current contents (sans `node_modules`/`.git`) -- so layers run against the project's existing state with plain `node:fs`, `ember-apply`, and subprocesses, and authoring a layer is exactly the same with or without one.
 
 ```js
 import { generateProject, Project, Stage } from "ember.nvp";
@@ -83,8 +80,8 @@ const changes = await stage.changes(); // [{ path, status: 'added' | 'modified' 
 console.log(await stage.diff(changes)); // unified diff against the target directory
 
 await stage.commit(); // write the changes to the target directory
-// or
-await stage.discard(); // throw them away, touching nothing
+// or: await stage.commit(someOfTheChanges)  -- write only an accepted subset
+// or: await stage.discard()                 -- throw everything away, touching nothing
 ```
 
 ## Reqs

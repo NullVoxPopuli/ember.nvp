@@ -118,6 +118,27 @@ describe("Stage", () => {
       ).toBe(true);
     });
 
+    it("commit applies only the given subset of changes", async () => {
+      const target = await makeTargetProject();
+      const stage = await Stage.create(target);
+
+      await writeFile(join(stage.directory, ".prettierrc.js"), `export default {};`);
+      await writeFile(join(stage.directory, "package.json"), `{ "name": "renamed" }`);
+      await rm(join(stage.directory, "tsconfig.json"));
+
+      const changes = await stage.changes();
+      const accepted = changes.filter((change) => change.path !== "package.json");
+
+      await stage.commit(accepted);
+
+      expect(existsSync(join(target, ".prettierrc.js")), "accepted addition is written").toBe(true);
+      expect(existsSync(join(target, "tsconfig.json")), "accepted deletion is applied").toBe(false);
+      expect(
+        await readFile(join(target, "package.json"), "utf-8"),
+        "rejected change is not applied",
+      ).toBe(`{ "name": "my-app" }`);
+    });
+
     it("discard leaves the target exactly as it was", async () => {
       const target = await makeTargetProject();
       const stage = await Stage.create(target);
