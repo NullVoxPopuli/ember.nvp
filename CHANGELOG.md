@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-07-04)
+
+* ember.nvp 0.6.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#56](https://github.com/NullVoxPopuli/ember.nvp/pull/56) Stage all generation in a copy-on-write overlay; confirm before writing ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-06-29)
 
 * ember.nvp 0.5.0 (minor)
