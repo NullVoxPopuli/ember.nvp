@@ -2,17 +2,13 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "0.4.0",
-      "newVersion": "0.5.0",
+      "oldVersion": "0.5.0",
+      "newVersion": "0.6.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -21,5 +17,5 @@
       "oldVersion": "1.0.3"
     }
   },
-  "description": "## Release (2026-06-29)\n\n* ember.nvp 0.5.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#55](https://github.com/NullVoxPopuli/ember.nvp/pull/55) Upgrade @clack/prompts ([@tcjr](https://github.com/tcjr))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#53](https://github.com/NullVoxPopuli/ember.nvp/pull/53) Add typescript to root ([@tcjr](https://github.com/tcjr))\n\n#### Committers: 1\n- Tom Carter ([@tcjr](https://github.com/tcjr))\n"
+  "description": "## Release (2026-07-04)\n\n* ember.nvp 0.6.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#56](https://github.com/NullVoxPopuli/ember.nvp/pull/56) Stage all generation in a copy-on-write overlay; confirm before writing ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
