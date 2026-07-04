@@ -35,10 +35,15 @@ const { values } = parseArgs({
       type: "string",
       choices: ["replace", "update"],
     },
+
+    write: {
+      type: "string",
+      choices: ["yes", "no"],
+    },
   },
 });
 
-const { replaceOrUpdate, name, type, layers = [], packageManager, path, confirm } = values;
+const { replaceOrUpdate, name, type, layers = [], packageManager, path, confirm, write } = values;
 
 export const answers = {
   name,
@@ -48,6 +53,7 @@ export const answers = {
   path,
   confirm,
   replaceOrUpdate,
+  write,
 };
 
 /**

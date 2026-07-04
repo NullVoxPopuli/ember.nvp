@@ -17,6 +17,9 @@ importers:
       content-tag:
         specifier: ^4.2.0
         version: 4.2.0
+      diff:
+        specifier: ^9.0.0
+        version: 9.0.0
       ember-apply:
         specifier: ^2.17.0
         version: 2.17.0(@types/node@25.0.8)(ejs@3.1.10)(handlebars@4.7.8)(underscore@1.13.7)
@@ -3826,6 +3829,10 @@ packages:
 
   diff@8.0.3:
     resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
+    engines: {node: '>=0.3.1'}
+
+  diff@9.0.0:
+    resolution: {integrity: sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==}
     engines: {node: '>=0.3.1'}
 
   dir-glob@3.0.1:
@@ -11601,6 +11608,8 @@ snapshots:
   diff@7.0.0: {}
 
   diff@8.0.3: {}
+
+  diff@9.0.0: {}
 
   dir-glob@3.0.1:
     dependencies:

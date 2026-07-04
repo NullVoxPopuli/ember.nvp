@@ -30,6 +30,18 @@ pnpm dlx NullVoxPopuli/ember.nvp
 npx NullVoxPopuli/ember.nvp
 ```
 
+### Updating an existing project
+
+You can run `ember.nvp` on top of an existing project to add layers to it. Generation never writes directly to your project -- everything runs in a staging directory first, and before finishing you choose to:
+
+- **write the files** -- apply all of the staged changes
+- **review the diff** -- step through each changed file's diff, accepting or rejecting it individually (or accept/reject everything remaining)
+- **cancel** -- discard everything; your project is untouched
+
+Only files that actually changed are written. `node_modules`, `.git`, and everything else in your project are left alone, and the accepted changes land as uncommitted edits for you to review with your own git tooling.
+
+New projects skip the confirmation and are written as soon as generation succeeds. For scripting, `--write yes` / `--write no` answers the confirmation up front.
+
 ### Wrapping
 
 The provided CLI is only a wrapper around our exported `generateProject` function.
@@ -54,6 +66,23 @@ await generateProject(new Project(
 ```
 
 All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
+
+To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`. A stage is a real directory in the OS temp dir, seeded with a copy of the target directory's current contents (sans `node_modules`/`.git`) -- so layers run against the project's existing state with plain `node:fs`, `ember-apply`, and subprocesses, and authoring a layer is exactly the same with or without one.
+
+```js
+import { generateProject, Project, Stage } from "ember.nvp";
+
+const stage = await Stage.create(directoryToGenerateIn);
+
+await generateProject(new Project(stage.directory, { name, path, type, layers, packageManager }));
+
+const changes = await stage.changes(); // [{ path, status: 'added' | 'modified' | 'deleted' }]
+console.log(await stage.diff(changes)); // unified diff against the target directory
+
+await stage.commit(); // write the changes to the target directory
+// or: await stage.commit(someOfTheChanges)  -- write only an accepted subset
+// or: await stage.discard()                 -- throw everything away, touching nothing
+```
 
 ## Reqs
 
