@@ -54,18 +54,23 @@ function rewriteSpecifier(specifier) {
  * so import specifiers that mention those extensions have to be updated
  * to match what's on disk.
  *
- * AST-guided (ember-estree parses gjs natively) so that only actual module
- * specifiers are touched (static imports, re-exports, and dynamic import()),
- * and applied via string-splicing so the rest of the file's formatting is
- * left alone.
+ * ember-estree (which parses gjs natively) tells us which strings are
+ * actual module specifiers (static imports, re-exports, and dynamic
+ * import()), then each changed specifier is swapped out via quoted-string
+ * replacement -- no offsets to track, and comments / formatting are
+ * untouched.
+ *
+ * (ember-estree's print() isn't usable here yet: comments live on
+ * `File.comments` and aren't printed, so reprinting would strip every
+ * comment from the converted files.)
  *
  * @param {string} code the already-converted (type-free) source
  * @param {".js" | ".gjs"} extension the extension the converted file will have
  * @returns {string}
  */
 export function rewriteImportExtensions(code, extension) {
-  /** @type {Array<{ start: number, end: number, replacement: string }>} */
-  let edits = [];
+  /** @type {Map<string, string>} */
+  let rewrites = new Map();
 
   /**
    * @param {unknown} source
@@ -79,8 +84,8 @@ export function rewriteImportExtensions(code, extension) {
 
     let replacement = rewriteSpecifier(node.value);
 
-    if (replacement !== node.value && node.start != null && node.end != null) {
-      edits.push({ start: node.start, end: node.end, replacement });
+    if (replacement !== node.value) {
+      rewrites.set(node.value, replacement);
     }
   }
 
@@ -95,11 +100,8 @@ export function rewriteImportExtensions(code, extension) {
     },
   });
 
-  // Apply edits from the end of the file backwards so earlier offsets stay valid
-  for (let { start, end, replacement } of edits.sort((a, b) => b.start - a.start)) {
-    let quote = code[start];
-
-    code = code.slice(0, start) + quote + replacement + quote + code.slice(end);
+  for (let [from, to] of rewrites) {
+    code = code.replaceAll(`"${from}"`, `"${to}"`).replaceAll(`'${from}'`, `'${to}'`);
   }
 
   return code;
