@@ -1,1 +1,14 @@
-node_modules
+# compiled output
+/dist/
+/dist-*
+
+# dependencies
+/node_modules/
+
+# misc
+*.local
+/.pnp*
+/.eslintcache
+/coverage/
+/npm-debug.log*
+/testem.log

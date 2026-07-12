@@ -8,6 +8,10 @@
 # dependencies
 /node_modules/
 
+# lockfiles
+pnpm-lock.yaml
+package-lock.json
+
 # misc
 /.env*
 /.vite/

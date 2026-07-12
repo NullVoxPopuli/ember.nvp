@@ -69,7 +69,7 @@ concurrency:
   cancel-in-progress: true`;
 
 const lint = {
-  npm: `lint:
+  npm: `  lint:
     name: "Lints"
     runs-on: ubuntu-latest
     steps:
@@ -78,18 +78,20 @@ const lint = {
         with:
           node-version: 24
       - run: npm install
-      - run: npm run lint`,
+      - run: npm run lint
+`,
   pnpm: `  lint:
     name: "Lints"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm lint`,
+      - run: pnpm lint
+`,
 };
 
 const test = {
-  npm: `test:
+  npm: `  test:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
@@ -98,14 +100,16 @@ const test = {
         with:
           node-version: 24
       - run: npm install
-      - run: npm test`,
+      - run: npm test
+`,
   pnpm: `  test:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm test`,
+      - run: pnpm test
+`,
 };
 
 /**
@@ -175,7 +179,7 @@ async function addOrUpdateLints(project, file) {
     file += "\n\njobs:\n";
   }
 
-  return file + "\n" + lint[project.desires.packageManager];
+  return file + lint[project.desires.packageManager];
 }
 
 /**
@@ -196,5 +200,5 @@ async function addOrUpdateTests(project, file) {
     file += "\n\njobs:\n";
   }
 
-  return file + "\n" + test[project.desires.packageManager];
+  return file + test[project.desires.packageManager];
 }
