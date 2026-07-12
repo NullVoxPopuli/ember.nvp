@@ -1,6 +1,6 @@
-import { parseAsync, traverse } from "@babel/core";
 import { Preprocessor } from "content-tag";
 import { removeTypes as babelRemoveTypes } from "babel-remove-types";
+import { parse } from "ember-estree";
 import { substringBytes } from "./buffer.js";
 
 /**
@@ -11,21 +11,14 @@ import { substringBytes } from "./buffer.js";
  */
 export async function removeTypes(extension, code) {
   if (extension === ".gts") {
-    return await wrappedRemoveTypes(code, removeTypesAndFixImports);
+    return rewriteImportExtensions(await wrappedRemoveTypes(code, babelRemoveTypes), ".gjs");
   }
 
   if (extension === ".ts") {
-    return await removeTypesAndFixImports(code);
+    return rewriteImportExtensions(await babelRemoveTypes(code), ".js");
   }
 
   return code;
-}
-
-/**
- * @param {string} code
- */
-async function removeTypesAndFixImports(code) {
-  return await rewriteImportExtensions(await babelRemoveTypes(code));
 }
 
 /** @type {Array<[from: string, to: string]>} */
@@ -61,35 +54,28 @@ function rewriteSpecifier(specifier) {
  * so import specifiers that mention those extensions have to be updated
  * to match what's on disk.
  *
- * AST-guided so that only actual module specifiers are touched
- * (static imports, re-exports, and dynamic import()), and applied via
- * string-splicing so the rest of the file's formatting is left alone.
+ * AST-guided (ember-estree parses gjs natively) so that only actual module
+ * specifiers are touched (static imports, re-exports, and dynamic import()),
+ * and applied via string-splicing so the rest of the file's formatting is
+ * left alone.
  *
- * @param {string} code
- * @returns {Promise<string>}
+ * @param {string} code the already-converted (type-free) source
+ * @param {".js" | ".gjs"} extension the extension the converted file will have
+ * @returns {string}
  */
-export async function rewriteImportExtensions(code) {
-  let ast = await parseAsync(code, {
-    babelrc: false,
-    configFile: false,
-    parserOpts: {
-      sourceType: "module",
-      plugins: ["decorators-legacy"],
-    },
-  });
-
-  if (!ast) {
-    return code;
-  }
-
+export function rewriteImportExtensions(code, extension) {
   /** @type {Array<{ start: number, end: number, replacement: string }>} */
   let edits = [];
 
   /**
-   * @param {import('@babel/core').types.Node | null | undefined} node
+   * @param {unknown} source
    */
-  function consider(node) {
-    if (!node || node.type !== "StringLiteral") return;
+  function consider(source) {
+    if (!source || typeof source !== "object") return;
+
+    let node = /** @type {import('ember-estree').ASTNode} */ (source);
+
+    if (node.type !== "Literal" || typeof node.value !== "string") return;
 
     let replacement = rewriteSpecifier(node.value);
 
@@ -98,25 +84,14 @@ export async function rewriteImportExtensions(code) {
     }
   }
 
-  traverse(ast, {
-    /** @param {import('@babel/core').NodePath<import('@babel/core').types.ImportDeclaration>} path */
-    ImportDeclaration(path) {
-      consider(path.node.source);
-    },
-    /** @param {import('@babel/core').NodePath<import('@babel/core').types.ExportNamedDeclaration>} path */
-    ExportNamedDeclaration(path) {
-      consider(path.node.source);
-    },
-    /** @param {import('@babel/core').NodePath<import('@babel/core').types.ExportAllDeclaration>} path */
-    ExportAllDeclaration(path) {
-      consider(path.node.source);
-    },
-    /** @param {import('@babel/core').NodePath<import('@babel/core').types.CallExpression>} path */
-    CallExpression(path) {
+  parse(code, {
+    filePath: `module${extension}`,
+    visitors: {
+      ImportDeclaration: (node) => consider(node.source),
+      ExportNamedDeclaration: (node) => consider(node.source),
+      ExportAllDeclaration: (node) => consider(node.source),
       // dynamic import()
-      if (path.node.callee.type === "Import") {
-        consider(path.node.arguments[0]);
-      }
+      ImportExpression: (node) => consider(node.source),
     },
   });
 
