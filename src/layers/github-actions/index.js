@@ -69,7 +69,7 @@ concurrency:
   cancel-in-progress: true`;
 
 const lint = {
-  npm: `lint:
+  npm: `  lint:
     name: "Lints"
     runs-on: ubuntu-latest
     steps:
@@ -89,7 +89,7 @@ const lint = {
 };
 
 const test = {
-  npm: `test:
+  npm: `  test:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
@@ -137,6 +137,10 @@ async function transform(project) {
 
   content = await addOrUpdateBase(project, content);
 
+  if (!content.endsWith("\n")) {
+    content += "\n";
+  }
+
   return { content, original, didChange: original !== content, outputPath };
 }
 
@@ -175,7 +179,10 @@ async function addOrUpdateLints(project, file) {
     file += "\n\njobs:\n";
   }
 
-  return file + "\n" + lint[project.desires.packageManager];
+  // No blank line between `jobs:` and its first entry (prettier removes it)
+  let separator = file.endsWith("jobs:\n") ? "" : "\n";
+
+  return file + separator + lint[project.desires.packageManager];
 }
 
 /**
@@ -196,5 +203,8 @@ async function addOrUpdateTests(project, file) {
     file += "\n\njobs:\n";
   }
 
-  return file + "\n" + test[project.desires.packageManager];
+  // No blank line between `jobs:` and its first entry (prettier removes it)
+  let separator = file.endsWith("jobs:\n") ? "" : "\n";
+
+  return file + separator + test[project.desires.packageManager];
 }

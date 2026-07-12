@@ -1,6 +1,6 @@
+import { assert as emberAssert } from "@ember/debug";
 import { module, test } from "qunit";
 import { isTesting } from "@embroider/macros";
-import { assert as emberAssert } from "@ember/debug";
 
 module("@embroider/macros | runtime mode in tests", function () {
   /**
@@ -11,7 +11,7 @@ module("@embroider/macros | runtime mode in tests", function () {
    * `setTesting(true)` in tests/test-helper.ts.
    */
   test("isTesting() is true", function (assert) {
-    assert.strictEqual(isTesting(), true);
+    assert.true(isTesting());
   });
 
   /**

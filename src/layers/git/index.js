@@ -1,5 +1,6 @@
 import { hasGit, initGit, isInGit } from "#utils/git.js";
 import { formatLabel } from "#utils/cli.js";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cp } from "node:fs/promises";
 
@@ -27,7 +28,10 @@ export default {
       let gitIgnorePath = join(import.meta.dirname, "files/gitignore");
       let targetPath = join(project.directory, ".gitignore");
 
-      await cp(gitIgnorePath, targetPath, { force: true });
+      // Don't clobber a .gitignore provided by a base or by the user
+      if (!existsSync(targetPath)) {
+        await cp(gitIgnorePath, targetPath);
+      }
     }
 
     return initOk;
