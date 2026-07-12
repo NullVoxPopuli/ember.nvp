@@ -13,7 +13,7 @@ import { setup } from "qunit-dom";
 import { setupEmberOnerrorValidation, start as qunitStart } from "ember-qunit";
 import { setTesting } from "@embroider/macros";
 
-import Application from "#app/app";
+import Application from "#app/app.ts";
 import config from "#config";
 
 Object.assign(window, {
