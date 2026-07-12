@@ -78,14 +78,16 @@ const lint = {
         with:
           node-version: 24
       - run: npm install
-      - run: npm run lint`,
+      - run: npm run lint
+`,
   pnpm: `  lint:
     name: "Lints"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm lint`,
+      - run: pnpm lint
+`,
 };
 
 const test = {
@@ -98,14 +100,16 @@ const test = {
         with:
           node-version: 24
       - run: npm install
-      - run: npm test`,
+      - run: npm test
+`,
   pnpm: `  test:
     name: "Tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: wyvox/action-setup-pnpm@v3
-      - run: pnpm test`,
+      - run: pnpm test
+`,
 };
 
 /**
@@ -136,10 +140,6 @@ async function transform(project) {
   }
 
   content = await addOrUpdateBase(project, content);
-
-  if (!content.endsWith("\n")) {
-    content += "\n";
-  }
 
   return { content, original, didChange: original !== content, outputPath };
 }
@@ -179,10 +179,7 @@ async function addOrUpdateLints(project, file) {
     file += "\n\njobs:\n";
   }
 
-  // No blank line between `jobs:` and its first entry (prettier removes it)
-  let separator = file.endsWith("jobs:\n") ? "" : "\n";
-
-  return file + separator + lint[project.desires.packageManager];
+  return file + lint[project.desires.packageManager];
 }
 
 /**
@@ -203,8 +200,5 @@ async function addOrUpdateTests(project, file) {
     file += "\n\njobs:\n";
   }
 
-  // No blank line between `jobs:` and its first entry (prettier removes it)
-  let separator = file.endsWith("jobs:\n") ? "" : "\n";
-
-  return file + separator + test[project.desires.packageManager];
+  return file + test[project.desires.packageManager];
 }
