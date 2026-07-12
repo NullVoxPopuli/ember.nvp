@@ -29,6 +29,7 @@
     "test:vitest": "FORCE_COLOR=1 vitest"
   },
   "dependencies": {
+    "@babel/core": "^7.29.7",
     "@clack/prompts": "^1.6.0",
     "babel-remove-types": "^2.0.0",
     "content-tag": "^4.2.0",
@@ -44,6 +45,7 @@
     "@glint/ember-tsc": "^1.7.5",
     "@glint/template": "^1.7.7",
     "@glint/tsserver-plugin": "^2.5.5",
+    "@types/babel__core": "^7.20.5",
     "concurrently": "^9.2.1",
     "ember-source": "^7.0.0",
     "prettier": "^3.8.3",
