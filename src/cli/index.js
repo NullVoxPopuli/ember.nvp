@@ -10,7 +10,8 @@ import { askPath } from "./questions/path.js";
 import { askIfOK } from "./questions/ok.js";
 import { askToWrite } from "./questions/write.js";
 import { styleText } from "node:util";
-import { rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
+import { join } from "node:path";
 import { Project } from "#utils/project.js";
 import { Stage } from "#utils/stage.js";
 import { askReplaceOrUpdate } from "./questions/replace-or-update.js";
@@ -120,9 +121,27 @@ async function main() {
 
   p.log.success(`Applied ${toApply.length} change${toApply.length === 1 ? "" : "s"}`);
 
+  /**
+   * Converted / generated files are written expecting the project's own
+   * formatting and lint pass to run right away (e.g. blank lines between
+   * import groups are `eslint --fix`'s job) -- so when the project has a
+   * lint:fix script, surface it as the step right after install.
+   */
+  let lintFixStep = "";
+  try {
+    const manifest = JSON.parse(await readFile(join(projectPath, "package.json"), "utf-8"));
+
+    if (manifest.scripts?.["lint:fix"]) {
+      lintFixStep = `${packageManager} ${packageManager === "npm" ? "run " : ""}lint:fix\n`;
+    }
+  } catch {
+    // no readable package.json -- skip the suggestion
+  }
+
   p.note(
     `cd ${projectName}\n` +
       `${packageManager} install\n` +
+      lintFixStep +
       `${packageManager} ${packageManager === "npm" ? "run " : ""}start`,
     "Next steps",
   );
