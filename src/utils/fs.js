@@ -3,6 +3,13 @@ import { readFile, glob, mkdir, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { parse as parsePath } from "node:path";
 import { removeTypes } from "./remove-types.js";
+import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
+
+/**
+ * Files whose import specifiers are checked against the emitted tree
+ * before being written.
+ */
+const MODULE_EXTENSIONS = new Set([".js", ".gjs", ".ts", ".gts"]);
 
 /**
  *
@@ -65,9 +72,9 @@ export async function applyFolderTo(from, project) {
              */
             return;
           }
-          let newContents = await removeTypes(ext, contents, filePath);
+          let newContents = await removeTypes(ext, contents);
 
-          await writeFile(filePath, newContents);
+          await writeFile(filePath, rewriteImportsToMatchFiles(newContents, filePath));
           return;
         }
       }
@@ -79,6 +86,16 @@ export async function applyFolderTo(from, project) {
          */
         return;
       }
+
+      if (MODULE_EXTENSIONS.has(ext)) {
+        /**
+         * Imports must always match the emitted files. This is a no-op
+         * when they already do (e.g. TS projects, where nothing was
+         * renamed), so it runs unconditionally for module files.
+         */
+        contents = rewriteImportsToMatchFiles(contents, entry);
+      }
+
       await writeFile(entry, contents);
     },
   });
