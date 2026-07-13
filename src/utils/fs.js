@@ -6,12 +6,6 @@ import { removeTypes } from "./remove-types.js";
 import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
 /**
- * Files whose import specifiers are checked against the emitted tree
- * before being written.
- */
-const MODULE_EXTENSIONS = new Set([".js", ".gjs", ".ts", ".gts"]);
-
-/**
  *
  * Modified version of applyFolder from ember-apply
  * where the caller gets to decide the final output filPath and contents - whereas the version from ember-apply only allows similar file paths in source and destination.
@@ -87,16 +81,12 @@ export async function applyFolderTo(from, project) {
         return;
       }
 
-      if (MODULE_EXTENSIONS.has(ext)) {
-        /**
-         * Imports must always match the emitted files. This is a no-op
-         * when they already do (e.g. TS projects, where nothing was
-         * renamed), so it runs unconditionally for module files.
-         */
-        contents = rewriteImportsToMatchFiles(contents, entry);
-      }
-
-      await writeFile(entry, contents);
+      /**
+       * Imports must always match the emitted files (and carry their
+       * extension). The util decides which files it applies to and is a
+       * no-op for everything else.
+       */
+      await writeFile(entry, rewriteImportsToMatchFiles(contents, entry));
     },
   });
 }

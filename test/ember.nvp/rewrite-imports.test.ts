@@ -75,18 +75,38 @@ describe("rewriteImportsToMatchFiles", () => {
     expect(result).toMatchInlineSnapshot(`"import x from "./helpers/x.ts";"`);
   });
 
-  it("leaves extensionless specifiers alone", async () => {
+  it("adds the on-disk extension to extensionless local imports", async () => {
     const project = await makeProject({
       "package.json": manifest,
       "app/helpers/x.js": "",
+      "app/app.ts": "",
     });
 
     const result = rewriteImportsToMatchFiles(
-      `import x from "./helpers/x";`,
+      [`import x from "./helpers/x";`, `import Application from "#app/app";`].join("\n"),
       join(project, "app/consumer.js"),
     );
 
-    expect(result).toMatchInlineSnapshot(`"import x from "./helpers/x";"`);
+    expect(result).toMatchInlineSnapshot(`
+      "import x from "./helpers/x.js";
+      import Application from "#app/app.ts";"
+    `);
+  });
+
+  it("keeps an extensionless specifier whose fully-specified form would not map", async () => {
+    const project = await makeProject({
+      "package.json": manifest,
+      "app/config.js": "",
+    });
+
+    // `#config` maps to "./app/config.js" -- the extension lives in the
+    // `imports` target, so "#config.js" would not resolve
+    const result = rewriteImportsToMatchFiles(
+      `import config from "#config";`,
+      join(project, "app/consumer.js"),
+    );
+
+    expect(result).toMatchInlineSnapshot(`"import config from "#config";"`);
   });
 
   it("rewrites relative, re-export, and dynamic import() specifiers", async () => {

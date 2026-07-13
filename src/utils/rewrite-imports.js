@@ -6,17 +6,19 @@ import enhancedResolve from "enhanced-resolve";
 const { ResolverFactory, CachedInputFileSystem } = enhancedResolve;
 
 /**
- * Candidate extensions the resolver may append when a request has none
- * (or when we retry a request without its original extension).
+ * The module files this util operates on. Doubles as the candidate
+ * extensions the resolver may append when a request has none (or when we
+ * retry a request without its original extension) -- the single source
+ * of truth for both.
  */
-const RESOLVE_EXTENSIONS = [".js", ".gjs", ".ts", ".gts"];
+const MODULE_EXTENSIONS = [".js", ".gjs", ".ts", ".gts"];
 
 function createResolver() {
   return ResolverFactory.createResolver({
     // short-lived cache: files are being written while generation runs
     fileSystem: new CachedInputFileSystem(fs, 100),
     useSyncFileSystemCalls: true,
-    extensions: RESOLVE_EXTENSIONS,
+    extensions: MODULE_EXTENSIONS,
     // no conditionNames: we only resolve local paths and sub-path
     // self-imports (whose targets in the emitted `imports` field are
     // plain strings, which match regardless of conditions)
@@ -30,11 +32,18 @@ function createResolver() {
  * `imports` field) we check what actually exists in the emitted project
  * tree:
  *
- * - the specifier resolves to a file? leave it alone.
- * - it doesn't, but the same specifier with whatever extension IS on
- *   disk does? rewrite it to that.
+ * - the specifier resolves to a file and carries an extension? leave it
+ *   alone.
+ * - it resolves but has no extension? append the resolved file's
+ *   extension (fully-specified local imports resolve faster), unless the
+ *   fully-specified form no longer maps to the same file (e.g. `#config`,
+ *   whose `imports` target carries the extension itself).
+ * - it doesn't resolve, but the same specifier with whatever extension
+ *   IS on disk does? rewrite it to that.
  * - nothing matches? leave it alone -- we can't know better, and the
  *   project's own build will report it loudly.
+ *
+ * Non-module files are returned untouched.
  *
  * ember-estree parses gjs natively and its visitors fire on actual module
  * specifiers only (static imports, re-exports, and dynamic import()) --
@@ -50,6 +59,8 @@ function createResolver() {
  * @returns {string}
  */
 export function rewriteImportsToMatchFiles(code, emittedPath) {
+  if (!MODULE_EXTENSIONS.includes(extname(emittedPath))) return code;
+
   let issuerDirectory = dirname(emittedPath);
   let resolver = createResolver();
 
@@ -83,23 +94,44 @@ export function rewriteImportsToMatchFiles(code, emittedPath) {
 
     if (!isLocal) return;
 
-    // already matches a file on disk
-    if (resolveFrom(specifier)) return;
-
     let currentExtension = extname(specifier);
+    let resolved = resolveFrom(specifier);
+
+    if (resolved) {
+      // fully specified and correct
+      if (currentExtension) return;
+
+      // extensionless: append the resolved file's extension, as long as
+      // the fully-specified form still maps to the same file (`#config`
+      // maps with the extension in the target, so `#config.js` wouldn't)
+      let candidate = specifier + extname(resolved);
+
+      if (resolveFrom(candidate) !== resolved) return;
+
+      rewrite(node, candidate);
+      return;
+    }
 
     if (!currentExtension) return;
 
     // check which file actually exists for this specifier
     let base = specifier.slice(0, -currentExtension.length);
-    let resolved = resolveFrom(base);
+    let resolvedBase = resolveFrom(base);
 
-    if (!resolved) return;
+    if (!resolvedBase) return;
 
-    let replacement = base + extname(resolved);
+    let replacement = base + extname(resolvedBase);
 
     if (replacement === specifier) return;
 
+    rewrite(node, replacement);
+  }
+
+  /**
+   * @param {import('ember-estree').ASTNode} node
+   * @param {string} replacement
+   */
+  function rewrite(node, replacement) {
     node.value = replacement;
     node.raw = JSON.stringify(replacement);
     changed = true;
