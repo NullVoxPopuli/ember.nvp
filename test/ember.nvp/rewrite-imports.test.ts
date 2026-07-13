@@ -55,8 +55,10 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "tests/test-helper.js"),
     );
 
-    expect(result).toContain(`#app/app.js`);
-    expect(result).toContain(`#config`);
+    expect(result).toMatchInlineSnapshot(`
+      "import Application from "#app/app.js";
+      import config from "#config";"
+    `);
   });
 
   it("leaves a specifier alone when its file exists as written", async () => {
@@ -70,7 +72,7 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/consumer.ts"),
     );
 
-    expect(result).toContain(`./helpers/x.ts`);
+    expect(result).toMatchInlineSnapshot(`"import x from "./helpers/x.ts";"`);
   });
 
   it("leaves extensionless specifiers alone", async () => {
@@ -84,8 +86,7 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/consumer.js"),
     );
 
-    expect(result).toContain(`./helpers/x`);
-    expect(result).not.toContain(`./helpers/x.js`);
+    expect(result).toMatchInlineSnapshot(`"import x from "./helpers/x";"`);
   });
 
   it("rewrites relative, re-export, and dynamic import() specifiers", async () => {
@@ -107,9 +108,13 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/consumer.js"),
     );
 
-    expect(result).toContain(`./thing.js`);
-    expect(result).toContain(`../shared/other.js`);
-    expect(result).toContain(`./lazy.js`);
+    expect(result).toMatchInlineSnapshot(`
+      "export { thing } from "./thing.js";
+      export * from "../shared/other.js";
+      export async function load() {
+        return await import("./lazy.js");
+      }"
+    `);
   });
 
   it("leaves a specifier alone when no file matches at all", async () => {
@@ -122,7 +127,7 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/consumer.js"),
     );
 
-    expect(result).toContain(`./does-not-exist.ts`);
+    expect(result).toMatchInlineSnapshot(`"import missing from "./does-not-exist.ts";"`);
   });
 
   it("leaves package specifiers and non-import strings alone", async () => {
@@ -138,8 +143,10 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/consumer.js"),
     );
 
-    expect(result).toContain(`some-lib/file.ts`);
-    expect(result).toContain("./looks-like-a-file.ts");
+    expect(result).toMatchInlineSnapshot(`
+      "import lib from "some-lib/file.ts";
+      const notAnImport = "./looks-like-a-file.ts";"
+    `);
   });
 
   it("rewrites imports in gjs files while preserving the template", async () => {
@@ -162,9 +169,13 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "app/components/foo.gjs"),
     );
 
-    expect(result).toContain(`./button.gjs`);
-    expect(result).toContain("<template>");
-    expect(result).toContain("<Button />");
+    expect(result).toMatchInlineSnapshot(`
+      "import Component from "@glimmer/component";
+      import Button from "./button.gjs";
+      export default class Foo extends Component {
+        <template><Button /></template>
+      }"
+    `);
   });
 
   it("keeps comments in files whose imports are rewritten", async () => {
@@ -189,9 +200,16 @@ describe("rewriteImportsToMatchFiles", () => {
       join(project, "tests/test-helper.js"),
     );
 
-    expect(result).toContain(`#app/app.js`);
-    expect(result).toContain("// top comment");
-    expect(result).toContain("doc comment for start");
-    expect(result).toContain("// inner comment");
+    expect(result).toMatchInlineSnapshot(`
+      "// top comment
+      import Application from "#app/app.js";
+      /**
+       * doc comment for start
+       */
+      export function start() {
+        // inner comment
+        Application.create();
+      }"
+    `);
   });
 });
