@@ -24,8 +24,8 @@ importers:
         specifier: ^2.17.0
         version: 2.17.0(@types/node@25.0.8)(ejs@3.1.10)(handlebars@4.7.8)(underscore@1.13.7)
       ember-estree:
-        specifier: ^0.6.10
-        version: 0.6.10
+        specifier: ^0.6.11
+        version: 0.6.11
       execa:
         specifier: ^9.6.1
         version: 9.6.1
@@ -35,6 +35,12 @@ importers:
       package-name-regex:
         specifier: ^5.0.0
         version: 5.0.0
+      prettier:
+        specifier: ^3.8.3
+        version: 3.8.3
+      prettier-plugin-ember-template-tag:
+        specifier: ^2.1.6
+        version: 2.1.6(prettier@3.8.3)
     devDependencies:
       '@ember/app-tsconfig':
         specifier: ^2.0.0
@@ -57,12 +63,6 @@ importers:
       ember-source:
         specifier: ^7.0.0
         version: 7.0.0(@glimmer/component@2.1.1)
-      prettier:
-        specifier: ^3.8.3
-        version: 3.8.3
-      prettier-plugin-ember-template-tag:
-        specifier: ^2.1.6
-        version: 2.1.6(prettier@3.8.3)
       release-plan:
         specifier: ^0.18.0
         version: 0.18.0
@@ -4088,8 +4088,8 @@ packages:
     engines: {node: '>= 20.19.0'}
     hasBin: true
 
-  ember-estree@0.6.10:
-    resolution: {integrity: sha512-5nItZGzvxHgoCdASQbn9qBzF4sdjSggUeZpXdihAanmYWm6XkObT/TlUvakYtoKret1/8gm0jNLwNPqZYwHtCw==}
+  ember-estree@0.6.11:
+    resolution: {integrity: sha512-aZyheQGUXyHu8GARPd1YyjbDMGkvqBYKzPj6RVp8qqMqA1L1MbkWKsljWE3K1CwiJcHwTPgm/O3oxS0TY1AX9Q==}
 
   ember-rfc176-data@0.3.18:
     resolution: {integrity: sha512-JtuLoYGSjay1W3MQAxt3eINWXNYYQliK90tLwtb8aeCuQK8zKGCRbBodVIrkcTqshULMnRuTOS6t1P7oQk3g6Q==}
@@ -12267,7 +12267,7 @@ snapshots:
       - walrus
       - whiskers
 
-  ember-estree@0.6.10:
+  ember-estree@0.6.11:
     dependencies:
       '@glimmer/env': 0.1.7
       '@glimmer/syntax': 0.95.0

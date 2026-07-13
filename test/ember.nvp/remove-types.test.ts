@@ -42,7 +42,30 @@ describe("removeTypes", () => {
 
       expect(result).toContain("./thing.js");
       expect(result).toContain("./other.gjs");
-      expect(result).toContain(`import('./lazy.js')`);
+      expect(result).toContain(`import("./lazy.js")`);
+    });
+
+    it("keeps comments in files whose imports are rewritten", async () => {
+      let result = await removeTypes(
+        ".ts",
+        [
+          `// top comment`,
+          `import Application from "#app/app.ts";`,
+          ``,
+          `/**`,
+          ` * doc comment for start`,
+          ` */`,
+          `export function start(): void {`,
+          `  // inner comment`,
+          `  Application.create();`,
+          `}`,
+        ].join("\n"),
+      );
+
+      expect(result).toContain("#app/app.js");
+      expect(result).toContain("// top comment");
+      expect(result).toContain("doc comment for start");
+      expect(result).toContain("// inner comment");
     });
 
     it("leaves package specifiers and non-import strings alone", async () => {
