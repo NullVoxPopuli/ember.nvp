@@ -65,7 +65,7 @@ export async function applyFolderTo(from, project) {
              */
             return;
           }
-          let newContents = await removeTypes(ext, contents);
+          let newContents = await removeTypes(ext, contents, filePath);
 
           await writeFile(filePath, newContents);
           return;
