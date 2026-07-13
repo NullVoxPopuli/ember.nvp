@@ -3,6 +3,7 @@ import { readFile, glob, mkdir, writeFile } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { parse as parsePath } from "node:path";
 import { removeTypes } from "./remove-types.js";
+import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
 /**
  *
@@ -67,7 +68,7 @@ export async function applyFolderTo(from, project) {
           }
           let newContents = await removeTypes(ext, contents);
 
-          await writeFile(filePath, newContents);
+          await writeFile(filePath, rewriteImportsToMatchFiles(newContents, filePath));
           return;
         }
       }
@@ -79,7 +80,13 @@ export async function applyFolderTo(from, project) {
          */
         return;
       }
-      await writeFile(entry, contents);
+
+      /**
+       * Imports must always match the emitted files (and carry their
+       * extension). The util decides which files it applies to and is a
+       * no-op for everything else.
+       */
+      await writeFile(entry, rewriteImportsToMatchFiles(contents, entry));
     },
   });
 }
