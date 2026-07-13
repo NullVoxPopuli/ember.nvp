@@ -35,12 +35,6 @@ importers:
       package-name-regex:
         specifier: ^5.0.0
         version: 5.0.0
-      prettier:
-        specifier: ^3.8.3
-        version: 3.8.3
-      prettier-plugin-ember-template-tag:
-        specifier: ^2.1.6
-        version: 2.1.6(prettier@3.8.3)
     devDependencies:
       '@ember/app-tsconfig':
         specifier: ^2.0.0
@@ -63,6 +57,12 @@ importers:
       ember-source:
         specifier: ^7.0.0
         version: 7.0.0(@glimmer/component@2.1.1)
+      prettier:
+        specifier: ^3.8.3
+        version: 3.8.3
+      prettier-plugin-ember-template-tag:
+        specifier: ^2.1.6
+        version: 2.1.6(prettier@3.8.3)
       release-plan:
         specifier: ^0.18.0
         version: 0.18.0

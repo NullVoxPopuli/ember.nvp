@@ -1,7 +1,6 @@
 import { Preprocessor } from "content-tag";
 import { removeTypes as babelRemoveTypes } from "babel-remove-types";
 import { toTree, print } from "ember-estree";
-import { format } from "prettier";
 import { substringBytes } from "./buffer.js";
 
 /**
@@ -12,29 +11,14 @@ import { substringBytes } from "./buffer.js";
  */
 export async function removeTypes(extension, code) {
   if (extension === ".gts") {
-    return await rewriteImportExtensions(
-      await wrappedRemoveTypes(code, removeTypesMatchingAppConfig),
-      ".gjs",
-    );
+    return rewriteImportExtensions(await wrappedRemoveTypes(code, babelRemoveTypes), ".gjs");
   }
 
   if (extension === ".ts") {
-    return await rewriteImportExtensions(await removeTypesMatchingAppConfig(code), ".js");
+    return rewriteImportExtensions(await babelRemoveTypes(code), ".js");
   }
 
   return code;
-}
-
-/**
- * babel-remove-types formats with its own prettier defaults (singleQuote,
- * printWidth 80); the emitted app's prettier config wants double quotes at
- * printWidth 100 -- so pass the app's options through, otherwise every
- * converted file fails the generated project's own `lint:prettier`.
- *
- * @param {string} code
- */
-async function removeTypesMatchingAppConfig(code) {
-  return await babelRemoveTypes(code, { ...PRETTIER_OPTIONS, singleQuote: false });
 }
 
 /** @type {Array<[from: string, to: string]>} */
@@ -66,35 +50,24 @@ function rewriteSpecifier(specifier) {
 }
 
 /**
- * Matches the emitted app's .prettierrc.js (src/layers/prettier/files),
- * which is what a generated project's `lint:prettier` checks against.
- *
- * (The template-tag plugin is passed as a module rather than by name:
- * prettier resolves plugin names relative to the process cwd, which is the
- * generated project, not this package.)
- */
-const PRETTIER_OPTIONS = {
-  printWidth: 100,
-};
-
-/**
  * When we remove types, files are renamed (.ts => .js, .gts => .gjs),
  * so import specifiers that mention those extensions have to be updated
- * to match what's on disk.
+ * to match what's on disk. That's all this does.
  *
  * ember-estree parses gjs natively and its visitors fire on actual module
  * specifiers only (static imports, re-exports, and dynamic import()) --
- * each one is rewritten on the AST, the File is printed back out
- * (comments included, as of ember-estree 0.6.11), and prettier formats
- * the result.
+ * each one is rewritten on the AST and the File is printed back out
+ * (comments included, as of ember-estree 0.6.11). Formatting is the
+ * project's own concern: new projects run their configured
+ * lint:fix / format right away (it's in the CLI's "Next steps").
  *
  * Files with no specifiers to rewrite are returned untouched.
  *
  * @param {string} code the already-converted (type-free) source
  * @param {".js" | ".gjs"} extension the extension the converted file will have
- * @returns {Promise<string>}
+ * @returns {string}
  */
-export async function rewriteImportExtensions(code, extension) {
+export function rewriteImportExtensions(code, extension) {
   let changed = false;
 
   /**
@@ -132,20 +105,7 @@ export async function rewriteImportExtensions(code, extension) {
 
   if (!changed) return code;
 
-  if (extension === ".gjs") {
-    let plugin = await import("prettier-plugin-ember-template-tag");
-
-    return await format(print(tree), {
-      ...PRETTIER_OPTIONS,
-      parser: "ember-template-tag",
-      plugins: [plugin.default ?? plugin],
-    });
-  }
-
-  return await format(print(tree), {
-    ...PRETTIER_OPTIONS,
-    parser: "babel",
-  });
+  return print(tree);
 }
 
 /**
