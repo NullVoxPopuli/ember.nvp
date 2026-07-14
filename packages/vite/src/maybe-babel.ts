@@ -140,6 +140,6 @@ export function maybeBabel(userOptions: Options = {}): Plugin {
   return {
     ...plugin,
     enforce: "pre",
-    name: "embroider:maybe-babel",
+    name: "nullvoxpopuli:babel",
   } as Plugin;
 }
