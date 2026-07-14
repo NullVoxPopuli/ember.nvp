@@ -5,215 +5,141 @@
  * - scoped-css
  * - template compilation optimization
  */
+import { and, code, id, include, not, or } from "@rolldown/pluginutils";
 import { extensions } from "@embroider/vite";
 import { babel } from "@rollup/plugin-babel";
-import { join, resolve } from "node:path";
-import { parse as oxcParse } from "oxc-parser";
-import { transform } from "oxc-transform";
-import { walk } from "zimmerframe";
+import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
+import type { Plugin } from "vite";
 
 /**
- * if a file imports any of these, it must be optimize
+ * If a file imports any of these, it needs babel (templates, macros, and a
+ * couple of addons that ship decorator-adjacent runtime code).
  */
-const babelTemplateImports = new Set([
+const babelRequiredImports = [
   // Templates
+  // (old non template() form)
   "@ember/template-compiler",
   "@ember/template-compilation",
+
+  // Legacy templates (hbs / loose mode)
   "ember-cli-htmlbars",
   "ember-cli-htmlbars-inline-precompile",
   "htmlbars-inline-precompile",
-]);
 
-const babelMacroImports = new Set([
-  // Macros
+  // Build Macros
+  // (since import.meta.env is not available in all environments)
   "@embroider/macros",
   "@glimmer/env",
-  "@ember/application/deprecations",
-  // Macros only needed in prod
   "@ember/debug",
-]); // Babel plugins required from libraries
-const babelOtherImports = new Set([
-  "ember-concurrency",
-  "ember-scoped-css",
-  "ember-intl/helpers/format-message",
-]);
+  "@ember/application/deprecations",
+];
 
-const babelRequiredImports = [...babelTemplateImports, ...babelMacroImports, ...babelOtherImports];
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-const counts = {
-  total: 0,
-  babel: 0,
-  why: {
-    decorators: 0,
-    formatMessage: 0,
-    imports: {
-      templates: 0,
-      macros: 0,
-      other: 0,
-    },
-    initializeRuntimeMacrosConfig: 0,
-  },
+const decoratorRegex = /(?<![\w'"`])(?<!\*\s+)(?<!\/\/[^\n]*)(?<!\/\*[^\n]*)@\w+/;
+//                     └────┬─────┘└───┬───┘└──────┬──────┘└──────┬──────┘└┬─┘
+//                          │          │           │              │        │
+//                          │          │           │              │        └── the `@decorator`
+//                          │          │           │              └──────── not inside a single-line block comment (`/* @dec */`)
+//                          │          │           └─────────────────────── not on a `//` line comment
+//                          │          └─────────────────────────────────── not a JSDoc tag, even with multiple spaces (`*    @param`)
+//                          └────────────────────────────────────────────── not mid-identifier or inside a string
+
+const nodeModulesPattern = /\/node_modules\//;
+
+function escapeRegExpCharacters(str: string) {
+  return str.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+}
+
+const extensionRegExp = new RegExp(
+  `(${extensions
+    .filter((ext) => ext !== ".json")
+    .map(escapeRegExpCharacters)
+    .join("|")})(\\?.*)?(#.*)?$`,
+);
+
+type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
+  filter?: {
+    include: {
+      /**
+       * If any additional (custom) plugins are provided, a pattern
+       * should be provided that detects their usage
+       *
+       * for example, to also run babel on files that import from ember-concurrency
+       * ```js
+       * {
+       *   code: ['ember-concurrency'],
+       * }
+       * ```
+       */
+      imports: string[];
+      /**
+       * If any additional (custom) plugins are provided, a pattern
+       * should be provided that detects their usage
+       *
+       * for example, to also run babel on files that use polyfilled APIs,
+       * or use the "formatMessage" technique for translations
+       * ```js
+       * {
+       *   code: ['myPolyfilledAPICall(', /\bintl\.formatMessage\b/],
+       * }
+       * ```
+       */
+      code: (string | RegExp)[];
+    };
+  };
 };
-export function maybeBabel(options: { parallel?: boolean; configFile: string; env: any }) {
-  const { env, parallel, ...restOptions } = options;
-  const original = (() => {
-    const babelPath = resolve(join(process.cwd(), "./babel.config.js"));
 
-    return babel({
-      babelHelpers: "runtime",
-      extensions,
-      skipPreflightCheck: true,
-      ...restOptions,
-      configFile: babelPath,
-      parallel: parallel ?? true,
-    });
-  })();
+export function maybeBabel(userOptions: Options = {}): Plugin {
+  const { filter, ...options } = userOptions;
 
-  /**
-   * In @rollup/plugin-babel v7+, the `transform` hook is the object form
-   * `{ filter, handler }` rather than a plain function. Normalize to the
-   * underlying handler so we can invoke it directly.
-   */
-  const originalTransform = (
-    typeof original.transform === "function" ? original.transform : original.transform?.handler
-  )!;
+  const plugin = babel({
+    babelHelpers: "runtime",
+    extensions,
+    skipPreflightCheck: true,
+    ...options,
+  });
 
-  const babelMacros = new Set(babelRequiredImports);
-  if (env.mode === "development") {
-    babelMacros.delete("@ember/debug");
-  }
+  const importsRegex = new RegExp(
+    babelRequiredImports
+      .concat(filter?.include?.imports ?? [])
+      .map(escapeRegExp)
+      .join("|"),
+  );
 
-  async function doTransform(this: any, code: string, id: string) {
-    counts.total++;
+  const maybeBabelFilter = [
+    include(
+      and(
+        // is one of the babel-supported extensions
+        id(extensionRegExp),
+        or(
+          // always run gts and gjs through babel
+          id(/\.gts$/),
+          id(/\.gjs$/),
+          // imports one of the modules above
+          code(importsRegex),
+          // (a common way to do translations)
+          // local app code using a decorator
+          // NOTE: maybeBabel requires that all libraries compile away their decorators
+          //
+          // TODO: what do we do when native decorators start shipping?
+          //     (ignore decorator transforming entirely?)
+          and(not(id(nodeModulesPattern)), code(decoratorRegex)),
+          // user provided additional opt-ins to the regex here
+          ...(filter?.include?.code?.map((x) => code(x)) ?? []),
+        ),
+      ),
+    ),
+  ];
 
-    const ext = id.split(".").at(-1);
-    const lang = (ext === "gjs" ? "js" : ext === "gts" ? "ts" : ext) as
-      | "js"
-      | "ts"
-      | "jsx"
-      | "tsx"
-      | "dts"
-      | undefined;
-
-    let needsBabel = false;
-
-    const estree = await oxcParse(id, code, { lang });
-
-    walk(
-      estree.program as any,
-      /* state */ {},
-      {
-        Decorator(_node: any, { stop }: any) {
-          needsBabel = true;
-          counts.why.decorators++;
-          stop();
-        },
-        MemberExpression(node: any, { stop }: any) {
-          if (node.property?.name === "formatMessage" && node.object?.name === "intl") {
-            needsBabel = true;
-            counts.why.formatMessage++;
-            stop();
-          }
-        },
-        ImportDeclaration(node: any, { stop }: any) {
-          const value = node.source.value;
-          if (babelMacros.has(value)) {
-            needsBabel = true;
-
-            if (babelTemplateImports.has(value)) {
-              counts.why.imports.templates++;
-            } else if (babelMacroImports.has(value)) {
-              counts.why.imports.macros++;
-            } else {
-              counts.why.imports.other++;
-            }
-
-            stop();
-          }
-        },
-      },
-    );
-
-    if (!needsBabel && code.includes("initializeRuntimeMacrosConfig")) {
-      counts.why.initializeRuntimeMacrosConfig++;
-      needsBabel = true;
-    }
-
-    if (needsBabel) {
-      counts.babel++;
-
-      const result = await originalTransform.call(this, code, id);
-
-      return result;
-    }
-
-    if (ext === "json") {
-      return;
-    }
-
-    if (ext === "js" || ext === "gjs") {
-      // We don't need to process JS
-      return null;
-    }
-
-    const result = await transform(id, code, {
-      lang,
-      typescript: {
-        onlyRemoveTypeImports: true,
-        /**
-         * We should work towards disabling this.
-         */
-        allowNamespaces: true,
-        removeClassFieldsWithoutInitializer: false,
-        rewriteImportExtensions: false,
-      },
-    });
-
-    if (result.errors?.length) {
-      console.error(`Errors during oxc-transform of ${id}:`);
-      for (const err of result.errors) {
-        if (err.labels) {
-          console.error(err.labels);
-        }
-        console.error(err.codeframe || err.message);
-      }
-      throw result.errors;
-    }
-
-    return result;
-  }
+  // types are incorrect
+  (plugin.transform as { filter: unknown }).filter = maybeBabelFilter;
 
   return {
+    ...plugin,
     enforce: "pre",
-    buildEnd() {
-      if (process.env.INSPECT) {
-        console.debug(`Babel usage: ${counts.babel} / ${counts.total}`, counts.why);
-      }
-    },
-    ...original,
     name: "nullvoxpopuli:babel",
-    transform: {
-      filter: {
-        id: {
-          include: [/\.js/, /\.gjs/, /\.ts/, /\.gts/],
-          exclude: [/\.json/],
-        },
-        // Enabling this opts us out of template compilation
-        // it's an AND instead of OR
-        // code: {
-        // 	include: [/initializeRuntimeMacrosConfig/, /precompileTemplate/],
-        // },
-      },
-      handler(this: any, code: string, id: string) {
-        try {
-          return doTransform.call(this, code, id);
-        } catch (e) {
-          // Use VSCode JavaScript Debug Terminal
-          // eslint-disable-next-line no-debugger
-          debugger;
-          throw e;
-        }
-      },
-    },
-  };
+  } as Plugin;
 }

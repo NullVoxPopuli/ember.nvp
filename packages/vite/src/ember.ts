@@ -12,6 +12,27 @@ function absolutePath(relativePath: string) {
   return join(cwd, relativePath);
 }
 
+/**
+ * Additional opt-ins beyond maybeBabel's built-in list.
+ *
+ * These libraries ship code that still needs babel (ember-concurrency's
+ * decorators, ember-scoped-css transforms, ember-intl's formatMessage macro),
+ * and the `initializeRuntimeMacrosConfig` runtime call must be compiled away.
+ */
+function babelFilter(nvpConfig: Config) {
+  return {
+    include: {
+      imports: [
+        "ember-concurrency",
+        "ember-scoped-css",
+        "ember-intl/helpers/format-message",
+        ...(nvpConfig.babel?.include?.whenImporting ?? []),
+      ],
+      code: [/\bintl\.formatMessage\b/, "initializeRuntimeMacrosConfig"] as (string | RegExp)[],
+    },
+  };
+}
+
 interface Config {
   babel?: {
     /**
@@ -52,7 +73,7 @@ interface Config {
 
 export function ember(nvpConfig: Config = {}) {
   const babelConfigFile = resolve(join(process.cwd(), "./babel.config.js"));
-  const defaultEnv = { mode: process.env.NODE_ENV || "development" };
+  const filter = babelFilter(nvpConfig);
 
   /*
    * Plugins must be returned as top-level array entries — NOT pushed into
@@ -98,16 +119,20 @@ export function ember(nvpConfig: Config = {}) {
           // Libraries will have precompileTemplate and macros, etc,
           // and we need to compile that away using this app's
           // template compiler
-          maybeBabel({ env, parallel: nvpConfig.babel?.parallel, configFile: babelConfigFile }),
+          maybeBabel({
+            configFile: babelConfigFile,
+            parallel: nvpConfig.babel?.parallel,
+            filter,
+          }),
         ];
       },
     },
     resolver({ rolldown: true }),
     templateTag(),
     maybeBabel({
-      env: defaultEnv,
-      parallel: nvpConfig.babel?.parallel,
       configFile: babelConfigFile,
+      parallel: nvpConfig.babel?.parallel,
+      filter,
     }),
   ];
 }
