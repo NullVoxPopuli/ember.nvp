@@ -49,7 +49,8 @@ export async function getLatest(deps) {
        * so its `.ts` runs directly.
        */
       if (needsLocalLink && LOCAL_PACKAGES[dep]) {
-        version = "link:" + resolve(join(import.meta.dirname, "../../packages", LOCAL_PACKAGES[dep]));
+        version =
+          "link:" + resolve(join(import.meta.dirname, "../../packages", LOCAL_PACKAGES[dep]));
       } else {
         if (range == "workspace:*") {
           range = "latest";
