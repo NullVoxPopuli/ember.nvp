@@ -34,10 +34,6 @@ const babelRequiredImports = [
   "@ember/application/deprecations",
 ];
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 const decoratorRegex = /(?<![\w'"`])(?<!\*\s+)(?<!\/\/[^\n]*)(?<!\/\*[^\n]*)@\w+/;
 //                     └────┬─────┘└───┬───┘└──────┬──────┘└──────┬──────┘└┬─┘
 //                          │          │           │              │        │
@@ -49,14 +45,10 @@ const decoratorRegex = /(?<![\w'"`])(?<!\*\s+)(?<!\/\/[^\n]*)(?<!\/\*[^\n]*)@\w+
 
 const nodeModulesPattern = /\/node_modules\//;
 
-function escapeRegExpCharacters(str: string) {
-  return str.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-}
-
 const extensionRegExp = new RegExp(
   `(${extensions
     .filter((ext) => ext !== ".json")
-    .map(escapeRegExpCharacters)
+    .map(RegExp.escape)
     .join("|")})(\\?.*)?(#.*)?$`,
 );
 
@@ -105,7 +97,7 @@ export function maybeBabel(userOptions: Options = {}): Plugin {
   const importsRegex = new RegExp(
     babelRequiredImports
       .concat(filter?.include?.imports ?? [])
-      .map(escapeRegExp)
+      .map(RegExp.escape)
       .join("|"),
   );
 
