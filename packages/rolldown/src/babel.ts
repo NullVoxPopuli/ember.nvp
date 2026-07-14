@@ -8,6 +8,12 @@ import type { Plugin } from "rolldown";
  * The file extensions babel should consider. `.gts`/`.gjs` are included even
  * though `emberTransform()` renames them to `.ts`/`.js` before babel runs --
  * keeping them here is harmless and matches the ember tooling convention.
+ *
+ * This mirrors embroider's canonical list, which today is only exported from
+ * `@embroider/vite` (see its `src/ember.ts`: `export let extensions = [...]`).
+ * We intentionally copy it rather than depend on `@embroider/vite`, so this
+ * rolldown/tsdown-oriented package stays vite-free. Keep in sync if embroider's
+ * list changes (it rarely does).
  */
 export const extensions = [
   ".mjs",
