@@ -41,11 +41,6 @@ export async function askProjectType() {
     ],
   });
 
-  if (answer === "library") {
-    p.cancel("Not implemented yet, apologies!");
-    return process.exit(0);
-  }
-
   if (p.isCancel(answer)) {
     p.cancel("Operation cancelled");
     return process.exit(0);

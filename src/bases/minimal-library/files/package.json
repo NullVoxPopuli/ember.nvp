@@ -1,0 +1,56 @@
+{
+  "name": "minimal-library",
+  "version": "0.0.0",
+  "private": false,
+  "description": "Your Ember library's description here",
+  "repository": "",
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepack": "tsdown",
+    "start": "tsdown --watch"
+  },
+  "dependencies": {
+    "@embroider/macros": "^1.20.3",
+    "decorator-transforms": "^2.3.2"
+  },
+  "peerDependencies": {
+    "@glimmer/component": "^2.0.0",
+    "ember-source": ">= 6.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^7.29.7",
+    "@ember/library-tsconfig": "^2.0.0",
+    "@glimmer/component": "^2.1.1",
+    "@nullvoxpopuli/ember-rolldown": "workspace:*",
+    "@rollup/plugin-babel": "^7.1.0",
+    "babel-plugin-ember-template-compilation": "^4.0.0",
+    "ember-source": "~7.0.0",
+    "rolldown": "^1.1.2",
+    "tsdown": "^0.22.7",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">= 24"
+  },
+  "ember": {
+    "edition": "octane"
+  }
+}
