@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ConfigEnv, ResolvedConfig } from "vite";
 
-import { maybeBabel } from "./maybe-babel.ts";
+import { maybeBabel } from "@nullvoxpopuli/ember-build-tooling-utils";
 
 const emberConfig = embroiderEmber()[3]!;
 

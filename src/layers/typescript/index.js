@@ -15,10 +15,7 @@ const deps = {
   "@glint/ember-tsc": "^1.0.8",
   "@glint/template": "^1.7.3",
   "@glint/tsserver-plugin": "^2.0.8",
-  // TS 6+ is required for the ES2025 lib types (e.g. `RegExp.escape`, used by
-  // @nullvoxpopuli/ember-vite). Paired with `"lib": ["ESNext", ...]` in the
-  // base tsconfigs.
-  typescript: "^6.0.3",
+  typescript: "^5.9.3",
 };
 
 /**

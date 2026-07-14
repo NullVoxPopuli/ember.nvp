@@ -4,12 +4,21 @@
  * - ember-concurrency
  * - scoped-css
  * - template compilation optimization
+ *
+ * `maybeBabel` runs babel ONLY on the files that actually need it (template-tag
+ * files, files importing template/macro modules, and local code using
+ * decorators). Everything else skips babel so the bundler's native (oxc)
+ * transform handles it -- the whole point being to keep the fast path fast and
+ * not re-slow the build by sending every file through babel.
+ *
+ * This is shared between the vite (app) and rolldown/tsdown (library)
+ * meta-plugins.
  */
 import { and, code, id, include, not, or } from "@rolldown/pluginutils";
-import { extensions } from "@embroider/vite";
 import { babel } from "@rollup/plugin-babel";
 import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
-import type { Plugin } from "vite";
+
+import { extensions } from "./extensions.ts";
 
 /**
  * If a file imports any of these, it needs babel (templates, macros, and a
@@ -45,10 +54,20 @@ const decoratorRegex = /(?<![\w'"`])(?<!\*\s+)(?<!\/\/[^\n]*)(?<!\/\*[^\n]*)@\w+
 
 const nodeModulesPattern = /\/node_modules\//;
 
+/**
+ * Escape a string for literal use inside a RegExp. We ship our own rather than
+ * use `RegExp.escape`: that's an ES2025 API, and evaluating it at module load
+ * breaks in toolchains that load this config under an older engine or bundle it
+ * for one (e.g. rolldown's config loader).
+ */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const extensionRegExp = new RegExp(
   `(${extensions
     .filter((ext) => ext !== ".json")
-    .map(RegExp.escape)
+    .map(escapeRegExp)
     .join("|")})(\\?.*)?(#.*)?$`,
 );
 
@@ -84,7 +103,7 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
   };
 };
 
-export function maybeBabel(userOptions: Options = {}): Plugin {
+export function maybeBabel(userOptions: Options = {}) {
   const { filter, ...options } = userOptions;
 
   const plugin = babel({
@@ -97,7 +116,7 @@ export function maybeBabel(userOptions: Options = {}): Plugin {
   const importsRegex = new RegExp(
     babelRequiredImports
       .concat(filter?.include?.imports ?? [])
-      .map(RegExp.escape)
+      .map(escapeRegExp)
       .join("|"),
   );
 
@@ -133,5 +152,5 @@ export function maybeBabel(userOptions: Options = {}): Plugin {
     ...plugin,
     enforce: "pre",
     name: "nullvoxpopuli:babel",
-  } as Plugin;
+  } as ReturnType<typeof babel>;
 }

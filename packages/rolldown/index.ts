@@ -25,6 +25,19 @@ interface Config {
      * (TypeScript stripping + template compilation).
      */
     plugins?: unknown[];
+
+    /**
+     * Opt additional files into babel. By default babel only runs on files
+     * that need it (template-tag, decorators, template imports); everything
+     * else stays on the fast native (oxc) transform. Use this to cover addons
+     * that ship code needing babel, e.g. `{ include: { imports: ["ember-concurrency"], code: [] } }`.
+     */
+    filter?: {
+      include: {
+        imports: string[];
+        code: (string | RegExp)[];
+      };
+    };
   };
 }
 
@@ -39,8 +52,10 @@ interface Config {
  *   ember virtual packages external, so consuming apps resolve them.
  * - `emberTransform()` — preprocesses `<template>` via content-tag and maps
  *   `.gts`/`.gjs` to `.ts`/`.js` so rolldown can understand them.
- * - `emberBabel()` — runs your `babel.config.js` (template compilation,
- *   decorators, type stripping, …) with `babelHelpers: "bundled"`.
+ * - `emberBabel()` — runs babel (template compilation, decorators, type
+ *   stripping) with `babelHelpers: "bundled"`, but only on the files that
+ *   actually need it (via `maybeBabel`); everything else stays on the fast
+ *   native transform. No `babel.config.js` required.
  *
  * Usage in `tsdown.config.js` / `rolldown.config.js`:
  *
