@@ -60,7 +60,6 @@ describe("base: minimal-library", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
           "package.json",
           "src/components/badge.gjs",
           "src/components/greeting.gjs",
@@ -84,13 +83,8 @@ describe("base: minimal-library", () => {
 
       expect(manifest.devDependencies).not.toHaveProperty("typescript");
       expect(manifest.devDependencies).not.toHaveProperty("@ember/library-tsconfig");
-      expect(manifest.devDependencies).not.toHaveProperty("@babel/plugin-transform-typescript");
       // No declarations are emitted without types
       expect(JSON.stringify(manifest.exports)).not.toContain("types");
-
-      expect(await read(project, "babel.config.js")).not.toContain(
-        "@babel/plugin-transform-typescript",
-      );
 
       let tsdownConfig = await read(project, "tsdown.config.js");
 
@@ -130,7 +124,6 @@ describe("base: minimal-library", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
           "package.json",
           "src/components/badge.gts",
           "src/components/greeting.gts",

@@ -3,7 +3,6 @@ import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
 import { getLatest } from "#utils/npm.js";
 import { applyFolderTo } from "#utils/fs.js";
-import { removeConfiguredPlugin } from "#utils/babel.js";
 
 /**
  * Minimal Library Base
@@ -12,6 +11,8 @@ import { removeConfiguredPlugin } from "#utils/babel.js";
  * - type: "module" in package.json
  * - built with tsdown + @nullvoxpopuli/ember-rolldown
  * - a sample `<template>` component and a plain module
+ * - No babel.config.js: @nullvoxpopuli/ember-rolldown's built-in default
+ *   babel config covers TS stripping, template compilation, and decorators
  * - No testing framework
  * - No linting or formatting
  *
@@ -27,7 +28,6 @@ export default {
    * 2. Update name(s)
    * 3. Remove TS deps/files/config if needed
    * 4. Upgrade in-range dependencies
-   * 5. Update babel config
    *
    * @param {import('#utils/project.js').Project} project
    */
@@ -36,7 +36,6 @@ export default {
     await updateName(project);
     await makeJavaScript(project);
     await upgradeDependencies(project);
-    await updateBabelConfig(project);
   },
 };
 
@@ -71,7 +70,7 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   await packageJson.removeDevDependencies(
-    ["@babel/plugin-transform-typescript", "@ember/library-tsconfig", "typescript"],
+    ["@ember/library-tsconfig", "typescript"],
     project.directory,
   );
 
@@ -131,13 +130,4 @@ async function upgradeDependencies(project) {
       Object.assign(json.devDependencies, await getLatest(existing.devDependencies));
     }
   }, project.directory);
-}
-
-/**
- * @param {import('#utils/project.js').Project} project
- */
-async function updateBabelConfig(project) {
-  if (await project.hasOrWantsLayer("typescript")) return;
-
-  await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }

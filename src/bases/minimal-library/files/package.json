@@ -34,12 +34,9 @@
     "ember-source": ">= 6.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@babel/plugin-transform-typescript": "^7.29.7",
     "@ember/library-tsconfig": "^2.0.0",
     "@glimmer/component": "^2.1.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",
-    "babel-plugin-ember-template-compilation": "^4.0.0",
     "ember-source": "~7.0.0",
     "tsdown": "^0.22.7",
     "typescript": "^6.0.3"
