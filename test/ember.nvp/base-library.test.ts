@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate } from "#test-helpers";
+import { generate, mktemp } from "#test-helpers";
 import { execa } from "execa";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import { rimraf } from "rimraf";
 
@@ -90,6 +90,33 @@ describe("base: minimal-library", () => {
 
       expect(tsdownConfig).toContain("./src/index.js");
       expect(tsdownConfig).toContain("dts: false");
+    });
+
+    it("removes the TS plugin from an existing project's babel config", async () => {
+      // The base doesn't emit a babel.config.js, but generation can run
+      // over an existing project that has one
+      let directory = await mktemp("existing-lib");
+
+      dirs.push(directory);
+
+      await mkdir(directory, { recursive: true });
+      await writeFile(
+        join(directory, "babel.config.js"),
+        `export default {
+  plugins: [
+    ["@babel/plugin-transform-typescript", { allExtensions: true }],
+    ["module:decorator-transforms"],
+  ],
+};
+`,
+      );
+
+      let existing = await generate({ directory, type: "library", name: "existing-lib" });
+
+      let babelConfig = await readFile(join(existing.directory, "babel.config.js"), "utf-8");
+
+      expect(babelConfig).not.toContain("@babel/plugin-transform-typescript");
+      expect(babelConfig).toContain("module:decorator-transforms");
     });
 
     it("builds", async () => {

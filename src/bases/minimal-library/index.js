@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
 import { getLatest } from "#utils/npm.js";
 import { applyFolderTo } from "#utils/fs.js";
+import { removeConfiguredPlugin } from "#utils/babel.js";
 
 /**
  * Minimal Library Base
@@ -28,6 +29,7 @@ export default {
    * 2. Update name(s)
    * 3. Remove TS deps/files/config if needed
    * 4. Upgrade in-range dependencies
+   * 5. Update an existing babel config, if any
    *
    * @param {import('#utils/project.js').Project} project
    */
@@ -36,6 +38,7 @@ export default {
     await updateName(project);
     await makeJavaScript(project);
     await upgradeDependencies(project);
+    await updateBabelConfig(project);
   },
 };
 
@@ -70,7 +73,7 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   await packageJson.removeDevDependencies(
-    ["@ember/library-tsconfig", "typescript"],
+    ["@babel/plugin-transform-typescript", "@ember/library-tsconfig", "typescript"],
     project.directory,
   );
 
@@ -130,4 +133,18 @@ async function upgradeDependencies(project) {
       Object.assign(json.devDependencies, await getLatest(existing.devDependencies));
     }
   }, project.directory);
+}
+
+/**
+ * The base doesn't emit a babel.config.js, but this can run over an
+ * existing project that has one -- and a JavaScript project's config
+ * must not reference the TS plugin.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function updateBabelConfig(project) {
+  if (await project.hasOrWantsLayer("typescript")) return;
+  if (!project.hasFile("babel.config.js")) return;
+
+  await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }
