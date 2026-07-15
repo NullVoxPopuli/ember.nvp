@@ -1,10 +1,9 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { generate, layers, expectIsSetup } from "#test-helpers";
 import { generateProject } from "ember.nvp";
-import { writeFile } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { rimraf } from "rimraf";
 
 /**
  * The replace-or-update question only matters when a project already exists
@@ -21,7 +20,7 @@ describe("generating over an existing project", () => {
     if (process.env.CI) return;
 
     for (const dir of dirs) {
-      await rimraf(dir, { maxRetries: 3, retryDelay: 100 });
+      await rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
   });
 

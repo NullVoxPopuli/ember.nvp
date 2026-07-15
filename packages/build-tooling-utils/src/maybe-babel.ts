@@ -54,20 +54,10 @@ const decoratorRegex = /(?<![\w'"`])(?<!\*\s+)(?<!\/\/[^\n]*)(?<!\/\*[^\n]*)@\w+
 
 const nodeModulesPattern = /\/node_modules\//;
 
-/**
- * Escape a string for literal use inside a RegExp. We ship our own rather than
- * use `RegExp.escape`: that's an ES2025 API, and evaluating it at module load
- * breaks in toolchains that load this config under an older engine or bundle it
- * for one (e.g. rolldown's config loader).
- */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 const extensionRegExp = new RegExp(
   `(${extensions
     .filter((ext) => ext !== ".json")
-    .map(escapeRegExp)
+    .map(RegExp.escape)
     .join("|")})(\\?.*)?(#.*)?$`,
 );
 
@@ -116,7 +106,7 @@ export function maybeBabel(userOptions: Options = {}) {
   const importsRegex = new RegExp(
     babelRequiredImports
       .concat(filter?.include?.imports ?? [])
-      .map(escapeRegExp)
+      .map(RegExp.escape)
       .join("|"),
   );
 
