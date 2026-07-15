@@ -1,41 +1,16 @@
-import { existsSync } from "node:fs";
-import { readFile, readdir, mkdir, writeFile } from "node:fs/promises";
-import { join, dirname, relative, sep } from "node:path";
+import { existsSync, lstatSync } from "node:fs";
+import { readFile, glob, mkdir, writeFile } from "node:fs/promises";
+import { join, dirname } from "node:path";
 import { parse as parsePath } from "node:path";
 import { removeTypes } from "./remove-types.js";
 import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
-const EXCLUDED_DIRECTORIES = new Set(["node_modules", "dist"]);
-
 /**
- * All files under `directory` (as paths relative to it), excluding
- * node_modules and dist. Uses readdir rather than `fs.glob` because glob
- * skips dotfiles (`.gitignore`, `.env.development`, ...), which bases
- * legitimately provide.
- *
- * @param {string} directory
- * @returns {Promise<string[]>}
+ * `**\/*` alone skips dotfiles, which bases legitimately provide
+ * (`.gitignore`, `.env.development`, ...): the extra patterns match
+ * dotfiles at any depth and files inside dot-directories (`.github/...`).
  */
-async function listFiles(directory) {
-  /** @type {string[]} */
-  const files = [];
-
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
-
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-
-    const path = relative(directory, join(entry.parentPath, entry.name));
-
-    if (path.split(sep).some((segment) => EXCLUDED_DIRECTORIES.has(segment))) {
-      continue;
-    }
-
-    files.push(path);
-  }
-
-  return files;
-}
+const EVERY_FILE = ["**/*", "**/.*", "**/.*/**/*"];
 
 /**
  *
@@ -48,13 +23,22 @@ async function listFiles(directory) {
  * @param {{to: import('#utils/project.js').Project, process: (data: { entry: string, contents: string }) => string | Promise<void>}} options sub folder within the target project to copy the contents to
  */
 export async function applyFolder(from, options) {
-  for (const entry of await listFiles(from)) {
+  for await (const entry of glob(EVERY_FILE, {
+    exclude: ["**/node_modules", "**/dist"],
+    cwd: from,
+  })) {
     let sourcePath = join(from, entry);
     let targetPath = join(options.to.directory, entry);
     let directory = dirname(targetPath);
 
     if (directory) {
       await mkdir(directory, { recursive: true });
+    }
+
+    let stat = lstatSync(sourcePath);
+
+    if (stat.isDirectory()) {
+      continue;
     }
 
     let buffer = await readFile(sourcePath);

@@ -1,6 +1,6 @@
 import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, reapply } from "#test-helpers";
-import { TODO, layersFor } from "#layers";
+import { TODO } from "#layers";
 
 import type { Project } from "ember.nvp";
 import type { ProjectType } from "#types";
@@ -19,14 +19,21 @@ const INITIAL_ONLY = new Set<string>([
   // "typescript"
 ]);
 
+/**
+ * Layers that don't yet generate a working setup for a project type.
+ * Every layer is *supposed* to support every base eventually -- shrink
+ * these as layers learn.
+ */
+const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
+  app: new Set(),
+  // qunit's scripts assume an app (vite build + testem against index.html)
+  library: new Set(["qunit"]),
+};
+
 const eachBase = bases.map((base) => {
   const type: ProjectType = base === "minimal-app" ? "app" : "library";
 
-  /**
-   * Only the layers that can apply to this base's project type
-   * (e.g. qunit is app-only).
-   */
-  const applicableLayers = layersFor(type, layers);
+  const applicableLayers = layers.filter((layer) => !NOT_YET_SUPPORTED[type].has(layer.name));
 
   const permutations = permutate(applicableLayers.map((layer) => layer.name));
   permutations.push([baseline]);
