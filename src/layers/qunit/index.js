@@ -22,6 +22,13 @@ const tsDeps = {
 export default {
   label: "QUnit",
 
+  /**
+   * The scripts this layer adds assume an app (vite build + testem against
+   * index.html). Library testing needs a different shape (a test-app or
+   * vitest), so this layer is app-only for now.
+   */
+  projectTypes: ["app"],
+
   async run(project) {
     let filePath = join(import.meta.dirname, "files");
     await applyFolderTo(filePath, project);

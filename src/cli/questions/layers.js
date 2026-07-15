@@ -1,10 +1,13 @@
 import { answers, printArgInUse } from "#args";
-import { discoverLayers } from "#layers";
+import { discoverLayers, layersFor } from "#layers";
 
 import * as p from "@clack/prompts";
 
-export async function askLayers() {
-  const optionalLayers = (await discoverLayers()).filter(
+/**
+ * @param {import('#types').ProjectType} projectType
+ */
+export async function askLayers(projectType) {
+  const optionalLayers = layersFor(projectType, await discoverLayers()).filter(
     (layer) => typeof layer.run === "function",
   );
 

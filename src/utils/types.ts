@@ -10,6 +10,11 @@ export interface Layer {
   hint?: string;
   defaultValue?: () => unknown;
   /**
+   * Which project types this layer can apply to.
+   * Omitted means the layer applies to every project type.
+   */
+  projectTypes?: ProjectType[];
+  /**
    * The function that applies the codemod
    *
    * run _may_ be invoked multiple times,

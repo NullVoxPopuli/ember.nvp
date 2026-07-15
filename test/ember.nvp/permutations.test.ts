@@ -1,14 +1,12 @@
 import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, reapply } from "#test-helpers";
-import { TODO } from "#layers";
+import { TODO, layersFor } from "#layers";
 
 import type { Project } from "ember.nvp";
+import type { ProjectType } from "#types";
 import { rimraf } from "rimraf";
 
-let permutations = permutate(layers.map((layer) => layer.name));
-
 const baseline = "<baseline>";
-permutations.push([baseline]);
 
 const RE_APPLY_ONLY = new Set<string>([
   // "typescript"
@@ -21,32 +19,37 @@ const INITIAL_ONLY = new Set<string>([
   // "typescript"
 ]);
 
-const eachBase = bases
-  .map((base) => ({ name: base }))
-  .filter(({ name }) => {
-    if (name === "minimal-library") {
-      /** TODO **/
-      return false;
-    }
+const eachBase = bases.map((base) => {
+  const type: ProjectType = base === "minimal-app" ? "app" : "library";
 
-    return true;
-  });
-const eachPermutation = permutations
-  .filter((permutation) => {
-    if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
-      return;
-    }
+  /**
+   * Only the layers that can apply to this base's project type
+   * (e.g. qunit is app-only).
+   */
+  const applicableLayers = layersFor(type, layers);
 
-    // Not implemented yet
-    if (permutation.some((x) => TODO.has(x))) {
-      return;
-    }
+  const permutations = permutate(applicableLayers.map((layer) => layer.name));
+  permutations.push([baseline]);
 
-    return true;
-  })
-  .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+  const eachPermutation = permutations
+    .filter((permutation) => {
+      if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
+        return;
+      }
 
-describe.each(eachBase)("$name", ({ name: base }) => {
+      // Not implemented yet
+      if (permutation.some((x) => TODO.has(x))) {
+        return;
+      }
+
+      return true;
+    })
+    .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+
+  return { name: base, type, applicableLayers, eachPermutation };
+});
+
+describe.each(eachBase)("$name", ({ type, applicableLayers, eachPermutation }) => {
   describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
     let project: Project;
     let layerNames = permutation.filter((x) => x !== baseline);
@@ -54,7 +57,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
 
     beforeAll(async () => {
       project = await generate({
-        type: base === "minimal-app" ? "app" : "library",
+        type,
         layers: layerNames,
       });
     });
@@ -144,7 +147,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
      * on the same project
      */
     describe("apply anew", () => {
-      let newLayers = layers
+      let newLayers = applicableLayers
         .filter((layer) => {
           if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
             return false;

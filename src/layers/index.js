@@ -45,3 +45,15 @@ export async function discoverLayers() {
 
 export const layers = await discoverLayers();
 export const layerNames = layers.map((layer) => layer.name);
+
+/**
+ * The subset of `allLayers` that can apply to `projectType`.
+ * Layers without `projectTypes` apply to every project type.
+ *
+ * @param {import('#types').ProjectType} projectType
+ * @param {Array<import('#types').DiscoveredLayer>} allLayers
+ * @returns {Array<import('#types').DiscoveredLayer>}
+ */
+export function layersFor(projectType, allLayers = layers) {
+  return allLayers.filter((layer) => layer.projectTypes?.includes(projectType) ?? true);
+}
