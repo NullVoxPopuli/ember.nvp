@@ -20,6 +20,16 @@ import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
 
 import { extensions } from "./extensions.ts";
 
+declare global {
+  interface RegExpConstructor {
+    /**
+     * ES2025, present on node 24 -- typed here because consuming projects
+     * type-check this file with `lib: es2024` tsconfigs, which predate it.
+     */
+    escape(text: string): string;
+  }
+}
+
 /**
  * If a file imports any of these, it needs babel (templates, macros, and a
  * couple of addons that ship decorator-adjacent runtime code).

@@ -123,8 +123,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/vite:
     dependencies:
@@ -145,8 +145,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^8.0.14
         version: 8.0.14(@types/node@25.0.8)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)
