@@ -12,6 +12,8 @@ import { removeConfiguredPlugin } from "#utils/babel.js";
  * - type: "module" in package.json
  * - built with tsdown + @nullvoxpopuli/ember-rolldown
  * - a sample `<template>` component and a plain module
+ * - No babel.config.js: @nullvoxpopuli/ember-rolldown's built-in default
+ *   babel config covers TS stripping, template compilation, and decorators
  * - No testing framework
  * - No linting or formatting
  *
@@ -27,7 +29,7 @@ export default {
    * 2. Update name(s)
    * 3. Remove TS deps/files/config if needed
    * 4. Upgrade in-range dependencies
-   * 5. Update babel config
+   * 5. Update an existing babel config, if any
    *
    * @param {import('#utils/project.js').Project} project
    */
@@ -134,10 +136,15 @@ async function upgradeDependencies(project) {
 }
 
 /**
+ * The base doesn't emit a babel.config.js, but this can run over an
+ * existing project that has one -- and a JavaScript project's config
+ * must not reference the TS plugin.
+ *
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
+  if (!project.hasFile("babel.config.js")) return;
 
   await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
 }

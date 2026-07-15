@@ -94,9 +94,6 @@ importers:
         specifier: ^7.1.0
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.55.3)
     devDependencies:
-      rolldown:
-        specifier: ^1.1.2
-        version: 1.1.5
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -227,12 +224,6 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2(@babel/core@7.29.7)
     devDependencies:
-      '@babel/core':
-        specifier: ^7.29.7
-        version: 7.29.7
-      '@babel/plugin-transform-typescript':
-        specifier: ^7.29.7
-        version: 7.29.7(@babel/core@7.29.7)
       '@ember/library-tsconfig':
         specifier: ^2.0.0
         version: 2.0.0
@@ -242,9 +233,6 @@ importers:
       '@nullvoxpopuli/ember-rolldown':
         specifier: workspace:*
         version: link:../../../../packages/rolldown
-      babel-plugin-ember-template-compilation:
-        specifier: ^4.0.0
-        version: 4.0.0
       ember-source:
         specifier: ~7.0.0
         version: 7.0.0(@glimmer/component@2.1.1)

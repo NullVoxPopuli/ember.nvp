@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate } from "#test-helpers";
+import { generate, mktemp } from "#test-helpers";
 import { execa } from "execa";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import { rimraf } from "rimraf";
 
@@ -60,7 +60,6 @@ describe("base: minimal-library", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
           "package.json",
           "src/components/badge.gjs",
           "src/components/greeting.gjs",
@@ -84,18 +83,40 @@ describe("base: minimal-library", () => {
 
       expect(manifest.devDependencies).not.toHaveProperty("typescript");
       expect(manifest.devDependencies).not.toHaveProperty("@ember/library-tsconfig");
-      expect(manifest.devDependencies).not.toHaveProperty("@babel/plugin-transform-typescript");
       // No declarations are emitted without types
       expect(JSON.stringify(manifest.exports)).not.toContain("types");
-
-      expect(await read(project, "babel.config.js")).not.toContain(
-        "@babel/plugin-transform-typescript",
-      );
 
       let tsdownConfig = await read(project, "tsdown.config.js");
 
       expect(tsdownConfig).toContain("./src/index.js");
       expect(tsdownConfig).toContain("dts: false");
+    });
+
+    it("removes the TS plugin from an existing project's babel config", async () => {
+      // The base doesn't emit a babel.config.js, but generation can run
+      // over an existing project that has one
+      let directory = await mktemp("existing-lib");
+
+      dirs.push(directory);
+
+      await mkdir(directory, { recursive: true });
+      await writeFile(
+        join(directory, "babel.config.js"),
+        `export default {
+  plugins: [
+    ["@babel/plugin-transform-typescript", { allExtensions: true }],
+    ["module:decorator-transforms"],
+  ],
+};
+`,
+      );
+
+      let existing = await generate({ directory, type: "library", name: "existing-lib" });
+
+      let babelConfig = await readFile(join(existing.directory, "babel.config.js"), "utf-8");
+
+      expect(babelConfig).not.toContain("@babel/plugin-transform-typescript");
+      expect(babelConfig).toContain("module:decorator-transforms");
     });
 
     it("builds", async () => {
@@ -130,7 +151,6 @@ describe("base: minimal-library", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
           "package.json",
           "src/components/badge.gts",
           "src/components/greeting.gts",
