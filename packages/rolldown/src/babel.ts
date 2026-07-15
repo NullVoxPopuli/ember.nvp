@@ -1,10 +1,8 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
-
 import { maybeBabel } from "@nullvoxpopuli/ember-build-tooling-utils";
 import transformTypeScript from "@babel/plugin-transform-typescript";
 import templateCompilation from "babel-plugin-ember-template-compilation";
 import decoratorTransforms from "decorator-transforms";
+import { loadPartialConfigSync } from "@babel/core";
 import type { PluginItem } from "@babel/core";
 import type { Plugin } from "rolldown";
 
@@ -13,9 +11,9 @@ export interface BabelOptions {
   /**
    * The babel config file to use.
    *
-   * - `undefined` (default): auto-detect `babel.config.{js,mjs,cjs,json}` in
-   *   the cwd and use it when present, falling back to the built-in default
-   *   config otherwise.
+   * - `undefined` (default): auto-detect the project's babel config (via
+   *   babel's own config resolution) and use it when present, falling back to
+   *   the built-in default config otherwise.
    * - a string: use that config file.
    * - `false`: ignore any config file and always use the built-in defaults.
    */
@@ -37,23 +35,17 @@ export interface BabelOptions {
   };
 }
 
-const CONFIG_FILES = [
-  "babel.config.js",
-  "babel.config.mjs",
-  "babel.config.cjs",
-  "babel.config.json",
-];
-
+/**
+ * Resolve the project's root babel config the way babel itself does
+ * (`babel.config.{js,cjs,mjs,cts,json}`, honoring `rootMode` semantics).
+ *
+ * The sync API evaluates the config file; on node 24+ that works for native
+ * ESM configs too (require(esm)).
+ */
 function detectConfigFile(): string | undefined {
-  for (const name of CONFIG_FILES) {
-    const candidate = resolve(name);
+  const partial = loadPartialConfigSync({ cwd: process.cwd() });
 
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return undefined;
+  return partial?.config ?? undefined;
 }
 
 /**

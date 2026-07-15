@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
 import { execa } from "execa";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import { rimraf } from "rimraf";
 
@@ -164,6 +164,34 @@ describe("base: minimal-library", () => {
           "index.js.map",
         ]
       `);
+    });
+
+    it("errors when tsconfig lacks isolatedDeclarations", async () => {
+      let tsconfigPath = join(project.directory, "tsconfig.json");
+      let original = await readFile(tsconfigPath, "utf-8");
+
+      try {
+        await writeFile(
+          tsconfigPath,
+          JSON.stringify({
+            extends: "@ember/library-tsconfig",
+            include: ["src"],
+            compilerOptions: { allowJs: true, rootDir: "./src" },
+          }),
+        );
+
+        let build = await execa("pnpm build", {
+          cwd: project.directory,
+          shell: true,
+          reject: false,
+          all: true,
+        });
+
+        expect(build.exitCode).not.toBe(0);
+        expect(build.all).toContain('"compilerOptions.isolatedDeclarations": true');
+      } finally {
+        await writeFile(tsconfigPath, original);
+      }
     });
   });
 });

@@ -55,7 +55,8 @@ compilation to `precompileTemplate`, and
 Declarations are emitted with oxc's isolated declarations — it is the only
 declaration pipeline that can see compiled `<template>` (`.gts`/`.gjs`)
 modules, which exist only inside the bundler's module graph (the `tsc`-based
-pipeline reads from disk and cannot). Set it in your `tsconfig.json`:
+pipeline reads from disk and cannot). This is required: `ember()` errors when
+a `tsconfig.json` is present without it. Set it in your `tsconfig.json`:
 
 ```jsonc
 {
@@ -78,6 +79,8 @@ export const Badge: TOC<BadgeSignature> = <template>...</template>;
 
 `ember()` returns an array of rolldown plugins:
 
+- **`emberIsolatedDeclarations()`** — errors when a `tsconfig.json` is present
+  without `isolatedDeclarations: true` (see above).
 - **`emberExternals()`** — keeps your `dependencies`, `peerDependencies`, and
   the ember virtual packages (e.g. `@ember/component`, `@glimmer/tracking`, the
   template compiler) external, so the consuming app resolves them.
