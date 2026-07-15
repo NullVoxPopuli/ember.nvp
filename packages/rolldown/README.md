@@ -14,7 +14,9 @@ publishable output, so a single `ember()` call replaces the usual stack of
 npm add --save-dev @nullvoxpopuli/ember-rolldown
 ```
 
-Requires node 24+
+Requires node 24+, and — since these packages ship TypeScript source — a
+modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
+`esnext`).
 
 ## Usage
 

@@ -8,7 +8,9 @@ A speed-optimized default meta-config for ember projects.
 npm add @nullvoxpopuli/ember-vite
 ```
 
-Requires node 24+
+Requires node 24+, and — since these packages ship TypeScript source — a
+modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
+`esnext`).
 
 ## Usage
 

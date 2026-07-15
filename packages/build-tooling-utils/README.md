@@ -7,6 +7,10 @@ Shared build tooling for the `@nullvoxpopuli` ember meta-plugins
 It's intentionally bundler-agnostic (no `vite`/`rolldown` dependency) so both
 meta-plugins can consume the same logic.
 
+Requires node 24+, and — since this package ships TypeScript source — a
+modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
+`esnext`).
+
 ## Exports
 
 ### `maybeBabel(options?)`
