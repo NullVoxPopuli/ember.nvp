@@ -223,9 +223,6 @@ importers:
 
   src/bases/minimal-library/files:
     dependencies:
-      '@embroider/macros':
-        specifier: ^1.20.3
-        version: 1.20.3(@babel/core@7.29.7)(@glint/template@1.7.7)
       decorator-transforms:
         specifier: ^2.3.2
         version: 2.3.2(@babel/core@7.29.7)
@@ -245,18 +242,12 @@ importers:
       '@nullvoxpopuli/ember-rolldown':
         specifier: workspace:*
         version: link:../../../../packages/rolldown
-      '@rollup/plugin-babel':
-        specifier: ^7.1.0
-        version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.55.3)
       babel-plugin-ember-template-compilation:
         specifier: ^4.0.0
         version: 4.0.0
       ember-source:
         specifier: ~7.0.0
         version: 7.0.0(@glimmer/component@2.1.1)
-      rolldown:
-        specifier: ^1.1.2
-        version: 1.1.2
       tsdown:
         specifier: ^0.22.7
         version: 0.22.7(typescript@6.0.3)

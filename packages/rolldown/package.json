@@ -39,6 +39,14 @@
   "engines": {
     "node": ">= 24"
   },
+  "peerDependencies": {
+    "typescript": ">= 5.5"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "rolldown": "^1.1.2",
     "typescript": "^5.9.3"

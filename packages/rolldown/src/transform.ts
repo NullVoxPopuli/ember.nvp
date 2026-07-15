@@ -43,7 +43,7 @@ async function fixDtsExtensionsInDir(dir: string): Promise<void> {
  * ts/js) and preprocesses `<template>` via content-tag.
  */
 export function emberTransform(): Plugin {
-  const virtualFiles: string[] = [];
+  const virtualFiles = new Set<string>();
 
   return {
     name: "ember:transform",
@@ -56,7 +56,7 @@ export function emberTransform(): Plugin {
         const fileName = path.join(path.dirname(importer), id);
 
         if (id.endsWith(".gts") && !importer.endsWith(".d.ts")) {
-          virtualFiles.push(fileName);
+          virtualFiles.add(fileName);
           return {
             id: fileName.replace(/\.gts$/, ".ts"),
             meta: { fileName },
@@ -64,7 +64,7 @@ export function emberTransform(): Plugin {
         }
 
         if (id.endsWith(".gjs") && !importer.endsWith(".d.ts")) {
-          virtualFiles.push(fileName);
+          virtualFiles.add(fileName);
           return {
             id: fileName.replace(/\.gjs$/, ".js"),
             meta: { fileName },
@@ -73,7 +73,7 @@ export function emberTransform(): Plugin {
 
         if (id.endsWith(".d.ts") && importer.endsWith(".d.ts")) {
           const gtsFile = fileName.replace(".d.ts", ".gts");
-          if (virtualFiles.includes(gtsFile)) {
+          if (virtualFiles.has(gtsFile)) {
             return fileName;
           }
         }
@@ -81,7 +81,7 @@ export function emberTransform(): Plugin {
         if (id.endsWith(".ts") && !importer.endsWith(".d.ts")) {
           const gtsFileName = fileName.replace(/\.ts$/, ".gts");
           if (existsSync(gtsFileName) && !existsSync(fileName)) {
-            virtualFiles.push(gtsFileName);
+            virtualFiles.add(gtsFileName);
             return { id: fileName, meta: { fileName: gtsFileName } };
           }
         }
@@ -89,7 +89,7 @@ export function emberTransform(): Plugin {
         if (id.endsWith(".js") && !importer.endsWith(".d.ts")) {
           const gjsFileName = fileName.replace(/\.js$/, ".gjs");
           if (existsSync(gjsFileName) && !existsSync(fileName)) {
-            virtualFiles.push(gjsFileName);
+            virtualFiles.add(gjsFileName);
             return { id: fileName, meta: { fileName: gjsFileName } };
           }
         }
