@@ -27,7 +27,6 @@
     "start": "tsdown --watch"
   },
   "dependencies": {
-    "@embroider/macros": "^1.20.3",
     "decorator-transforms": "^2.3.2"
   },
   "peerDependencies": {
@@ -40,10 +39,8 @@
     "@ember/library-tsconfig": "^2.0.0",
     "@glimmer/component": "^2.1.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",
-    "@rollup/plugin-babel": "^7.1.0",
     "babel-plugin-ember-template-compilation": "^4.0.0",
     "ember-source": "~7.0.0",
-    "rolldown": "^1.1.2",
     "tsdown": "^0.22.7",
     "typescript": "^6.0.3"
   },

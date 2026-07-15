@@ -3,6 +3,13 @@
   "include": ["src"],
   "compilerOptions": {
     "allowJs": true,
-    "rootDir": "./src"
+    "rootDir": "./src",
+
+    // Declarations are emitted per-module from the compiled source (oxc's
+    // isolated declarations, via tsdown), which is the only declaration
+    // pipeline that can see compiled `<template>` (gts/gjs) modules. The
+    // practical rule it imposes: exported values need explicit type
+    // annotations (e.g. template-only components: `export const X: TOC<Sig>`).
+    "isolatedDeclarations": true
   }
 }

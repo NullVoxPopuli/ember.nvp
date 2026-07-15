@@ -71,13 +71,30 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   await packageJson.removeDevDependencies(
-    ["@ember/library-tsconfig", "typescript"],
+    ["@babel/plugin-transform-typescript", "@ember/library-tsconfig", "typescript"],
     project.directory,
   );
 
   await project.removeFile("tsconfig.json");
 
+  await removeTypesExports(project);
   await pointBuildAtJavaScript(project);
+}
+
+/**
+ * No declarations are emitted for a JavaScript library, so the `types`
+ * export conditions would point at files that never exist.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function removeTypesExports(project) {
+  await packageJson.modify((json) => {
+    for (let condition of Object.values(json.exports ?? {})) {
+      if (condition && typeof condition === "object") {
+        delete condition.types;
+      }
+    }
+  }, project.directory);
 }
 
 /**

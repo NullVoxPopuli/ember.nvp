@@ -1,7 +1,3 @@
-import { buildMacros } from "@embroider/macros/babel";
-
-const macros = buildMacros();
-
 export default {
   plugins: [
     [
@@ -15,18 +11,23 @@ export default {
     [
       "babel-plugin-ember-template-compilation",
       {
-        transforms: [...macros.templateMacros],
+        // Publish `precompileTemplate` calls, not wire format: the wire
+        // format is private between the template compiler and the glimmer
+        // runtime of the same version, so the consuming app must perform
+        // the final compilation.
+        targetFormat: "hbs",
       },
     ],
     [
       "module:decorator-transforms",
       {
         runtime: {
-          import: import.meta.resolve("decorator-transforms/runtime-esm"),
+          // A bare specifier (not import.meta.resolve): the consuming app
+          // resolves it via this library's `decorator-transforms` dependency.
+          import: "decorator-transforms/runtime-esm",
         },
       },
     ],
-    ...macros.babelMacros,
   ],
 
   generatorOpts: {
