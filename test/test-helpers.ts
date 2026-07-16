@@ -16,10 +16,22 @@ export const bases = [minimalApp, minimalAddon];
 
 export const layers = await discoverLayers();
 
+/**
+ * Layers in the same group are alternatives to each other (one eslint
+ * config, one test framework): selecting two of them would produce a
+ * broken project, so permutations never combine them.
+ */
+function exclusivityGroup(name: string): string | undefined {
+  if (name.startsWith("eslint-")) return "eslint";
+  if (name === "qunit" || name === "vitest") return "testing";
+
+  return undefined;
+}
+
 export function permutate(toPermutate: string[]): string[][] {
   const out: string[][] = [];
 
-  function backtrack(startIndex: number, prefix: string[], hasEslint: boolean) {
+  function backtrack(startIndex: number, prefix: string[], usedGroups: Set<string>) {
     if (prefix.length > 0) out.push(prefix.slice());
 
     for (let i = startIndex; i < toPermutate.length; i++) {
@@ -34,19 +46,20 @@ export function permutate(toPermutate: string[]): string[][] {
       // (silly TS not understanding loop bounds)
       if (!option) continue;
 
-      const isEslint = option.startsWith("eslint-");
+      const group = exclusivityGroup(option);
 
-      // Skip this option if it's an eslint entry and we already have one
-      // (enforce mutual exclusivity for eslint-prefixed entries)
-      if (isEslint && hasEslint) continue;
+      // Skip this option if we already have one from its exclusivity group
+      if (group && usedGroups.has(group)) continue;
 
+      if (group) usedGroups.add(group);
       prefix.push(option);
-      backtrack(i + 1, prefix, hasEslint || isEslint);
+      backtrack(i + 1, prefix, usedGroups);
       prefix.pop();
+      if (group) usedGroups.delete(group);
     }
   }
 
-  backtrack(0, [], false);
+  backtrack(0, [], new Set());
   return out;
 }
 

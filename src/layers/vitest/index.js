@@ -1,6 +1,41 @@
+import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
-import { packageJson, files } from "ember-apply";
+import { packageJson } from "ember-apply";
 import { join } from "node:path";
+
+const deps = {
+  "@babel/core": "^7.28.10",
+  "@babel/plugin-transform-typescript": "^7.28.5",
+  "@ember/test-helpers": "^5.4.3",
+  "@embroider/core": "^4.6.2",
+  "@embroider/macros": "^1.20.5",
+  "@embroider/vite": "^1.7.8",
+  "@rollup/plugin-babel": "^7.1.0",
+  "@vitest/browser": "^4.1.10",
+  "@vitest/browser-webdriverio": "^4.1.10",
+  "@vitest/ui": "^4.1.10",
+  "babel-plugin-ember-template-compilation": "^4.0.0",
+  "ember-vitest": "^0.4.0",
+  vite: "^8.0.14",
+  vitest: "^4.1.10",
+  webdriverio: "^9.29.1",
+};
+
+const scripts = {
+  test: "vitest run",
+  "test:watch": "vitest",
+  "test:ui": "vitest --ui",
+};
+
+/**
+ * ember-vitest's app-level testing API is experimental (not covered by
+ * semver), so this layer only wires up libraries.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+function isSupported(project) {
+  return project.type === "library";
+}
 
 /**
  * @type {import('#types').Layer}
@@ -9,34 +44,13 @@ export default {
   label: "Vitest",
 
   async run(project) {
-    // Apply test files
-    await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
+    if (!isSupported(project)) return;
 
-    // Add devDependencies
-    await packageJson.addDevDependencies(
-      await getLatest({
-        "@ember/test-helpers": "^5.4.1",
-        "@ember/test-waiters": "^4.1.1",
-        "@testing-library/dom": "^10.4.1",
-        "ember-vitest": "^0.3.3",
-        vitest: "^4.0.0",
-        "@vitest/ui": "^4.0.0",
-        "@vitest/browser": "^4.0.0",
-        "@vitest/browser-webdriverio": "^4.0.0",
-        webdriverio: "^9.23.2",
-      }),
-      project.directory,
-    );
+    await applyFolderTo(join(import.meta.dirname, "files"), project);
 
-    // Add scripts
-    await packageJson.addScripts(
-      {
-        test: "vitest run",
-        "test:watch": "vitest",
-        "test:ui": "vitest --ui",
-      },
-      project.directory,
-    );
+    await packageJson.addDevDependencies(await getLatest(deps), project.directory);
+
+    await packageJson.addScripts(scripts, project.directory);
   },
 
   /**
@@ -52,15 +66,45 @@ export default {
    * @returns {Promise<boolean>}
    */
   async isSetup(project, explain) {
-    const reasons = ["Vitest setup detection not implemented"];
+    const reasons = [];
+
+    if (!isSupported(project)) {
+      if (!explain) return false;
+
+      reasons.push(`vitest does not support ${project.type} projects`);
+    }
+
+    if (!project.hasFile("vitest.config.mjs")) {
+      if (!explain) return false;
+
+      reasons.push("vitest.config.mjs is missing");
+    }
+
+    let manifest = await packageJson.read(project.directory);
+
+    for (let script of Object.keys(scripts)) {
+      if (!manifest.scripts?.[script]) {
+        if (!explain) return false;
+
+        reasons.push(`package.json is missing the "${script}" script`);
+      }
+    }
+
+    for (let dep of Object.keys(deps)) {
+      if (!manifest.devDependencies?.[dep]) {
+        if (!explain) return false;
+
+        reasons.push(`package.json is missing ${dep} in devDependencies`);
+      }
+    }
 
     if (explain) {
       return {
-        isSetup: false,
+        isSetup: reasons.length === 0,
         reasons,
       };
     }
 
-    return false;
+    return reasons.length === 0;
   },
 };

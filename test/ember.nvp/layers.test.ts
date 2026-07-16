@@ -18,6 +18,7 @@ describe("discoverLayers", () => {
         "qunit",
         "renovate",
         "typescript",
+        "vitest",
       ]
     `);
   });
