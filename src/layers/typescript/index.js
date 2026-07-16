@@ -18,7 +18,7 @@ const sharedDeps = {
 
 const appDeps = {
   // Apps strip types via their own babel.config.js; libraries have no babel
-  // config -- @nullvoxpopuli/ember-rolldown's built-in default handles it.
+  // config -- ember() handles type stripping.
   "@babel/plugin-transform-typescript": "^7.28.5",
   "@ember/app-tsconfig": "^2.0.0",
 };
@@ -77,8 +77,7 @@ export default {
     }
 
     // Only projects with their own babel config need the TS plugin in it;
-    // without one (libraries), @nullvoxpopuli/ember-rolldown's built-in
-    // default babel config strips types.
+    // without one (libraries), ember() strips types.
     if (project.hasFile("babel.config.js") && !(await hasConfiguredTSBabel(project))) {
       if (!explain) return false;
 
@@ -150,9 +149,7 @@ async function addTSConfig(project) {
  */
 async function updateBabelConfig(project) {
   if (!project.hasFile("babel.config.js")) {
-    // No babel config to patch (libraries):
-    // @nullvoxpopuli/ember-rolldown's built-in default babel config strips
-    // types, so nothing is needed here.
+    // No babel config to patch (libraries): ember() strips types.
     return;
   }
 

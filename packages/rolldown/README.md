@@ -31,11 +31,10 @@ export default defineConfig({
 });
 ```
 
-`defineConfig` is tsdown's, preloaded with the settings every Ember v2
-library wants — `dts`, `sourcemap`, `clean`, `outExtensions` pinning
-`.js`/`.d.ts` (tsdown emits `.mjs`/`.d.mts` by default), and `neverBundle`
-for the ember virtual packages. You choose the `entry` and `plugins`, and
-anything you pass overrides the defaults.
+This builds your entry to `dist/*.js` and `dist/*.d.ts` with sourcemaps,
+cleaning `dist/` between builds and leaving the ember virtual packages to the
+consuming app. You choose the `entry` and `plugins`; any tsdown option you
+pass wins.
 
 Or in a plain `rolldown.config.js`:
 
@@ -49,18 +48,17 @@ export default defineConfig({
 });
 ```
 
-A `babel.config.js` is optional: if your project has one, `ember()` uses it;
-otherwise a built-in default config applies (TypeScript stripping, template
-compilation to `precompileTemplate`, and
-[decorator-transforms](https://github.com/ef4/decorator-transforms)).
+A `babel.config.js` is optional. Without one, `ember()` compiles templates
+(to `precompileTemplate`), decorators (via
+[decorator-transforms](https://github.com/ef4/decorator-transforms)), and
+TypeScript; with one, your config runs instead.
 
-### Declarations (`dts: true`)
+### Declarations
 
-Declarations are emitted with oxc's isolated declarations — it is the only
-declaration pipeline that can see compiled `<template>` (`.gts`/`.gjs`)
-modules, which exist only inside the bundler's module graph (the `tsc`-based
-pipeline reads from disk and cannot). This is required: `ember()` errors when
-a `tsconfig.json` is present without it. Set it in your `tsconfig.json`:
+Declarations are emitted with isolated declarations — the only declaration
+pipeline that can see `<template>` (`.gts`/`.gjs`) modules, which exist only
+inside the bundler's module graph. Your `tsconfig.json` must enable it
+(`ember()` errors otherwise):
 
 ```jsonc
 {
@@ -70,8 +68,8 @@ a `tsconfig.json` is present without it. Set it in your `tsconfig.json`:
 }
 ```
 
-The practical rule isolated declarations imposes: every exported value needs
-an explicit type annotation. In particular, exported template-only components:
+Isolated declarations means every exported value carries an explicit type
+annotation. For template-only components:
 
 ```gts
 import type { TOC } from "@ember/component/template-only";
@@ -84,7 +82,7 @@ export const Badge: TOC<BadgeSignature> = <template>...</template>;
 `ember()` returns an array of rolldown plugins:
 
 - **`emberIsolatedDeclarations()`** — errors when a `tsconfig.json` is present
-  without `isolatedDeclarations: true` (see above).
+  without `isolatedDeclarations: true`.
 - **`emberExternals()`** — keeps your `dependencies`, `peerDependencies`, and
   the ember virtual packages (e.g. `@ember/component`, `@glimmer/tracking`, the
   template compiler) external, so the consuming app resolves them.
@@ -94,22 +92,21 @@ export const Badge: TOC<BadgeSignature> = <template>...</template>;
   `.gts` specifiers in emitted `.d.ts` files.
 - **`emberBabel()`** — runs babel with `babelHelpers: "bundled"`, but only on
   the files that actually need it (template-tag, decorators, template imports);
-  everything else stays on rolldown's fast native (oxc) transform. Uses your
-  `babel.config.js` when present, the built-in defaults otherwise.
+  everything else stays on rolldown's fast native (oxc) transform.
 
 ## Configuration
 
 ```ts
 ember({
   babel: {
-    // undefined (default): auto-detect babel.config.{js,mjs,cjs,json};
-    // a string: use that file; false: always use the built-in defaults
+    // a string: use that config file;
+    // false: ignore config files entirely
     configFile: "./babel.config.js",
-    // defaults to "bundled" -- correct for libraries
+    // how @rollup/plugin-babel injects helpers
     babelHelpers: "bundled",
     // extra babel plugins, appended after the config's plugins
     plugins: [],
-    // opt additional files into babel (see maybeBabel's filter)
+    // opt additional files into babel
     filter: { include: { imports: ["ember-concurrency"], code: [] } },
   },
 });

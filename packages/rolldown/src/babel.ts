@@ -11,16 +11,17 @@ export interface BabelOptions {
   /**
    * The babel config file to use.
    *
-   * - `undefined` (default): auto-detect the project's babel config (via
-   *   babel's own config resolution) and use it when present, falling back to
-   *   the built-in default config otherwise.
+   * - `undefined`: auto-detect the project's babel config (via babel's own
+   *   config resolution).
    * - a string: use that config file.
-   * - `false`: ignore any config file and always use the built-in defaults.
+   * - `false`: ignore config files entirely.
+   *
+   * Without a config file, templates, decorators, and TypeScript are still
+   * handled (see `defaultPlugins`).
    */
   configFile?: string | false;
   /**
-   * Extra babel plugins to run, appended after the config's plugins
-   * (or after the built-in default plugins when no config file exists).
+   * Extra babel plugins to run, appended after the config's plugins.
    */
   plugins?: PluginItem[];
   /**
@@ -49,16 +50,15 @@ function detectConfigFile(): string | undefined {
 }
 
 /**
- * The built-in default babel config, used when the library has no babel
- * config file of its own:
+ * Everything a library without its own babel config needs:
  *
  * - TypeScript stripping
  * - template compilation to `precompileTemplate` (`targetFormat: "hbs"`).
  *   Published libraries must NOT ship wire format: the wire format is
  *   private between the template compiler and the glimmer runtime of the
  *   same version, so baking it in ties the published artifact to the
- *   consuming app's exact ember-source. `precompileTemplate` output is what
- *   the v2 addon spec expects; the consuming app performs final compilation.
+ *   consuming app's exact ember-source. The consuming app performs final
+ *   compilation.
  * - decorator-transforms, with its runtime left as a bare specifier so the
  *   consuming app resolves it (the library keeps `decorator-transforms` as
  *   a real dependency).
@@ -102,11 +102,9 @@ function defaultPlugins(): PluginItem[] {
  * to only the files that actually need it (template-tag, decorators, template
  * imports). Everything else stays on the native transform.
  *
- * The library's own `babel.config.js` is used when it exists (babel resolves
- * plugins-by-name itself; on node 24+ `require()` of ESM plugin modules is
- * native, so this is safe even under bundler config loaders like tsdown's).
- * Otherwise we fall back to a built-in default config (see `defaultPlugins`),
- * so a library without special needs doesn't need a config file at all.
+ * The library's own babel config is used when it exists; without one,
+ * `defaultPlugins` covers templates, decorators, and TypeScript, so no
+ * config file is required.
  *
  * Libraries default to `babelHelpers: "bundled"` so the emitted output is
  * self-contained.

@@ -8,9 +8,9 @@ export interface BadgeSignature {
 }
 
 /**
- * Exported template-only components need an explicit type annotation
- * (`TOC<...>`): declarations are emitted with isolated declarations, which
- * requires every exported value to have an explicit type.
+ * Exported template-only components need an explicit `TOC<...>` annotation:
+ * declarations are emitted with isolated declarations, which requires every
+ * exported value to have an explicit type.
  */
 export const Badge: TOC<BadgeSignature> = <template>
   <span class="badge" ...attributes>{{yield}}</span>
