@@ -60,13 +60,24 @@ const eachBase = bases.map((base) => {
 
 /**
  * The permutation matrix grows exponentially with the layer count, so
- * each base runs from its own test file -- CI runs them as separate,
- * parallel jobs.
+ * each base runs from its own test file(s) -- CI runs them as separate,
+ * parallel jobs. A base whose matrix outgrows one job's budget runs from
+ * several files, each taking a deterministic 1-of-N slice.
  *
  * @param base which base's permutations this file runs
+ * @param slice which 1-of-N slice of the permutations this file runs
  */
-export function testPermutations(base: (typeof bases)[number]) {
-  const { type, applicableLayers, eachPermutation } = eachBase.find((b) => b.name === base)!;
+export function testPermutations(
+  base: (typeof bases)[number],
+  slice: { index: number; total: number } = { index: 0, total: 1 },
+) {
+  const {
+    type,
+    applicableLayers,
+    eachPermutation: allPermutations,
+  } = eachBase.find((b) => b.name === base)!;
+
+  const eachPermutation = allPermutations.filter((_, i) => i % slice.total === slice.index);
 
   describe(base, () => {
     describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
