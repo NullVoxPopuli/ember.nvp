@@ -43,6 +43,16 @@ function depsFor(project) {
 export default {
   label: "TypeScript",
 
+  /**
+   * Libraries publish declarations, so they are TypeScript unless the
+   * user opts out.
+   *
+   * @param {import('#types').ProjectType} projectType
+   */
+  defaultValue(projectType) {
+    return projectType === "library";
+  },
+
   async run(project) {
     /**
      * if jsconfig exists, switch to tsconfig

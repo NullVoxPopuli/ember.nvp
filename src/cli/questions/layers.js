@@ -3,7 +3,10 @@ import { discoverLayers } from "#layers";
 
 import * as p from "@clack/prompts";
 
-export async function askLayers() {
+/**
+ * @param {import('#types').ProjectType} projectType
+ */
+export async function askLayers(projectType) {
   const optionalLayers = (await discoverLayers()).filter(
     (layer) => typeof layer.run === "function",
   );
@@ -34,7 +37,7 @@ export async function askLayers() {
   const defaultValues = (
     await Promise.all(
       optionalLayers.map(async (layer) => {
-        let result = await layer.defaultValue?.();
+        let result = await layer.defaultValue?.(projectType);
 
         return result && layer.name;
       }),

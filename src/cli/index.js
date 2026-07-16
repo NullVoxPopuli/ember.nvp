@@ -32,7 +32,7 @@ async function main() {
   const projectPath = await askPath(projectName);
   const replaceOrUpdate = await askReplaceOrUpdate(projectPath);
   const projectType = await askProjectType();
-  const selectedLayers = await askLayers();
+  const selectedLayers = await askLayers(projectType);
   const packageManager = await askPackageManager();
 
   await askIfOK();
