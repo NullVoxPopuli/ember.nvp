@@ -8,10 +8,7 @@ export default {
   label: formatLabel("git init"),
   hint: "set up this project as a fresh git repository",
 
-  /**
-   * @param {import('#utils/project.js').Project} project
-   */
-  async defaultValue(project) {
+  async defaultValue() {
     return !isInGit();
   },
 
