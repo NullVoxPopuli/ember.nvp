@@ -1,5 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
+import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
@@ -176,10 +177,7 @@ describe("layer: qunit", () => {
           "config/test/babel.config.js",
           "config/test/testem.cjs",
           "package.json",
-          "src/components/badge.gts",
-          "src/components/greeting.gts",
           "src/index.ts",
-          "src/utils/math.ts",
           "tests/rendering/.gitkeep",
           "tests/test-helper.ts",
           "tests/unit/.gitkeep",
@@ -288,6 +286,7 @@ describe("layer: qunit", () => {
     });
 
     it("installs, and tests generated against the library's exports pass", async () => {
+      await writeLibrarySource(project, "typescript");
       await writeExampleTests(project, "typescript");
       await installAndTest(project);
     });
@@ -322,10 +321,7 @@ describe("layer: qunit", () => {
           "config/test/babel.config.js",
           "config/test/testem.cjs",
           "package.json",
-          "src/components/badge.gjs",
-          "src/components/greeting.gjs",
           "src/index.js",
-          "src/utils/math.js",
           "tests/rendering/.gitkeep",
           "tests/test-helper.js",
           "tests/unit/.gitkeep",
@@ -381,6 +377,7 @@ describe("layer: qunit", () => {
     });
 
     it("installs, and tests generated against the library's exports pass", async () => {
+      await writeLibrarySource(project, "javascript");
       await writeExampleTests(project, "javascript");
       await installAndTest(project);
     });

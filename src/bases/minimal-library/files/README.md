@@ -33,8 +33,7 @@ pnpm start
 Declarations are emitted with
 [isolated declarations](https://www.typescriptlang.org/tsconfig/#isolatedDeclarations),
 so every exported value needs an explicit type annotation — in particular,
-annotate exported template-only components with `TOC<...>` (see
-`src/components/badge.gts`).
+annotate exported template-only components with `TOC<...>`.
 
 ## Publishing
 
