@@ -175,6 +175,14 @@ describe("base: minimal-library", () => {
       `);
     });
 
+    it("type checks", async () => {
+      let install = await execa("pnpm install", { cwd: project.directory, shell: true });
+      expect(install.exitCode).toBe(0);
+
+      let types = await execa("pnpm lint:types", { cwd: project.directory, shell: true });
+      expect(types.exitCode).toBe(0);
+    });
+
     it("builds, including declarations", async () => {
       await installAndBuild(project);
 
