@@ -10,6 +10,7 @@
     "dist",
     "packages",
     "src/**/layers/*/files/**",
+    "src/**/layers/*/library-files/**",
     "src/**/bases/*/files/**",
     "my-app"
   ]

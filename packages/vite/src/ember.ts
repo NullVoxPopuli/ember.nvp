@@ -44,6 +44,16 @@ interface Config {
     parallel?: false;
 
     /**
+     * which babel config file to use for this build, relative to the
+     * project root. defaults to "./babel.config.js".
+     *
+     * useful when the root babel config belongs to another pipeline
+     * (e.g. a library's publish build) and the vite build needs its own,
+     * such as "./config/test/babel.config.js".
+     */
+    configFile?: string;
+
+    /**
      * optional way to configure when babel is activateed.
      * by default, all transforming is oxc, except when babel is needed
      * (for things not currently implemented in oxc)
@@ -74,7 +84,9 @@ interface Config {
 }
 
 export function ember(nvpConfig: Config = {}) {
-  const babelConfigFile = resolve(join(process.cwd(), "./babel.config.js"));
+  const babelConfigFile = resolve(
+    join(process.cwd(), nvpConfig.babel?.configFile ?? "./babel.config.js"),
+  );
   const filter = babelFilter(nvpConfig);
 
   /*
@@ -174,7 +186,7 @@ function dev(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.input ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  // Libraries have no app entry point
+  // libraries don't, by default, have a "demo app" entrypoint
   if (existsSync("./index.html")) {
     Object.assign(viteConfig.build.rolldownOptions.input, {
       main: absolutePath("./index.html"),
@@ -238,7 +250,7 @@ function prod(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.optimization ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  // Libraries have no app entry point
+  // libraries don't, by default, have a "demo app" entrypoint
   if (existsSync("./index.html")) {
     Object.assign(viteConfig.build.rolldownOptions.input, {
       main: absolutePath("./index.html"),

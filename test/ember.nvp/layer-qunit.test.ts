@@ -1,8 +1,8 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
 import { execa } from "execa";
-import { readdir, readFile, rm } from "node:fs/promises";
-import { join, relative, sep } from "node:path";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, relative, sep } from "node:path";
 
 import type { Project } from "ember.nvp";
 
@@ -27,6 +27,110 @@ async function installAndTest(project: Project) {
 
   let test = await execa("pnpm test", { cwd: project.directory, shell: true });
   expect(test.exitCode).toBe(0);
+}
+
+/**
+ * The layer ships testing infrastructure only; the tests exercising the
+ * base's example exports are generated here, in both flavors.
+ */
+const exampleTests = {
+  typescript: {
+    "tests/rendering/greeting-test.gts": `import { render } from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { setupRenderingTest } from "ember-qunit";
+
+import Greeting from "#src/components/greeting.gts";
+
+module("Rendering | Greeting", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("it renders", async function (assert) {
+    await render(<template><Greeting @name="Tomster" /></template>);
+
+    assert.dom("p").hasText("Hello, Tomster!");
+  });
+});
+`,
+    "tests/rendering/badge-test.gts": `import { render } from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { setupRenderingTest } from "ember-qunit";
+
+import { Badge } from "#src/components/badge.gts";
+
+module("Rendering | Badge", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("it renders its content", async function (assert) {
+    await render(<template><Badge>New</Badge></template>);
+
+    assert.dom("span.badge").hasText("New");
+  });
+});
+`,
+    "tests/unit/math-test.ts": `import { module, test } from "qunit";
+
+import { add } from "#src/utils/math.ts";
+
+module("Unit | add", function () {
+  test("adds two numbers", function (assert) {
+    assert.strictEqual(add(1, 2), 3);
+  });
+});
+`,
+  },
+  javascript: {
+    "tests/rendering/greeting-test.gjs": `import { render } from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { setupRenderingTest } from "ember-qunit";
+
+import Greeting from "#src/components/greeting.gjs";
+
+module("Rendering | Greeting", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("it renders", async function (assert) {
+    await render(<template><Greeting @name="Tomster" /></template>);
+
+    assert.dom("p").hasText("Hello, Tomster!");
+  });
+});
+`,
+    "tests/rendering/badge-test.gjs": `import { render } from "@ember/test-helpers";
+import { module, test } from "qunit";
+import { setupRenderingTest } from "ember-qunit";
+
+import { Badge } from "#src/components/badge.gjs";
+
+module("Rendering | Badge", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("it renders its content", async function (assert) {
+    await render(<template><Badge>New</Badge></template>);
+
+    assert.dom("span.badge").hasText("New");
+  });
+});
+`,
+    "tests/unit/math-test.js": `import { module, test } from "qunit";
+
+import { add } from "#src/utils/math.js";
+
+module("Unit | add", function () {
+  test("adds two numbers", function (assert) {
+    assert.strictEqual(add(1, 2), 3);
+  });
+});
+`,
+  },
+};
+
+async function writeExampleTests(project: Project, flavor: keyof typeof exampleTests) {
+  for (let [filePath, contents] of Object.entries(exampleTests[flavor])) {
+    let target = join(project.directory, filePath);
+
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, contents);
+  }
 }
 
 describe("layer: qunit", () => {
@@ -69,17 +173,16 @@ describe("layer: qunit", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
+          "config/test/babel.config.js",
+          "config/test/testem.cjs",
           "package.json",
           "src/components/badge.gts",
           "src/components/greeting.gts",
           "src/index.ts",
           "src/utils/math.ts",
-          "testem.cjs",
-          "tests/rendering/badge-test.gts",
-          "tests/rendering/greeting-test.gts",
+          "tests/rendering/.gitkeep",
           "tests/test-helper.ts",
-          "tests/unit/math-test.ts",
+          "tests/unit/.gitkeep",
           "tsconfig.json",
           "tsdown.config.js",
           "vite.config.mjs",
@@ -93,12 +196,11 @@ describe("layer: qunit", () => {
         import { ember } from "@nullvoxpopuli/ember-vite";
 
         export default defineConfig({
-          plugins: [ember()],
+          plugins: [ember({ babel: { configFile: "./config/test/babel.config.js" } })],
         });
         "
       `);
-
-      expect(await read(project, "babel.config.js")).toMatchInlineSnapshot(`
+      expect(await read(project, "config/test/babel.config.js")).toMatchInlineSnapshot(`
         "import { buildMacros } from "@embroider/macros/babel";
 
         const macros = buildMacros({
@@ -133,14 +235,6 @@ describe("layer: qunit", () => {
                 },
               },
             ],
-            [
-              "@babel/plugin-transform-runtime",
-              {
-                absoluteRuntime: import.meta.dirname,
-                useESModules: true,
-                regenerator: false,
-              },
-            ],
             ...macros.babelMacros,
           ],
 
@@ -150,8 +244,7 @@ describe("layer: qunit", () => {
         };
         "
       `);
-
-      expect(await read(project, "testem.cjs")).toMatchInlineSnapshot(`
+      expect(await read(project, "config/test/testem.cjs")).toMatchInlineSnapshot(`
         ""use strict";
 
         if (typeof module !== "undefined") {
@@ -180,19 +273,22 @@ describe("layer: qunit", () => {
         }
         "
       `);
+    });
 
+    it("leaves the publish build config alone", async () => {
       expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
         "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
 
         export default defineConfig({
           entry: ["./src/index.ts"],
-          plugins: [ember({ babel: { configFile: false } })],
+          plugins: [ember()],
         });
         "
       `);
     });
 
-    it("installs, and the generated tests pass", async () => {
+    it("installs, and tests generated against the library's exports pass", async () => {
+      await writeExampleTests(project, "typescript");
       await installAndTest(project);
     });
 
@@ -223,17 +319,16 @@ describe("layer: qunit", () => {
         [
           ".gitignore",
           "README.md",
-          "babel.config.js",
+          "config/test/babel.config.js",
+          "config/test/testem.cjs",
           "package.json",
           "src/components/badge.gjs",
           "src/components/greeting.gjs",
           "src/index.js",
           "src/utils/math.js",
-          "testem.cjs",
-          "tests/rendering/badge-test.gjs",
-          "tests/rendering/greeting-test.gjs",
+          "tests/rendering/.gitkeep",
           "tests/test-helper.js",
-          "tests/unit/math-test.js",
+          "tests/unit/.gitkeep",
           "tsdown.config.js",
           "vite.config.mjs",
         ]
@@ -241,7 +336,7 @@ describe("layer: qunit", () => {
     });
 
     it("has no TypeScript leftovers in the test build config", async () => {
-      expect(await read(project, "babel.config.js")).toMatchInlineSnapshot(`
+      expect(await read(project, "config/test/babel.config.js")).toMatchInlineSnapshot(`
         "import { buildMacros } from "@embroider/macros/babel";
 
         const macros = buildMacros({
@@ -265,13 +360,6 @@ describe("layer: qunit", () => {
                 import: import.meta.resolve("decorator-transforms/runtime-esm"),
               },
             },
-          ], [
-            "@babel/plugin-transform-runtime",
-            {
-              absoluteRuntime: import.meta.dirname,
-              useESModules: true,
-              regenerator: false,
-            },
           ], ...macros.babelMacros],
 
           generatorOpts: {
@@ -280,20 +368,20 @@ describe("layer: qunit", () => {
         };
         "
       `);
-
       expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
         "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
 
         export default defineConfig({
           entry: ["./src/index.js"],
           dts: false,
-          plugins: [ember({ babel: { configFile: false } })],
+          plugins: [ember()],
         });
         "
       `);
     });
 
-    it("installs, and the generated tests pass", async () => {
+    it("installs, and tests generated against the library's exports pass", async () => {
+      await writeExampleTests(project, "javascript");
       await installAndTest(project);
     });
 

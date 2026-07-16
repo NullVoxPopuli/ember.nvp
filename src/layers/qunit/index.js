@@ -1,8 +1,7 @@
 import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
-import { removeConfiguredPlugin } from "#utils/babel.js";
+import { hasConfiguredPlugin, prependPlugin, removeConfiguredPlugin } from "#utils/babel.js";
 import { packageJson } from "ember-apply";
-import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const deps = {
@@ -19,27 +18,25 @@ const tsDeps = {
 };
 
 /**
- * Libraries don't have the app's build stack, so the test build brings
- * its own: vite + the babel toolchain the generated babel.config.js
- * imports, plus a minimal test application to render into.
+ * Libraries don't have the app base's vite stack, so the test build
+ * brings the pieces the generated configs and test-helper import
+ * directly. Everything else (babel itself, the embroider machinery)
+ * comes with @nullvoxpopuli/ember-vite.
  */
 const libraryDeps = {
   ...deps,
-  "@babel/core": "^7.29.7",
-  "@babel/plugin-transform-runtime": "^7.29.7",
-  "@babel/runtime": "^7.29.7",
-  "@embroider/core": "^4.4.2",
   "@embroider/macros": "^1.20.3",
   "@nullvoxpopuli/ember-vite": "workspace:*",
-  "@rollup/plugin-babel": "^7.1.0",
   "babel-plugin-ember-template-compilation": "^4.0.0",
   "ember-strict-application-resolver": "^0.1.0",
   vite: "^8.0.14",
 };
 const libraryTsDeps = {
   ...tsDeps,
-  "@babel/plugin-transform-typescript": "^7.29.7",
+  "@babel/plugin-transform-typescript": "^7.28.5",
 };
+
+const TEST_BABEL_CONFIG = "config/test/babel.config.js";
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -69,18 +66,10 @@ export default {
       await addSourceImports(project);
     }
 
-    await applyFolderTo(join(import.meta.dirname, "files/shared"), project);
-    await applyFolderTo(
-      join(import.meta.dirname, isLibrary ? "files/library" : "files/app"),
-      project,
-    );
+    await applyFolderTo(join(import.meta.dirname, isLibrary ? "library-files" : "files"), project);
 
     if (isLibrary) {
-      if (!ts) {
-        await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
-      }
-
-      await keepTestBabelConfigOutOfPublishBuild(project);
+      await syncTestBabelConfig(project, ts);
     }
 
     await packageJson.addDevDependencies(
@@ -95,7 +84,9 @@ export default {
     await packageJson.addScripts(
       {
         "build:test": "EMBER_ENV=test NODE_ENV=development vite build --mode development",
-        "test:ci": "testem ci --port 0",
+        "test:ci": isLibrary
+          ? "testem ci --file config/test/testem.cjs --port 0"
+          : "testem ci --port 0",
         test: "pnpm build:test && pnpm test:ci",
       },
       project.directory,
@@ -176,25 +167,36 @@ async function addSourceImports(project) {
 }
 
 /**
- * The generated babel.config.js exists for the vite test build: it
- * compiles templates to wire format and evaluates macros, both of which
- * must never reach the published dist (libraries ship
- * `precompileTemplate`; consuming apps do the final compile). The
- * publish build's plugin resolves a root babel config on its own, so it
- * has to be told to ignore config files.
+ * The test babel config is the qunit layer's own (a root babel config,
+ * when a library has one, belongs to the publish build), so this layer
+ * also keeps the config's TypeScript handling in step with the project:
+ * the shipped config carries the TS plugin, which must not survive in a
+ * JavaScript project, and must come back when a project adopts the
+ * typescript layer later.
  *
  * @param {import('#utils/project.js').Project} project
+ * @param {boolean} ts
  */
-async function keepTestBabelConfigOutOfPublishBuild(project) {
-  let configPath = project.path("tsdown.config.js");
-  let contents = await readFile(configPath, "utf-8");
-
-  let updated = contents.replace(
-    "plugins: [ember()]",
-    "plugins: [ember({ babel: { configFile: false } })]",
-  );
-
-  if (updated !== contents) {
-    await writeFile(configPath, updated);
+async function syncTestBabelConfig(project, ts) {
+  if (!ts) {
+    await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript", TEST_BABEL_CONFIG);
+    return;
   }
+
+  if (await hasConfiguredPlugin(project, "@babel/plugin-transform-typescript", TEST_BABEL_CONFIG)) {
+    return;
+  }
+
+  await prependPlugin(
+    project,
+    `[
+      "@babel/plugin-transform-typescript",
+      {
+        allExtensions: true,
+        onlyRemoveTypeImports: true,
+        allowDeclareFields: true,
+      },
+    ]`,
+    TEST_BABEL_CONFIG,
+  );
 }
