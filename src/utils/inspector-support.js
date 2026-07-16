@@ -8,8 +8,6 @@ export const INSPECTOR_PACKAGE = "@embroider/legacy-inspector-support";
  */
 export const INSPECTOR_ENTRY = `${INSPECTOR_PACKAGE}/ember-source-4.12`;
 
-const DEFAULT_LOCAL_NAME = "setupInspector";
-
 /**
  * Modules whose default export is the Application (sub)class an app
  * extends. The class extending one of these is where inspector support
@@ -20,15 +18,6 @@ const APPLICATION_MODULES = new Set(["ember-strict-application-resolver", "@embe
 /** @typedef {import('ember-estree').ASTNode} ASTNode */
 
 /**
- * @typedef {object} Analysis
- * @property {import('ember-estree').FileNode} tree
- * @property {ASTNode[]} imports every import declaration, in source order
- * @property {ASTNode | null} inspectorImport the import from {@link INSPECTOR_PACKAGE}, if any
- * @property {ASTNode | null} applicationClass the class extending an Application import, if any
- * @property {ASTNode | null} field the `inspector` class member on that class, if any
- */
-
-/**
  * @param {unknown} value
  * @returns {ASTNode | null}
  */
@@ -37,33 +26,23 @@ function asNode(value) {
 }
 
 /**
- * @param {ASTNode | null} node
- * @returns {string | null} the module specifier of an import declaration
+ * @param {unknown} value
+ * @returns {string} an Identifier node's name ("" when it isn't one)
  */
-function importSource(node) {
-  let source = asNode(node?.source);
+function nameOf(value) {
+  let node = asNode(value);
 
-  if (source?.type !== "Literal") return null;
-
-  return typeof source.value === "string" ? source.value : null;
+  return node?.type === "Identifier" && typeof node.name === "string" ? node.name : "";
 }
 
 /**
- * @param {ASTNode} node an import declaration
+ * @param {ASTNode} importNode
  * @returns {ASTNode[]}
  */
-function importSpecifiers(node) {
-  return Array.isArray(node.specifiers) ? /** @type {ASTNode[]} */ (node.specifiers) : [];
-}
-
-/**
- * @param {ASTNode | null} node
- * @returns {string | null} the identifier's name
- */
-function identifierName(node) {
-  if (node?.type !== "Identifier") return null;
-
-  return typeof node.name === "string" ? node.name : null;
+function specifiersOf(importNode) {
+  return Array.isArray(importNode.specifiers)
+    ? /** @type {ASTNode[]} */ (importNode.specifiers)
+    : [];
 }
 
 /**
@@ -71,16 +50,69 @@ function identifierName(node) {
  * @returns {ASTNode[]} the class's members
  */
 function classMembers(classNode) {
-  let body = asNode(classNode.body);
-  let members = body?.body;
+  let members = asNode(classNode.body)?.body;
 
   return Array.isArray(members) ? /** @type {ASTNode[]} */ (members) : [];
 }
 
+const SOURCE_KEYS = ["start", "end", "range", "loc", "parent"];
+
 /**
+ * Removes source positions recursively: `print` weaves a file's comments
+ * in by `node.start`, so snippet-relative positions on inserted nodes
+ * would drag the host file's comments to the wrong place.
+ *
+ * @param {ASTNode} node
+ * @param {WeakSet<object>} [seen]
+ */
+function scrub(node, seen = new WeakSet()) {
+  if (seen.has(node)) return;
+
+  seen.add(node);
+
+  for (let key of SOURCE_KEYS) delete node[key];
+
+  for (let value of Object.values(node)) {
+    for (let item of Array.isArray(value) ? value : [value]) {
+      let child = asNode(item);
+
+      if (child) scrub(child, seen);
+    }
+  }
+}
+
+/**
+ * Parses a snippet and returns its single statement, position-free and
+ * ready to splice into another module's tree.
+ *
+ * (a local stand-in for ember-estree's tagged-template `statement`
+ * builder, NullVoxPopuli/ember-estree#75 -- swap to that import once it
+ * ships)
+ *
+ * @param {string} code
+ * @returns {ASTNode}
+ */
+function statement(code) {
+  let tree = /** @type {import('ember-estree').FileNode} */ (
+    toTree(code, { filePath: "snippet.ts" })
+  );
+  let [node] = /** @type {ASTNode[]} */ (tree.program.body);
+
+  if (!node) throw new Error(`no statement in snippet: ${code}`);
+
+  scrub(node);
+
+  return node;
+}
+
+/**
+ * Everything wiring and detection need to know about the module: its
+ * import declarations, the import from {@link INSPECTOR_PACKAGE} (any
+ * subpath), the class extending an Application import, and that class's
+ * `inspector` member.
+ *
  * @param {string} code
  * @param {string} filePath
- * @returns {Analysis}
  */
 function analyze(code, filePath) {
   /** @type {ASTNode[]} */
@@ -106,85 +138,32 @@ function analyze(code, filePath) {
   let inspectorImport = null;
 
   for (let node of imports) {
-    let source = importSource(node);
+    let source = asNode(node.source);
+    let from = source?.type === "Literal" && typeof source.value === "string" ? source.value : "";
 
-    if (source === null) continue;
-
-    if (APPLICATION_MODULES.has(source)) {
-      for (let specifier of importSpecifiers(node)) {
-        let local = identifierName(asNode(specifier.local));
+    if (APPLICATION_MODULES.has(from)) {
+      for (let specifier of specifiersOf(node)) {
+        let local = nameOf(specifier.local);
 
         if (local) applicationLocals.add(local);
       }
     }
 
-    if (source === INSPECTOR_PACKAGE || source.startsWith(`${INSPECTOR_PACKAGE}/`)) {
+    if (from === INSPECTOR_PACKAGE || from.startsWith(`${INSPECTOR_PACKAGE}/`)) {
       inspectorImport ??= node;
     }
   }
 
   let applicationClass =
-    classes.find((node) => {
-      let superClass = identifierName(asNode(node.superClass));
+    classes.find((node) => applicationLocals.has(nameOf(node.superClass))) ?? null;
 
-      return superClass !== null && applicationLocals.has(superClass);
-    }) ?? null;
-
-  let field = applicationClass
+  let inspectorMember = applicationClass
     ? (classMembers(applicationClass).find(
-        (member) =>
-          !member.static && !member.computed && identifierName(asNode(member.key)) === "inspector",
+        (member) => !member.static && !member.computed && nameOf(member.key) === "inspector",
       ) ?? null)
     : null;
 
-  return { tree, imports, inspectorImport, applicationClass, field };
-}
-
-/**
- * @param {string} name
- * @returns {ASTNode}
- */
-function identifier(name) {
-  return { type: "Identifier", name };
-}
-
-/**
- * @param {string} localName
- * @returns {ASTNode}
- */
-function defaultSpecifier(localName) {
-  return { type: "ImportDefaultSpecifier", local: identifier(localName) };
-}
-
-/**
- * @param {string} localName
- * @returns {ASTNode} `import <localName> from "<INSPECTOR_ENTRY>";`
- */
-function inspectorImportNode(localName) {
-  return {
-    type: "ImportDeclaration",
-    specifiers: [defaultSpecifier(localName)],
-    source: { type: "Literal", value: INSPECTOR_ENTRY, raw: JSON.stringify(INSPECTOR_ENTRY) },
-  };
-}
-
-/**
- * @param {string} localName
- * @returns {ASTNode} `inspector = <localName>(this);`
- */
-function inspectorFieldNode(localName) {
-  return {
-    type: "PropertyDefinition",
-    static: false,
-    computed: false,
-    key: identifier("inspector"),
-    value: {
-      type: "CallExpression",
-      callee: identifier(localName),
-      arguments: [{ type: "ThisExpression" }],
-      optional: false,
-    },
-  };
+  return { tree, imports, inspectorImport, applicationClass, inspectorMember };
 }
 
 /**
@@ -197,9 +176,9 @@ function inspectorFieldNode(localName) {
  * @returns {boolean}
  */
 export function hasInspectorSupport(code, filePath) {
-  let { inspectorImport, field } = analyze(code, filePath);
+  let { inspectorImport, inspectorMember } = analyze(code, filePath);
 
-  return Boolean(inspectorImport && field);
+  return Boolean(inspectorImport && inspectorMember);
 }
 
 /**
@@ -230,44 +209,38 @@ export function hasInspectorSupport(code, filePath) {
  * @returns {string}
  */
 export function wireInspectorSupport(code, filePath) {
-  let { tree, imports, inspectorImport, applicationClass, field } = analyze(code, filePath);
+  let { tree, imports, inspectorImport, applicationClass, inspectorMember } = analyze(
+    code,
+    filePath,
+  );
 
   if (!applicationClass) return code;
+  if (inspectorImport && inspectorMember) return code;
 
-  let changed = false;
-  let localName = inspectorImport
-    ? identifierName(
-        asNode(
-          importSpecifiers(inspectorImport).find(
-            (specifier) => specifier.type === "ImportDefaultSpecifier",
-          )?.local,
-        ),
-      )
-    : null;
+  let localName = "setupInspector";
 
-  if (!localName) {
-    localName = DEFAULT_LOCAL_NAME;
+  if (inspectorImport) {
+    let defaultSpecifier = specifiersOf(inspectorImport).find(
+      (specifier) => specifier.type === "ImportDefaultSpecifier",
+    );
 
-    if (inspectorImport) {
-      // a side-effect-only import: give it the default binding
-      importSpecifiers(inspectorImport).push(defaultSpecifier(localName));
-    } else {
-      let body = /** @type {ASTNode[]} */ (tree.program.body);
-      let lastImport = imports.at(-1);
-      let insertAt = lastImport ? body.indexOf(lastImport) + 1 : 0;
+    localName = nameOf(defaultSpecifier?.local);
 
-      body.splice(insertAt, 0, inspectorImportNode(localName));
-    }
+    // an import that binds no default gives the member nothing to call
+    if (!localName) return code;
+  } else {
+    let body = /** @type {ASTNode[]} */ (tree.program.body);
+    let lastImport = imports.at(-1);
+    let insertAt = lastImport ? body.indexOf(lastImport) + 1 : 0;
 
-    changed = true;
+    body.splice(insertAt, 0, statement(`import ${localName} from "${INSPECTOR_ENTRY}";`));
   }
 
-  if (!field) {
-    classMembers(applicationClass).push(inspectorFieldNode(localName));
-    changed = true;
-  }
+  if (!inspectorMember) {
+    let [member] = classMembers(statement(`class _ { inspector = ${localName}(this); }`));
 
-  if (!changed) return code;
+    if (member) classMembers(applicationClass).push(member);
+  }
 
   return print(tree);
 }
