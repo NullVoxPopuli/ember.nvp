@@ -26,7 +26,8 @@ const INITIAL_ONLY = new Set<string>([
  * these as layers learn.
  */
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
-  app: new Set(),
+  // publish checks: apps aren't published
+  app: new Set(["publint", "are-the-types-wrong"]),
   // libraries have no Application to wire inspector support into
   library: new Set(["inspector-support"]),
 };

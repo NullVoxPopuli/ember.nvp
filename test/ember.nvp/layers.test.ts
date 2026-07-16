@@ -10,12 +10,14 @@ describe("discoverLayers", () => {
 
     expect(layerNames).toMatchInlineSnapshot(`
       [
+        "are-the-types-wrong",
         "eslint-bundled-ember",
         "eslint-bundled-nvp",
         "git",
         "github-actions",
         "inspector-support",
         "prettier",
+        "publint",
         "qunit",
         "renovate",
         "typescript",
