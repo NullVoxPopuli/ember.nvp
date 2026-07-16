@@ -27,8 +27,12 @@ const INITIAL_ONLY = new Set<string>([
  */
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   app: new Set(),
-  // qunit's scripts assume an app (vite build + testem against index.html)
-  library: new Set(["qunit"]),
+  library: new Set([
+    // qunit's scripts assume an app (vite build + testem against index.html)
+    "qunit",
+    // libraries have no Application to wire inspector support into
+    "inspector-support",
+  ]),
 };
 
 const eachBase = bases.map((base) => {

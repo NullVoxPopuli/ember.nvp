@@ -27,15 +27,17 @@ export default {
    * 1. Apply files
    *   a. Remove TS if needed
    * 2. Update name(s)
-   * 3. Remove TS deps/files/config if needed
-   * 4. Upgrade in-range dependencies
-   * 5. Update an existing babel config, if any
+   * 3. Make publishable
+   * 4. Remove TS deps/files/config if needed
+   * 5. Upgrade in-range dependencies
+   * 6. Update an existing babel config, if any
    *
    * @param {import('#utils/project.js').Project} project
    */
   async run(project) {
     await applyFiles(project);
     await updateName(project);
+    await makePublishable(project);
     await makeJavaScript(project);
     await upgradeDependencies(project);
     await updateBabelConfig(project);
@@ -59,6 +61,19 @@ async function applyFiles(project) {
 async function updateName(project) {
   await packageJson.modify((json) => {
     json.name = project.desires.name;
+  }, project.directory);
+}
+
+/**
+ * The template's package.json is `private: true` so it can never be
+ * published from this repo; the generated library exists to be published,
+ * so the flag is removed entirely.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function makePublishable(project) {
+  await packageJson.modify((json) => {
+    delete json.private;
   }, project.directory);
 }
 
