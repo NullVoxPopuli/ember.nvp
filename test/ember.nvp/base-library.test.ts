@@ -85,10 +85,17 @@ describe("base: minimal-library", () => {
       // No declarations are emitted without types
       expect(JSON.stringify(manifest.exports)).not.toContain("types");
 
-      let tsdownConfig = await read(project, "tsdown.config.js");
+      expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
+        "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
 
-      expect(tsdownConfig).toContain("./src/index.js");
-      expect(tsdownConfig).toContain("dts: false");
+        export default defineConfig({
+          entry: ["./src/index.js"],
+          // Declarations can't be produced without types
+          dts: false,
+          plugins: [ember()],
+        });
+        "
+      `);
     });
 
     it("removes the TS plugin from an existing project's babel config", async () => {

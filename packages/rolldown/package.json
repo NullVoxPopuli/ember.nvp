@@ -33,15 +33,20 @@
     "node": ">= 24"
   },
   "peerDependencies": {
+    "tsdown": ">= 0.22.0",
     "typescript": ">= 5.5"
   },
   "peerDependenciesMeta": {
+    "tsdown": {
+      "optional": true
+    },
     "typescript": {
       "optional": true
     }
   },
   "devDependencies": {
     "rolldown": "^1.1.2",
+    "tsdown": "^0.22.7",
     "typescript": "^6.0.3"
   }
 }

@@ -23,17 +23,19 @@ modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
 In your `tsdown.config.js` (recommended — emits declarations):
 
 ```js
-import { defineConfig } from "tsdown";
-import { ember } from "@nullvoxpopuli/ember-rolldown";
+import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
 
 export default defineConfig({
   entry: ["./src/index.ts"],
-  sourcemap: true,
-  clean: true,
-  dts: true,
   plugins: [ember()],
 });
 ```
+
+`defineConfig` is tsdown's, preloaded with the settings every Ember v2
+library wants — `dts`, `sourcemap`, `clean`, `outExtensions` pinning
+`.js`/`.d.ts` (tsdown emits `.mjs`/`.d.mts` by default), and `neverBundle`
+for the ember virtual packages. You choose the `entry` and `plugins`, and
+anything you pass overrides the defaults.
 
 Or in a plain `rolldown.config.js`:
 

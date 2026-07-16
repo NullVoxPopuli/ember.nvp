@@ -5,6 +5,8 @@ import { emberExternals } from "./src/externals.ts";
 import { emberIsolatedDeclarations } from "./src/isolated-declarations.ts";
 import { emberTransform } from "./src/transform.ts";
 
+export { defineConfig } from "./src/define-config.ts";
+
 interface Config {
   /**
    * Options for the babel step (see `BabelOptions`):
