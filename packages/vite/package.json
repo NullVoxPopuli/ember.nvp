@@ -26,13 +26,10 @@
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "@babel/core": "^7.28.10",
-    "@babel/plugin-transform-typescript": "^7.28.10",
     "@embroider/core": "^4.4.2",
     "@embroider/macros": "^1.20.3",
     "@embroider/vite": "^1.5.0",
-    "@nullvoxpopuli/ember-build-tooling-utils": "workspace:*",
-    "babel-plugin-ember-template-compilation": "^4.0.0",
-    "decorator-transforms": "^2.3.2"
+    "@nullvoxpopuli/ember-build-tooling-utils": "workspace:*"
   },
   "engines": {
     "node": ">= 24"

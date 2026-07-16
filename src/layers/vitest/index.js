@@ -13,9 +13,13 @@ const deps = {
   webdriverio: "^9.29.1",
 };
 
-// Apps already get these from their base
+// Apps already get these from their base. The babel plugins are resolved
+// by name from the project by @nullvoxpopuli/ember-vite's no-config babel
+// fallback (decorator-transforms is already a base dependency).
 const libraryDeps = {
+  "@babel/plugin-transform-typescript": "^7.28.10",
   "@nullvoxpopuli/ember-vite": "workspace:*",
+  "babel-plugin-ember-template-compilation": "^4.0.0",
   vite: "^8.0.14",
 };
 
