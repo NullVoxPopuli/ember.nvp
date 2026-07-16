@@ -1,18 +1,18 @@
+import { ember } from "@nullvoxpopuli/ember-vite";
+import { webdriverio } from "@vitest/browser-webdriverio";
 import { defineConfig } from "vitest/config";
-import { extensions, ember } from "@embroider/vite";
-import { babel } from "@rollup/plugin-babel";
 
 export default defineConfig({
-  plugins: [
-    ember(),
-    babel({
-      babelHelpers: "runtime",
-      extensions: extensions.flatMap((extension) => [extension, ".gts", ".gjs"]),
-    }),
-  ],
+  plugins: [ember()],
   test: {
-    environment: "happy-dom",
-    setupFiles: ["./tests/test-helper.ts"],
     include: ["tests/**/*-test.{js,ts,gjs,gts}"],
+    maxConcurrency: 1,
+    passWithNoTests: true,
+    browser: {
+      provider: webdriverio(),
+      enabled: true,
+      headless: true,
+      instances: [{ browser: "chrome" }],
+    },
   },
 });

@@ -51,6 +51,23 @@ describe("permutate", () => {
     expect(hasOneEslint).toBe(true);
   });
 
+  it("enforces mutual exclusivity for testing layers", () => {
+    const result = permutate(["qunit", "vitest", "other"]);
+
+    for (const permutation of result) {
+      const testingCount = permutation.filter(
+        (item) => item === "qunit" || item === "vitest",
+      ).length;
+      expect(testingCount).toBeLessThanOrEqual(1);
+    }
+
+    const hasQunit = result.some((perm) => perm.includes("qunit"));
+    const hasVitest = result.some((perm) => perm.includes("vitest"));
+
+    expect(hasQunit).toBe(true);
+    expect(hasVitest).toBe(true);
+  });
+
   it("generates valid permutations with mixed items", () => {
     const result = permutate(["a", "eslint-foo", "eslint-bar", "b"]);
 
