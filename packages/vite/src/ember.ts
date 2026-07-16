@@ -2,7 +2,6 @@ import { buildMacros } from "@embroider/macros/babel";
 import { ember as embroiderEmber, extensions, resolver, templateTag } from "@embroider/vite";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { ConfigEnv, ResolvedConfig } from "vite";
 
 import { maybeBabel } from "@nullvoxpopuli/ember-build-tooling-utils";
@@ -15,17 +14,6 @@ function absolutePath(relativePath: string) {
 }
 
 /**
- * Absolute path to a babel plugin, resolved from this package (the
- * project itself doesn't carry these plugins). Paths rather than imported
- * plugin functions: these packages ship no type declarations, and untyped
- * value imports would fail any consuming project's own typecheck (this
- * package is consumed as TypeScript source).
- */
-function resolvePlugin(name: string): string {
-  return fileURLToPath(import.meta.resolve(name));
-}
-
-/**
  * Everything a project without its own babel config needs:
  *
  * - TypeScript stripping
@@ -34,27 +22,24 @@ function resolvePlugin(name: string): string {
  * - build macros, evaluated at build time
  * - decorator-transforms, with its runtime left as a bare specifier so it
  *   resolves from the project (which depends on `decorator-transforms`)
+ *
+ * The plugins are named, not imported: babel resolves them from the
+ * project, which carries them as its own dependencies.
  */
 function defaultBabelPlugins() {
   const macros = buildMacros();
 
   return [
     [
-      resolvePlugin("@babel/plugin-transform-typescript"),
+      "@babel/plugin-transform-typescript",
       {
         allExtensions: true,
         onlyRemoveTypeImports: true,
         allowDeclareFields: true,
       },
     ],
-    [
-      resolvePlugin("babel-plugin-ember-template-compilation"),
-      { transforms: [...macros.templateMacros] },
-    ],
-    [
-      resolvePlugin("decorator-transforms"),
-      { runtime: { import: "decorator-transforms/runtime-esm" } },
-    ],
+    ["babel-plugin-ember-template-compilation", { transforms: [...macros.templateMacros] }],
+    ["module:decorator-transforms", { runtime: { import: "decorator-transforms/runtime-esm" } }],
     ...macros.babelMacros,
   ];
 }
