@@ -2,7 +2,6 @@
   "extends": "@ember/app-tsconfig",
   "compilerOptions": {
     "allowJs": true,
-    // current platform APIs (node 24+, evergreen browsers)
     "lib": ["esnext", "dom", "dom.iterable"],
     "types": [
       "ember-source/types",

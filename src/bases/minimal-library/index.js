@@ -111,7 +111,7 @@ async function pointBuildAtJavaScript(project) {
 
   contents = contents.replace(
     `entry: ["./src/index.ts"],`,
-    `entry: ["./src/index.js"],\n  // Declarations can't be produced without types\n  dts: false,`,
+    `entry: ["./src/index.js"],\n  dts: false,`,
   );
 
   await writeFile(configPath, contents);

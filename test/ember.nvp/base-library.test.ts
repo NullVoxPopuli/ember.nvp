@@ -90,7 +90,6 @@ describe("base: minimal-library", () => {
 
         export default defineConfig({
           entry: ["./src/index.js"],
-          // Declarations can't be produced without types
           dts: false,
           plugins: [ember()],
         });
