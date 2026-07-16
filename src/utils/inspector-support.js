@@ -1,4 +1,4 @@
-import { toTree, print } from "ember-estree";
+import { toTree, print, statement } from "ember-estree";
 
 export const INSPECTOR_PACKAGE = "@embroider/legacy-inspector-support";
 
@@ -53,56 +53,6 @@ function classMembers(classNode) {
   let members = asNode(classNode.body)?.body;
 
   return Array.isArray(members) ? /** @type {ASTNode[]} */ (members) : [];
-}
-
-const SOURCE_KEYS = ["start", "end", "range", "loc", "parent"];
-
-/**
- * Removes source positions recursively: `print` weaves a file's comments
- * in by `node.start`, so snippet-relative positions on inserted nodes
- * would drag the host file's comments to the wrong place.
- *
- * @param {ASTNode} node
- * @param {WeakSet<object>} [seen]
- */
-function scrub(node, seen = new WeakSet()) {
-  if (seen.has(node)) return;
-
-  seen.add(node);
-
-  for (let key of SOURCE_KEYS) delete node[key];
-
-  for (let value of Object.values(node)) {
-    for (let item of Array.isArray(value) ? value : [value]) {
-      let child = asNode(item);
-
-      if (child) scrub(child, seen);
-    }
-  }
-}
-
-/**
- * Parses a snippet and returns its single statement, position-free and
- * ready to splice into another module's tree.
- *
- * (a local stand-in for ember-estree's tagged-template `statement`
- * builder, NullVoxPopuli/ember-estree#75 -- swap to that import once it
- * ships)
- *
- * @param {string} code
- * @returns {ASTNode}
- */
-function statement(code) {
-  let tree = /** @type {import('ember-estree').FileNode} */ (
-    toTree(code, { filePath: "snippet.ts" })
-  );
-  let [node] = /** @type {ASTNode[]} */ (tree.program.body);
-
-  if (!node) throw new Error(`no statement in snippet: ${code}`);
-
-  scrub(node);
-
-  return node;
 }
 
 /**
@@ -233,11 +183,11 @@ export function wireInspectorSupport(code, filePath) {
     let lastImport = imports.at(-1);
     let insertAt = lastImport ? body.indexOf(lastImport) + 1 : 0;
 
-    body.splice(insertAt, 0, statement(`import ${localName} from "${INSPECTOR_ENTRY}";`));
+    body.splice(insertAt, 0, statement`import ${localName} from "${INSPECTOR_ENTRY}";`);
   }
 
   if (!inspectorMember) {
-    let [member] = classMembers(statement(`class _ { inspector = ${localName}(this); }`));
+    let [member] = classMembers(statement`class _ { inspector = ${localName}(this); }`);
 
     if (member) classMembers(applicationClass).push(member);
   }
