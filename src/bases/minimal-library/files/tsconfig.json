@@ -4,13 +4,7 @@
   "compilerOptions": {
     "allowJs": true,
     "rootDir": "./src",
-
-    // current platform APIs (node 24+, evergreen browsers)
     "lib": ["esnext", "dom", "dom.iterable"],
-
-    // Required to emit declarations for `<template>` (gts/gjs) modules.
-    // Exported values need explicit type annotations, e.g.
-    // `export const X: TOC<Sig> = <template>...`
     "isolatedDeclarations": true
   }
 }

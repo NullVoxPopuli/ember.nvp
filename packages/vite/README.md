@@ -45,34 +45,18 @@ The `ember()` plugin takes the following options:
 
 ```ts
 ember({
-  // optional production configs
   production: {
-    // optional configuration of codeSplitting.groups
-    // in the vite config.
-    //
-    // Docs here:
-    // https://rolldown.rs/reference/OutputOptions.codeSplitting#groups
     codeSplittingGroups: [
-      /* ... */
+      /* https://rolldown.rs/reference/OutputOptions.codeSplitting#groups */
     ],
   },
-  // optional babel config
   babel: {
-    // defaults to true.
-    // when babel runs, do so in parallel across many cores.
     parallel: false,
-    // optional way to configure when babel is activateed.
-    // by default, all transforming is oxc, except when babel is needed
-    // (for things not currently implemented in oxc)
     include: {
-      // if a file imports from anything in this array, use babel instead of
-      // oxc for that file.
-      //
-      // For example: ['ember-concurrency', 'ember-intl/format-message'],
-      whenImporting: [
-        /* ... */
-      ],
+      whenImporting: ["ember-concurrency", "ember-intl/format-message"],
     },
   },
 });
 ```
+
+Each option is documented on its type.

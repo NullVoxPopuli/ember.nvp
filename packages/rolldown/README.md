@@ -99,18 +99,15 @@ export const Badge: TOC<BadgeSignature> = <template>...</template>;
 ```ts
 ember({
   babel: {
-    // a string: use that config file;
-    // false: ignore config files entirely
     configFile: "./babel.config.js",
-    // how @rollup/plugin-babel injects helpers
     babelHelpers: "bundled",
-    // extra babel plugins, appended after the config's plugins
     plugins: [],
-    // opt additional files into babel
     filter: { include: { imports: ["ember-concurrency"], code: [] } },
   },
 });
 ```
+
+Each option is documented on `BabelOptions`.
 
 ## Credit
 
