@@ -1,7 +1,7 @@
 {
   "name": "minimal-library",
   "version": "0.0.0",
-  "private": false,
+  "private": true,
   "description": "Your Ember library's description here",
   "repository": "",
   "license": "MIT",
