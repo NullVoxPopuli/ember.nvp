@@ -11,11 +11,12 @@ export async function hasConfiguredTSBabel(project) {
 /**
  * @param {import('./project.js').Project} project
  * @param {string} pluginName
+ * @param {string} [configPath] which babel config to inspect
  */
-export async function hasConfiguredPlugin(project, pluginName) {
+export async function hasConfiguredPlugin(project, pluginName, configPath = "babel.config.js") {
   let hasPlugin = false;
 
-  await js.analyze(project.path("babel.config.js"), async ({ root, j }) => {
+  await js.analyze(project.path(configPath), async ({ root, j }) => {
     root
       .find(j.ArrayExpression, {
         elements: {
@@ -33,9 +34,10 @@ export async function hasConfiguredPlugin(project, pluginName) {
 /**
  * @param {import('./project.js').Project} project
  * @param {string} pluginName
+ * @param {string} [configPath] which babel config to modify
  */
-export async function removeConfiguredPlugin(project, pluginName) {
-  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
+export async function removeConfiguredPlugin(project, pluginName, configPath = "babel.config.js") {
+  await js.transform(project.path(configPath), async ({ root, j }) => {
     root
       .find(j.ArrayExpression, {
         elements: {
@@ -56,9 +58,10 @@ export async function removeConfiguredPlugin(project, pluginName) {
 /**
  * @param {import('./project.js').Project} project
  * @param {string} plugin
+ * @param {string} [configPath] which babel config to modify
  */
-export async function prependPlugin(project, plugin) {
-  await js.transform(project.path("babel.config.js"), async ({ root, j }) => {
+export async function prependPlugin(project, plugin, configPath = "babel.config.js") {
+  await js.transform(project.path(configPath), async ({ root, j }) => {
     root
       .find(j.Property, {
         key: { name: "plugins" },

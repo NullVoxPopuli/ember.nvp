@@ -6,6 +6,8 @@ import type { ConfigEnv, ResolvedConfig } from "vite";
 
 import { maybeBabel } from "@nullvoxpopuli/ember-build-tooling-utils";
 
+import { testHtml } from "./test-html.ts";
+
 const emberConfig = embroiderEmber()[3]!;
 
 const cwd = process.cwd();
@@ -54,13 +56,17 @@ type BabelOptions =
     };
 
 /**
- * The project's own babel config wins when it exists. Without one
- * (libraries), `defaultBabelPlugins` covers TypeScript, templates, macros,
- * and decorators, so no config file is required -- helpers are inlined
- * because projects without a babel config don't carry `@babel/runtime`.
+ * The project's babel config wins when it exists -- `babel.configFile`
+ * selects which one (e.g. a test-only `config/test/babel.config.js`).
+ * Without one (libraries), `defaultBabelPlugins` covers TypeScript,
+ * templates, macros, and decorators, so no config file is required --
+ * helpers are inlined because projects without a babel config don't
+ * carry `@babel/runtime`.
  */
-function babelOptions(): BabelOptions {
-  const configFile = resolve(join(process.cwd(), "./babel.config.js"));
+function babelOptions(nvpConfig: Config): BabelOptions {
+  const configFile = resolve(
+    join(process.cwd(), nvpConfig.babel?.configFile ?? "./babel.config.js"),
+  );
 
   if (existsSync(configFile)) {
     return { configFile };
@@ -104,6 +110,16 @@ interface Config {
     parallel?: false;
 
     /**
+     * which babel config file to use for this build, relative to the
+     * project root. defaults to "./babel.config.js".
+     *
+     * useful when the root babel config belongs to another pipeline
+     * (e.g. a library's publish build) and the vite build needs its own,
+     * such as "./config/test/babel.config.js".
+     */
+    configFile?: string;
+
+    /**
      * optional way to configure when babel is activateed.
      * by default, all transforming is oxc, except when babel is needed
      * (for things not currently implemented in oxc)
@@ -134,7 +150,7 @@ interface Config {
 }
 
 export function ember(nvpConfig: Config = {}) {
-  const babel = babelOptions();
+  const babel = babelOptions(nvpConfig);
   const filter = babelFilter(nvpConfig);
 
   /*
@@ -191,6 +207,7 @@ export function ember(nvpConfig: Config = {}) {
     },
     resolver({ rolldown: true }),
     templateTag(),
+    testHtml(),
     maybeBabel({
       ...babel,
       parallel: nvpConfig.babel?.parallel,
@@ -233,17 +250,24 @@ function dev(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.input ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  Object.assign(viteConfig.build.rolldownOptions.input, {
-    main: absolutePath("./index.html"),
-  });
-
-  if (existsSync("./tests.html")) {
+  // libraries don't, by default, have a "demo app" entrypoint
+  if (existsSync("./index.html")) {
     Object.assign(viteConfig.build.rolldownOptions.input, {
-      tests: absolutePath("./tests.html"),
+      main: absolutePath("./index.html"),
     });
   }
 
   if (existsSync("./tests/index.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      tests: absolutePath("./tests/index.html"),
+    });
+  } else if (existsSync("./tests.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      tests: absolutePath("./tests.html"),
+    });
+  } else if (existsSync("./tests")) {
+    // no html of its own: the default-test-html plugin answers for
+    // tests/index.html
     Object.assign(viteConfig.build.rolldownOptions.input, {
       tests: absolutePath("./tests/index.html"),
     });
@@ -290,9 +314,12 @@ function prod(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.optimization ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  Object.assign(viteConfig.build.rolldownOptions.input, {
-    main: absolutePath("./index.html"),
-  });
+  // libraries don't, by default, have a "demo app" entrypoint
+  if (existsSync("./index.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      main: absolutePath("./index.html"),
+    });
+  }
 
   Object.assign(viteConfig.build.rolldownOptions.optimization, {
     inlineConst: {
