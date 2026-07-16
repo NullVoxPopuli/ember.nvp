@@ -29,13 +29,24 @@ jobs:
       - run: pnpm lint
 
   node_tests:
-    name: "Node Tests"
+    name: "Node Tests (${{ matrix.slice.name }})"
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        slice:
+          - name: app permutations
+            args: test/ember.nvp/permutations/app.test.ts
+          - name: library permutations
+            args: test/ember.nvp/permutations/library.test.ts
+          - name: everything else
+            args: --exclude 'test/ember.nvp/permutations/**'
 
     steps:
       - uses: wyvox/action@v1
       - run: |
           git config --global user.name "ci"
           git config --global user.email "non@none.none"
-          pnpm test:node
+          pnpm test:node ${{ matrix.slice.args }}
