@@ -8,7 +8,11 @@ export interface Layer {
    */
   label: string;
   hint?: string;
-  defaultValue?: () => unknown;
+  /**
+   * Whether the layer is pre-selected in the CLI (the user can still
+   * deselect it).
+   */
+  defaultValue?: (projectType: ProjectType) => unknown;
   /**
    * The function that applies the codemod
    *

@@ -36,4 +36,16 @@ describe("discoverLayers", () => {
       });
     }
   });
+
+  describe("default selections", () => {
+    const typescript = layers.find((layer) => layer.name === "typescript")!;
+
+    it("typescript is on by default for libraries", async () => {
+      expect(await typescript.defaultValue?.("library")).toBe(true);
+    });
+
+    it("typescript is opt-in for apps", async () => {
+      expect(await typescript.defaultValue?.("app")).toBeFalsy();
+    });
+  });
 });
