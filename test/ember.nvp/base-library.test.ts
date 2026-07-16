@@ -77,6 +77,14 @@ describe("base: minimal-library", () => {
       `);
     });
 
+    it("is publishable", async () => {
+      let manifest = JSON.parse(await read(project, "package.json"));
+
+      // The template is private (it lives in a workspace); the generated
+      // library must not be
+      expect(manifest).not.toHaveProperty("private");
+    });
+
     it("has no TypeScript leftovers", async () => {
       let manifest = JSON.parse(await read(project, "package.json"));
 
