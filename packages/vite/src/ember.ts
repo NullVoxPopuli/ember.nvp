@@ -5,6 +5,8 @@ import type { ConfigEnv, ResolvedConfig } from "vite";
 
 import { maybeBabel } from "@nullvoxpopuli/ember-build-tooling-utils";
 
+import { testHtml } from "./test-html.ts";
+
 const emberConfig = embroiderEmber()[3]!;
 
 const cwd = process.cwd();
@@ -129,6 +131,7 @@ export function ember(nvpConfig: Config = {}) {
     },
     resolver({ rolldown: true }),
     templateTag(),
+    testHtml(),
     maybeBabel({
       configFile: babelConfigFile,
       parallel: nvpConfig.babel?.parallel,
@@ -171,17 +174,24 @@ function dev(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.input ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  Object.assign(viteConfig.build.rolldownOptions.input, {
-    main: absolutePath("./index.html"),
-  });
-
-  if (existsSync("./tests.html")) {
+  // Libraries have no app entry point
+  if (existsSync("./index.html")) {
     Object.assign(viteConfig.build.rolldownOptions.input, {
-      tests: absolutePath("./tests.html"),
+      main: absolutePath("./index.html"),
     });
   }
 
   if (existsSync("./tests/index.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      tests: absolutePath("./tests/index.html"),
+    });
+  } else if (existsSync("./tests.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      tests: absolutePath("./tests.html"),
+    });
+  } else if (existsSync("./tests")) {
+    // no html of its own: the default-test-html plugin answers for
+    // tests/index.html
     Object.assign(viteConfig.build.rolldownOptions.input, {
       tests: absolutePath("./tests/index.html"),
     });
@@ -228,9 +238,12 @@ function prod(viteConfig: ResolvedConfig, nvpConfig: Config) {
   viteConfig.build.rolldownOptions.optimization ||= {};
   viteConfig.build.rolldownOptions.output ||= {};
 
-  Object.assign(viteConfig.build.rolldownOptions.input, {
-    main: absolutePath("./index.html"),
-  });
+  // Libraries have no app entry point
+  if (existsSync("./index.html")) {
+    Object.assign(viteConfig.build.rolldownOptions.input, {
+      main: absolutePath("./index.html"),
+    });
+  }
 
   Object.assign(viteConfig.build.rolldownOptions.optimization, {
     inlineConst: {

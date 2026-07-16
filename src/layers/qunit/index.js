@@ -1,6 +1,8 @@
 import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
-import { packageJson, files } from "ember-apply";
+import { removeConfiguredPlugin } from "#utils/babel.js";
+import { packageJson } from "ember-apply";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const deps = {
@@ -17,20 +19,74 @@ const tsDeps = {
 };
 
 /**
+ * Libraries don't have the app's build stack, so the test build brings
+ * its own: vite + the babel toolchain the generated babel.config.js
+ * imports, plus a minimal test application to render into.
+ */
+const libraryDeps = {
+  ...deps,
+  "@babel/core": "^7.29.7",
+  "@babel/plugin-transform-runtime": "^7.29.7",
+  "@babel/runtime": "^7.29.7",
+  "@embroider/core": "^4.4.2",
+  "@embroider/macros": "^1.20.3",
+  "@nullvoxpopuli/ember-vite": "workspace:*",
+  "@rollup/plugin-babel": "^7.1.0",
+  "babel-plugin-ember-template-compilation": "^4.0.0",
+  "ember-strict-application-resolver": "^0.1.0",
+  vite: "^8.0.14",
+};
+const libraryTsDeps = {
+  ...tsDeps,
+  "@babel/plugin-transform-typescript": "^7.29.7",
+};
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+function depsFor(project) {
+  return project.type === "library" ? libraryDeps : deps;
+}
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
+function tsDepsFor(project) {
+  return project.type === "library" ? libraryTsDeps : tsDeps;
+}
+
+/**
  * @type {import('#types').Layer}
  */
 export default {
   label: "QUnit",
 
   async run(project) {
-    let filePath = join(import.meta.dirname, "files");
-    await applyFolderTo(filePath, project);
+    let isLibrary = project.type === "library";
     let ts = await project.hasOrWantsLayer("typescript");
+
+    if (isLibrary) {
+      await addSourceImports(project);
+    }
+
+    await applyFolderTo(join(import.meta.dirname, "files/shared"), project);
+    await applyFolderTo(
+      join(import.meta.dirname, isLibrary ? "files/library" : "files/app"),
+      project,
+    );
+
+    if (isLibrary) {
+      if (!ts) {
+        await removeConfiguredPlugin(project, "@babel/plugin-transform-typescript");
+      }
+
+      await keepTestBabelConfigOutOfPublishBuild(project);
+    }
 
     await packageJson.addDevDependencies(
       await getLatest({
-        ...deps,
-        ...(ts ? tsDeps : {}),
+        ...depsFor(project),
+        ...(ts ? tsDepsFor(project) : {}),
       }),
       project.directory,
     );
@@ -59,7 +115,10 @@ export default {
    */
   async isSetup(project, explain) {
     const reasons = [];
-    let depsToCheck = [Object.keys(deps), project.wantsTypeScript ? Object.keys(tsDeps) : ""]
+    let depsToCheck = [
+      Object.keys(depsFor(project)),
+      project.wantsTypeScript ? Object.keys(tsDepsFor(project)) : "",
+    ]
       .flat()
       .filter(Boolean);
 
@@ -100,3 +159,42 @@ export default {
     return reasons.length === 0;
   },
 };
+
+/**
+ * Tests import the library's source (not its published dist), so the
+ * `#src/*` subpath must exist before the test files are applied --
+ * applying rewrites their import extensions by resolving each specifier
+ * through this mapping.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function addSourceImports(project) {
+  await packageJson.modify((json) => {
+    json.imports ||= {};
+    json.imports["#src/*"] ||= "./src/*";
+  }, project.directory);
+}
+
+/**
+ * The generated babel.config.js exists for the vite test build: it
+ * compiles templates to wire format and evaluates macros, both of which
+ * must never reach the published dist (libraries ship
+ * `precompileTemplate`; consuming apps do the final compile). The
+ * publish build's plugin resolves a root babel config on its own, so it
+ * has to be told to ignore config files.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function keepTestBabelConfigOutOfPublishBuild(project) {
+  let configPath = project.path("tsdown.config.js");
+  let contents = await readFile(configPath, "utf-8");
+
+  let updated = contents.replace(
+    "plugins: [ember()]",
+    "plugins: [ember({ babel: { configFile: false } })]",
+  );
+
+  if (updated !== contents) {
+    await writeFile(configPath, updated);
+  }
+}
