@@ -1,0 +1,52 @@
+{
+  "name": "@nullvoxpopuli/ember-rolldown",
+  "version": "1.0.0",
+  "description": "Meta plugin for building ember v2 libraries/addons with rolldown & tsdown.",
+  "type": "module",
+  "main": "index.ts",
+  "keywords": [
+    "rolldown",
+    "tsdown",
+    "ember",
+    "meta plugin",
+    "v2 addon",
+    "library"
+  ],
+  "author": "NullVoxPopuli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NullVoxPopuli/ember.nvp",
+    "directory": "packages/rolldown"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@babel/core": "^7.28.10",
+    "@babel/plugin-transform-typescript": "^7.28.10",
+    "@embroider/core": "^4.4.2",
+    "@nullvoxpopuli/ember-build-tooling-utils": "workspace:*",
+    "babel-plugin-ember-template-compilation": "^4.0.0",
+    "content-tag": "^4.2.0",
+    "decorator-transforms": "^2.3.2"
+  },
+  "engines": {
+    "node": ">= 24"
+  },
+  "peerDependencies": {
+    "tsdown": ">= 0.22.0",
+    "typescript": ">= 5.5"
+  },
+  "peerDependenciesMeta": {
+    "tsdown": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "rolldown": "^1.1.2",
+    "tsdown": "^0.22.7",
+    "typescript": "^6.0.3"
+  }
+}

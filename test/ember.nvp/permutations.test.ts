@@ -2,13 +2,12 @@ import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, reapply } from "#test-helpers";
 import { TODO } from "#layers";
 
-import type { Project } from "ember.nvp";
-import { rimraf } from "rimraf";
+import { rm } from "node:fs/promises";
 
-let permutations = permutate(layers.map((layer) => layer.name));
+import type { Project } from "ember.nvp";
+import type { ProjectType } from "#types";
 
 const baseline = "<baseline>";
-permutations.push([baseline]);
 
 const RE_APPLY_ONLY = new Set<string>([
   // "typescript"
@@ -21,32 +20,44 @@ const INITIAL_ONLY = new Set<string>([
   // "typescript"
 ]);
 
-const eachBase = bases
-  .map((base) => ({ name: base }))
-  .filter(({ name }) => {
-    if (name === "minimal-library") {
-      /** TODO **/
-      return false;
-    }
+/**
+ * Layers that don't yet generate a working setup for a project type.
+ * Every layer is *supposed* to support every base eventually -- shrink
+ * these as layers learn.
+ */
+const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
+  app: new Set(),
+  // qunit's scripts assume an app (vite build + testem against index.html)
+  library: new Set(["qunit"]),
+};
 
-    return true;
-  });
-const eachPermutation = permutations
-  .filter((permutation) => {
-    if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
-      return;
-    }
+const eachBase = bases.map((base) => {
+  const type: ProjectType = base === "minimal-app" ? "app" : "library";
 
-    // Not implemented yet
-    if (permutation.some((x) => TODO.has(x))) {
-      return;
-    }
+  const applicableLayers = layers.filter((layer) => !NOT_YET_SUPPORTED[type].has(layer.name));
 
-    return true;
-  })
-  .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+  const permutations = permutate(applicableLayers.map((layer) => layer.name));
+  permutations.push([baseline]);
 
-describe.each(eachBase)("$name", ({ name: base }) => {
+  const eachPermutation = permutations
+    .filter((permutation) => {
+      if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
+        return;
+      }
+
+      // Not implemented yet
+      if (permutation.some((x) => TODO.has(x))) {
+        return;
+      }
+
+      return true;
+    })
+    .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+
+  return { name: base, type, applicableLayers, eachPermutation };
+});
+
+describe.each(eachBase)("$name", ({ type, applicableLayers, eachPermutation }) => {
   describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
     let project: Project;
     let layerNames = permutation.filter((x) => x !== baseline);
@@ -54,7 +65,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
 
     beforeAll(async () => {
       project = await generate({
-        type: base === "minimal-app" ? "app" : "library",
+        type,
         layers: layerNames,
       });
     });
@@ -65,7 +76,12 @@ describe.each(eachBase)("$name", ({ name: base }) => {
       }
 
       if (project?.directory) {
-        await rimraf(project.directory, { maxRetries: 3, retryDelay: 100 });
+        await rm(project.directory, {
+          recursive: true,
+          force: true,
+          maxRetries: 3,
+          retryDelay: 100,
+        });
       }
     });
 
@@ -144,7 +160,7 @@ describe.each(eachBase)("$name", ({ name: base }) => {
      * on the same project
      */
     describe("apply anew", () => {
-      let newLayers = layers
+      let newLayers = applicableLayers
         .filter((layer) => {
           if (RE_APPLY_ONLY.size > 0 && !RE_APPLY_ONLY.has(layer.name)) {
             return false;

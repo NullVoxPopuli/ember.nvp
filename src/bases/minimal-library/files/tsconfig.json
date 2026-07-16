@@ -1,0 +1,10 @@
+{
+  "extends": "@ember/library-tsconfig",
+  "include": ["src"],
+  "compilerOptions": {
+    "allowJs": true,
+    "rootDir": "./src",
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "isolatedDeclarations": true
+  }
+}

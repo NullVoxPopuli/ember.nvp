@@ -1,0 +1,34 @@
+{
+  "name": "@nullvoxpopuli/ember-build-tooling-utils",
+  "version": "1.0.0",
+  "description": "Shared build tooling for @nullvoxpopuli ember meta-plugins: maybeBabel (run babel only where needed) and the ember file extensions list.",
+  "type": "module",
+  "main": "index.ts",
+  "keywords": [
+    "ember",
+    "babel",
+    "rolldown",
+    "vite",
+    "meta plugin",
+    "build"
+  ],
+  "author": "NullVoxPopuli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NullVoxPopuli/ember.nvp",
+    "directory": "packages/build-tooling-utils"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@babel/core": "^7.28.10",
+    "@rolldown/pluginutils": "^1.0.1",
+    "@rollup/plugin-babel": "^7.1.0"
+  },
+  "engines": {
+    "node": ">= 24"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

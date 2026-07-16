@@ -4,12 +4,21 @@
  * - ember-concurrency
  * - scoped-css
  * - template compilation optimization
+ *
+ * `maybeBabel` runs babel ONLY on the files that actually need it (template-tag
+ * files, files importing template/macro modules, and local code using
+ * decorators). Everything else skips babel so the bundler's native (oxc)
+ * transform handles it -- the whole point being to keep the fast path fast and
+ * not re-slow the build by sending every file through babel.
+ *
+ * This is shared between the vite (app) and rolldown/tsdown (library)
+ * meta-plugins.
  */
 import { and, code, id, include, not, or } from "@rolldown/pluginutils";
-import { extensions } from "@embroider/vite";
 import { babel } from "@rollup/plugin-babel";
 import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
-import type { Plugin } from "vite";
+
+import { extensions } from "./extensions.ts";
 
 /**
  * If a file imports any of these, it needs babel (templates, macros, and a
@@ -84,7 +93,7 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
   };
 };
 
-export function maybeBabel(userOptions: Options = {}): Plugin {
+export function maybeBabel(userOptions: Options = {}) {
   const { filter, ...options } = userOptions;
 
   const plugin = babel({
@@ -133,5 +142,5 @@ export function maybeBabel(userOptions: Options = {}): Plugin {
     ...plugin,
     enforce: "pre",
     name: "nullvoxpopuli:babel",
-  } as Plugin;
+  } as ReturnType<typeof babel>;
 }

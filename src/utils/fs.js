@@ -6,6 +6,13 @@ import { removeTypes } from "./remove-types.js";
 import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
 /**
+ * `**\/*` alone skips dotfiles, which bases legitimately provide
+ * (`.gitignore`, `.env.development`, ...): the extra patterns match
+ * dotfiles at any depth and files inside dot-directories (`.github/...`).
+ */
+const EVERY_FILE = ["**/*", "**/.*", "**/.*/**/*"];
+
+/**
  *
  * Modified version of applyFolder from ember-apply
  * where the caller gets to decide the final output filPath and contents - whereas the version from ember-apply only allows similar file paths in source and destination.
@@ -16,7 +23,10 @@ import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
  * @param {{to: import('#utils/project.js').Project, process: (data: { entry: string, contents: string }) => string | Promise<void>}} options sub folder within the target project to copy the contents to
  */
 export async function applyFolder(from, options) {
-  for await (const entry of glob("**/*", { exclude: ["**/node_modules", "**/dist"], cwd: from })) {
+  for await (const entry of glob(EVERY_FILE, {
+    exclude: ["**/node_modules", "**/dist"],
+    cwd: from,
+  })) {
     let sourcePath = join(from, entry);
     let targetPath = join(options.to.directory, entry);
     let directory = dirname(targetPath);
@@ -43,6 +53,19 @@ export async function applyFolder(from, options) {
  * @param {import('#utils/project.js').Project} project
  */
 export async function applyFolderTo(from, project) {
+  /**
+   * Files we wrote, to be import-rewritten in a second pass.
+   *
+   * Rewriting has to wait until every file is on disk: it checks which
+   * file a specifier actually resolves to, so rewriting while the folder
+   * is still half-applied depends on iteration order (e.g. `index.js`
+   * pointing at `./utils/math.ts` before `math.js` exists would be left
+   * alone, emitting a broken import).
+   *
+   * @type {string[]}
+   */
+  let written = [];
+
   await applyFolder(from, {
     to: project,
     async process({ entry, contents }) {
@@ -66,9 +89,9 @@ export async function applyFolderTo(from, project) {
              */
             return;
           }
-          let newContents = await removeTypes(ext, contents);
 
-          await writeFile(filePath, rewriteImportsToMatchFiles(newContents, filePath));
+          await writeFile(filePath, await removeTypes(ext, contents));
+          written.push(filePath);
           return;
         }
       }
@@ -81,12 +104,23 @@ export async function applyFolderTo(from, project) {
         return;
       }
 
-      /**
-       * Imports must always match the emitted files (and carry their
-       * extension). The util decides which files it applies to and is a
-       * no-op for everything else.
-       */
-      await writeFile(entry, rewriteImportsToMatchFiles(contents, entry));
+      await writeFile(entry, contents);
+      written.push(entry);
     },
   });
+
+  /**
+   * Imports must always match the emitted files (and carry their
+   * extension). The util decides which files it applies to and is a
+   * no-op for everything else. Files that already existed are the
+   * user's; we leave them alone.
+   */
+  for (let filePath of written) {
+    let contents = await readFile(filePath, "utf-8");
+    let rewritten = rewriteImportsToMatchFiles(contents, filePath);
+
+    if (rewritten !== contents) {
+      await writeFile(filePath, rewritten);
+    }
+  }
 }

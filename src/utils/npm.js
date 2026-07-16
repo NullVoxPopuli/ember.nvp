@@ -8,6 +8,18 @@ import { join, resolve } from "node:path";
 const CACHE = {};
 
 /**
+ * Local, not-yet-published workspace packages that must be `link:`ed rather
+ * than resolved from the registry. Maps the published package name to its
+ * folder under `packages/`.
+ *
+ * @type {{ [name: string]: string }}
+ */
+const LOCAL_PACKAGES = {
+  "@nullvoxpopuli/ember-vite": "vite",
+  "@nullvoxpopuli/ember-rolldown": "rolldown",
+};
+
+/**
  * @param {{ [name: string]: string }} deps map of dep name to semver range
  */
 export async function getLatest(deps) {
@@ -25,18 +37,20 @@ export async function getLatest(deps) {
 
       /**
        * HACK FOR CI.
-       * In practice, this package will be published separately, and that version will be used.
-       * Only the local, not-yet-published @nullvoxpopuli/ember-vite package needs the link;
-       * every other dependency must still resolve its real version.
+       * In practice, these packages will be published separately, and those
+       * versions will be used. Only the local, not-yet-published
+       * @nullvoxpopuli/ember-* packages need the link; every other dependency
+       * must still resolve its real version.
        *
        * We use `link:` (a symlink) rather than `file:` (a copy into the store)
-       * on purpose: the package ships TypeScript source, and Node 24 refuses to
+       * on purpose: the packages ship TypeScript source, and Node 24 refuses to
        * strip types for files physically located under node_modules. A symlink
-       * makes Node resolve the realpath to packages/vite (outside node_modules),
+       * makes Node resolve the realpath to packages/* (outside node_modules),
        * so its `.ts` runs directly.
        */
-      if (needsLocalLink && dep === "@nullvoxpopuli/ember-vite") {
-        version = "link:" + resolve(join(import.meta.dirname, "../../packages/vite"));
+      if (needsLocalLink && LOCAL_PACKAGES[dep]) {
+        version =
+          "link:" + resolve(join(import.meta.dirname, "../../packages", LOCAL_PACKAGES[dep]));
       } else {
         if (range == "workspace:*") {
           range = "latest";

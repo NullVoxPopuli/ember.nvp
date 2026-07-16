@@ -28,15 +28,14 @@
     "@babel/core": "^7.28.10",
     "@embroider/core": "^4.4.2",
     "@embroider/vite": "^1.5.0",
-    "@rolldown/pluginutils": "^1.0.1",
-    "@rollup/plugin-babel": "^7.1.0"
+    "@nullvoxpopuli/ember-build-tooling-utils": "workspace:*"
   },
   "engines": {
     "node": ">= 24"
   },
   "devDependencies": {
     "rolldown": "^1.1.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.14"
   }
 }
