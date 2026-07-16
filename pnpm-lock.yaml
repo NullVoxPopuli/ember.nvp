@@ -24,8 +24,8 @@ importers:
         specifier: ^2.17.0
         version: 2.17.0(@types/node@25.0.8)(ejs@3.1.10)(handlebars@4.7.8)(underscore@1.13.7)
       ember-estree:
-        specifier: ^0.6.11
-        version: 0.6.11
+        specifier: ^0.7.0
+        version: 0.7.0
       enhanced-resolve:
         specifier: ^5.24.2
         version: 5.24.2
@@ -4153,8 +4153,8 @@ packages:
     engines: {node: '>= 20.19.0'}
     hasBin: true
 
-  ember-estree@0.6.11:
-    resolution: {integrity: sha512-aZyheQGUXyHu8GARPd1YyjbDMGkvqBYKzPj6RVp8qqMqA1L1MbkWKsljWE3K1CwiJcHwTPgm/O3oxS0TY1AX9Q==}
+  ember-estree@0.7.0:
+    resolution: {integrity: sha512-wtP9xJzDrHV0+2/FmgF8jCC2mXO6Igf3edxi37+RZVWWbQZfabkAMyVV6mr7tntCI2dpaw3W32sBvnYF87f+Bw==}
 
   ember-rfc176-data@0.3.18:
     resolution: {integrity: sha512-JtuLoYGSjay1W3MQAxt3eINWXNYYQliK90tLwtb8aeCuQK8zKGCRbBodVIrkcTqshULMnRuTOS6t1P7oQk3g6Q==}
@@ -12448,7 +12448,7 @@ snapshots:
       - walrus
       - whiskers
 
-  ember-estree@0.6.11:
+  ember-estree@0.7.0:
     dependencies:
       '@glimmer/env': 0.1.7
       '@glimmer/syntax': 0.95.0
