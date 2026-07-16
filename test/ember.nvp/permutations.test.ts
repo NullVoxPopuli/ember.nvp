@@ -2,9 +2,10 @@ import { beforeAll, describe, it, expect, afterAll } from "vitest";
 import { generate, permutate, bases, layers, reapply } from "#test-helpers";
 import { TODO } from "#layers";
 
+import { rm } from "node:fs/promises";
+
 import type { Project } from "ember.nvp";
 import type { ProjectType } from "#types";
-import { rimraf } from "rimraf";
 
 const baseline = "<baseline>";
 
@@ -75,7 +76,12 @@ describe.each(eachBase)("$name", ({ type, applicableLayers, eachPermutation }) =
       }
 
       if (project?.directory) {
-        await rimraf(project.directory, { maxRetries: 3, retryDelay: 100 });
+        await rm(project.directory, {
+          recursive: true,
+          force: true,
+          maxRetries: 3,
+          retryDelay: 100,
+        });
       }
     });
 

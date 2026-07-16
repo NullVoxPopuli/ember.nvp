@@ -1,6 +1,6 @@
 import { packageJson } from "ember-apply";
-import { fileURLToPath } from "node:url";
 import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { getLatest } from "#utils/npm.js";
 import { applyFolderTo } from "#utils/fs.js";
 import { removeConfiguredPlugin } from "#utils/babel.js";
@@ -46,7 +46,7 @@ export default {
  * @param {import('#utils/project.js').Project} project
  */
 async function applyFiles(project) {
-  let filePath = fileURLToPath(new URL("files", import.meta.url));
+  let filePath = join(import.meta.dirname, "files");
 
   await applyFolderTo(filePath, project);
 }

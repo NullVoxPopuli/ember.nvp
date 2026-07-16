@@ -5,6 +5,10 @@
     "allowJs": true,
     "rootDir": "./src",
 
+    // @ember/library-tsconfig's target (es2024) predates APIs node 24 and
+    // evergreen browsers ship (e.g. RegExp.escape)
+    "lib": ["esnext", "dom", "dom.iterable"],
+
     // Declarations are emitted per-module from the compiled source (oxc's
     // isolated declarations, via tsdown), which is the only declaration
     // pipeline that can see compiled `<template>` (gts/gjs) modules. The

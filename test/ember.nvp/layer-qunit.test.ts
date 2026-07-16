@@ -1,7 +1,7 @@
 import { describe, it, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
-import { rimraf } from "rimraf";
 import { execa } from "execa";
+import { rm } from "node:fs/promises";
 
 /**
  * The replace-or-update question only matters when a project already exists
@@ -17,7 +17,7 @@ describe("layer: qunit", () => {
     if (process.env.CI) return;
 
     for (const dir of dirs) {
-      await rimraf(dir, { maxRetries: 3, retryDelay: 100 });
+      await rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
   });
 

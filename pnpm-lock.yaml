@@ -69,9 +69,6 @@ importers:
       release-plan:
         specifier: ^0.18.0
         version: 0.18.0
-      rimraf:
-        specifier: ^6.1.3
-        version: 6.1.3
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -95,8 +92,8 @@ importers:
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.55.3)
     devDependencies:
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/rolldown:
     dependencies:
@@ -126,8 +123,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/vite:
     dependencies:
@@ -148,8 +145,8 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2
       typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^8.0.14
         version: 8.0.14(@types/node@25.0.8)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0)

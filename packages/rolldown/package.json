@@ -42,6 +42,6 @@
   },
   "devDependencies": {
     "rolldown": "^1.1.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }

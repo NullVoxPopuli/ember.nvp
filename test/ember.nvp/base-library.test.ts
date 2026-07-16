@@ -1,9 +1,8 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate, mktemp } from "#test-helpers";
 import { execa } from "execa";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
-import { rimraf } from "rimraf";
 
 import type { Project } from "ember.nvp";
 
@@ -43,7 +42,7 @@ describe("base: minimal-library", () => {
     if (process.env.CI) return;
 
     for (const dir of dirs) {
-      await rimraf(dir, { maxRetries: 3, retryDelay: 100 });
+      await rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
   });
 

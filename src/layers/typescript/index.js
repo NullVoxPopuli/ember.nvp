@@ -13,7 +13,7 @@ const sharedDeps = {
   "@glint/ember-tsc": "^1.0.8",
   "@glint/template": "^1.7.3",
   "@glint/tsserver-plugin": "^2.0.8",
-  typescript: "^5.9.3",
+  typescript: "^6.0.3",
 };
 
 const appDeps = {
