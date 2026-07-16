@@ -1,5 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate, mktemp } from "#test-helpers";
+import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
@@ -54,27 +55,18 @@ describe("base: minimal-library", () => {
       dirs.push(project.directory);
     });
 
-    it("generates the expected files", async () => {
+    it("generates the expected files (src is empty)", async () => {
       expect(await listFiles(project.directory)).toMatchInlineSnapshot(`
         [
           ".gitignore",
           "README.md",
           "package.json",
-          "src/components/badge.gjs",
-          "src/components/greeting.gjs",
           "src/index.js",
-          "src/utils/math.js",
           "tsdown.config.js",
         ]
       `);
-    });
 
-    it("imports match the emitted files", async () => {
-      expect(await read(project, "src/index.js")).toMatchInlineSnapshot(`
-        "export { Badge } from "./components/badge.gjs";
-        export { default as Greeting } from "./components/greeting.gjs";
-        export { add } from "./utils/math.js";"
-      `);
+      expect(await read(project, "src/index.js")).toBe("");
     });
 
     it("is publishable", async () => {
@@ -132,7 +124,8 @@ describe("base: minimal-library", () => {
       expect(babelConfig).toContain("module:decorator-transforms");
     });
 
-    it("builds", async () => {
+    it("builds (with example source written in)", async () => {
+      await writeLibrarySource(project, "javascript");
       await installAndBuild(project);
 
       let output = await read(project, "dist/index.js");
@@ -159,23 +152,24 @@ describe("base: minimal-library", () => {
       dirs.push(project.directory);
     });
 
-    it("generates the expected files", async () => {
+    it("generates the expected files (src is empty)", async () => {
       expect(await listFiles(project.directory)).toMatchInlineSnapshot(`
         [
           ".gitignore",
           "README.md",
           "package.json",
-          "src/components/badge.gts",
-          "src/components/greeting.gts",
           "src/index.ts",
-          "src/utils/math.ts",
           "tsconfig.json",
           "tsdown.config.js",
         ]
       `);
+
+      expect(await read(project, "src/index.ts")).toBe("");
     });
 
     it("type checks", async () => {
+      await writeLibrarySource(project, "typescript");
+
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
 

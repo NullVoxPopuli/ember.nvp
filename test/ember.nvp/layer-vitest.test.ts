@@ -1,5 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
+import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, sep } from "node:path";
@@ -158,10 +159,7 @@ describe("layer: vitest", () => {
           ".gitignore",
           "README.md",
           "package.json",
-          "src/components/badge.gjs",
-          "src/components/greeting.gjs",
           "src/index.js",
-          "src/utils/math.js",
           "tsdown.config.js",
           "vitest.config.mjs",
         ]
@@ -169,6 +167,7 @@ describe("layer: vitest", () => {
     });
 
     it("runs and passes emitted example tests", { timeout: 300_000 }, async () => {
+      await writeLibrarySource(project, "javascript");
       await emit(project, libraryTests("js"));
       await installAndTest(project);
     });
@@ -192,10 +191,7 @@ describe("layer: vitest", () => {
           ".gitignore",
           "README.md",
           "package.json",
-          "src/components/badge.gts",
-          "src/components/greeting.gts",
           "src/index.ts",
-          "src/utils/math.ts",
           "tsconfig.json",
           "tsdown.config.js",
           "vitest.config.mjs",
@@ -228,6 +224,7 @@ describe("layer: vitest", () => {
     });
 
     it("runs and passes emitted example tests", { timeout: 300_000 }, async () => {
+      await writeLibrarySource(project, "typescript");
       await emit(project, libraryTests("ts"));
       await installAndTest(project);
     });

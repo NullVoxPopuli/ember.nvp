@@ -9,6 +9,11 @@ import { substringBytes } from "./buffer.js";
  * @returns
  */
 export async function removeTypes(extension, code) {
+  // Nothing to transform (babel-remove-types throws on empty input)
+  if (code.trim() === "") {
+    return code;
+  }
+
   if (extension === ".gts") {
     return await wrappedRemoveTypes(code, babelRemoveTypes);
   }
