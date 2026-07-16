@@ -134,15 +134,27 @@ importers:
       '@babel/core':
         specifier: ^7.28.10
         version: 7.29.7
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.28.10
+        version: 7.29.7(@babel/core@7.29.7)
       '@embroider/core':
         specifier: ^4.4.2
         version: 4.4.2(@glint/template@1.7.7)
+      '@embroider/macros':
+        specifier: ^1.20.3
+        version: 1.20.3(@babel/core@7.29.7)(@glint/template@1.7.7)
       '@embroider/vite':
         specifier: ^1.5.0
         version: 1.5.0(@embroider/core@4.4.2(@glint/template@1.7.7))(@glint/template@1.7.7)(rollup@4.55.3)(vite@8.0.14(@types/node@25.0.8)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.46.0))
       '@nullvoxpopuli/ember-build-tooling-utils':
         specifier: workspace:*
         version: link:../build-tooling-utils
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.0
+        version: 4.0.0
+      decorator-transforms:
+        specifier: ^2.3.2
+        version: 2.3.2(@babel/core@7.29.7)
     devDependencies:
       rolldown:
         specifier: ^1.1.2

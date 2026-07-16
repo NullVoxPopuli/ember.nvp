@@ -1,16 +1,16 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate } from "#test-helpers";
 import { execa } from "execa";
-import { readdir, readFile, rm } from "node:fs/promises";
-import { join, relative, sep } from "node:path";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join, relative, sep } from "node:path";
 
 import type { Project } from "ember.nvp";
 
 /**
- * The vitest layer has to produce a *runnable* test setup: these tests
- * generate both library flavors (JavaScript and TypeScript), snapshot the
- * interesting generated files, and run the real `pnpm test` (vitest in
- * headless-browser mode) against them, asserting the example tests pass.
+ * The vitest layer ships infrastructure only (config, deps, scripts).
+ * These tests generate projects with the layer, emit specs that exercise
+ * each project's real exports, and run the real `pnpm test` (vitest in
+ * headless-browser mode), asserting the specs genuinely run and pass.
  */
 
 async function listFiles(directory: string): Promise<string[]> {
@@ -27,12 +27,110 @@ async function read(project: Project, filePath: string): Promise<string> {
   return readFile(join(project.directory, filePath), "utf-8");
 }
 
+async function emit(project: Project, files: Record<string, string>) {
+  for (let [path, contents] of Object.entries(files)) {
+    let filePath = join(project.directory, path);
+
+    await mkdir(dirname(filePath), { recursive: true });
+    await writeFile(filePath, contents);
+  }
+}
+
 async function installAndTest(project: Project) {
   let install = await execa("pnpm install", { cwd: project.directory, shell: true });
   expect(install.exitCode).toBe(0);
 
   let test = await execa("pnpm test", { cwd: project.directory, shell: true });
   expect(test.exitCode).toBe(0);
+}
+
+/**
+ * Specs against the library base's real exports, in the flavor matching
+ * the generated project (these files are emitted by this test, not
+ * shipped by the layer, so no automatic conversion applies).
+ */
+function libraryTests(ext: "ts" | "js") {
+  return {
+    [`tests/rendering/greeting-test.g${ext}`]: `import { describe, test, expect } from "vitest";
+import { setupRenderingContext } from "ember-vitest";
+
+import { Greeting } from "../../src/index.${ext}";
+
+describe("Greeting", () => {
+  test("greets by name", async () => {
+    using ctx = await setupRenderingContext();
+
+    await ctx.render(<template><Greeting @name="World" /></template>);
+
+    expect(ctx.element.textContent).toContain("Hello, World!");
+  });
+});
+`,
+    [`tests/rendering/badge-test.g${ext}`]: `import { describe, test, expect } from "vitest";
+import { setupRenderingContext } from "ember-vitest";
+
+import { Badge } from "../../src/index.${ext}";
+
+describe("Badge", () => {
+  test("renders its block", async () => {
+    using ctx = await setupRenderingContext();
+
+    await ctx.render(<template><Badge>New</Badge></template>);
+
+    expect(ctx.find(".badge")?.textContent).toBe("New");
+  });
+});
+`,
+    [`tests/unit/math-test.${ext}`]: `import { describe, test, expect } from "vitest";
+
+import { add } from "../../src/utils/math.${ext}";
+
+describe("add", () => {
+  test("sums two numbers", () => {
+    expect(add(2, 3)).toBe(5);
+  });
+});
+`,
+  };
+}
+
+/**
+ * Specs against the app base's real modules: boots an app made from the
+ * app's own router class (pointed at a test-friendly location) and
+ * application template, and visits its application route.
+ */
+function appTests(ext: "ts" | "js") {
+  return {
+    [`tests/application/welcome-test.g${ext}`]: `import { describe, expect } from "vitest";
+import { applicationTest } from "ember-vitest";
+import { visit } from "@ember/test-helpers";
+import Application from "ember-strict-application-resolver";
+
+import Router from "#app/router.${ext}";
+import ApplicationTemplate from "#app/templates/application.g${ext}";
+
+class TestRouter extends Router {
+  location = "none";
+}
+
+class TestApp extends Application {
+  modules = {
+    "./router": TestRouter,
+    "./templates/application": ApplicationTemplate,
+  };
+}
+
+describe("application", () => {
+  applicationTest.override({ app: ({}, use) => use(TestApp) });
+
+  applicationTest("renders the welcome page", async ({ element }) => {
+    await visit("/");
+
+    expect(element.textContent).toContain("Welcome to Ember");
+  });
+});
+`,
+  };
 }
 
 describe("layer: vitest", () => {
@@ -64,41 +162,14 @@ describe("layer: vitest", () => {
           "src/components/greeting.gjs",
           "src/index.js",
           "src/utils/math.js",
-          "tests/rendering/badge-test.gjs",
-          "tests/rendering/greeting-test.gjs",
-          "tests/unit/math-test.js",
           "tsdown.config.js",
           "vitest.config.mjs",
         ]
       `);
     });
 
-    it("example test imports match the emitted files", async () => {
-      expect(await read(project, "tests/unit/math-test.js")).toMatchInlineSnapshot(`
-        "import { describe, test, expect } from 'vitest';
-        import { add } from "../../src/utils/math.js";
-        describe('add', () => {
-          test('sums two numbers', () => {
-            expect(add(2, 3)).toBe(5);
-          });
-        });"
-      `);
-
-      expect(await read(project, "tests/rendering/greeting-test.gjs")).toMatchInlineSnapshot(`
-        "import { describe, test, expect } from 'vitest';
-        import { setupRenderingContext } from 'ember-vitest';
-        import { Greeting } from "../../src/index.js";
-        describe('Greeting', () => {
-          test('greets by name', async () => {
-            using ctx = await setupRenderingContext();
-            await ctx.render(<template><Greeting @name="World" /></template>);
-            expect(ctx.element.textContent).toContain('Hello, World!');
-          });
-        });"
-      `);
-    });
-
-    it("runs and passes the generated example tests", { timeout: 300_000 }, async () => {
+    it("runs and passes emitted example tests", { timeout: 300_000 }, async () => {
+      await emit(project, libraryTests("js"));
       await installAndTest(project);
     });
   });
@@ -125,9 +196,6 @@ describe("layer: vitest", () => {
           "src/components/greeting.gts",
           "src/index.ts",
           "src/utils/math.ts",
-          "tests/rendering/badge-test.gts",
-          "tests/rendering/greeting-test.gts",
-          "tests/unit/math-test.ts",
           "tsconfig.json",
           "tsdown.config.js",
           "vitest.config.mjs",
@@ -137,64 +205,16 @@ describe("layer: vitest", () => {
 
     it("generates the vitest config", async () => {
       expect(await read(project, "vitest.config.mjs")).toMatchInlineSnapshot(`
-        "import { babel } from "@rollup/plugin-babel";
-        import { buildMacros } from "@embroider/macros/babel";
+        "import { ember } from "@nullvoxpopuli/ember-vite";
         import { webdriverio } from "@vitest/browser-webdriverio";
-        import { ember, extensions } from "@embroider/vite";
         import { defineConfig } from "vitest/config";
 
-        const macros = buildMacros();
-
         export default defineConfig({
-          plugins: [
-            ember(),
-            babel({
-              babelHelpers: "inline",
-              extensions,
-              babelrc: false,
-              configFile: false,
-              plugins: [
-                [
-                  "@babel/plugin-transform-typescript",
-                  {
-                    allExtensions: true,
-                    onlyRemoveTypeImports: true,
-                    allowDeclareFields: true,
-                  },
-                ],
-                [
-                  "babel-plugin-ember-template-compilation",
-                  {
-                    transforms: [...macros.templateMacros],
-                  },
-                ],
-                [
-                  "module:decorator-transforms",
-                  {
-                    runtime: {
-                      import: "decorator-transforms/runtime-esm",
-                    },
-                  },
-                ],
-                ...macros.babelMacros,
-              ],
-            }),
-          ],
-          optimizeDeps: {
-            include: [
-              "@glimmer/component",
-              "@ember/test-helpers",
-              "ember-strict-application-resolver",
-              "ember-source/@ember/component/index.js",
-              "ember-source/@ember/service/index.js",
-              "ember-source/@ember/template-factory/index.js",
-              "ember-source/@ember/component/template-only.js",
-              "ember-source/@glimmer/tracking/index.js",
-            ],
-          },
+          plugins: [ember()],
           test: {
             include: ["tests/**/*-test.{js,ts,gjs,gts}"],
             maxConcurrency: 1,
+            passWithNoTests: true,
             browser: {
               provider: webdriverio(),
               enabled: true,
@@ -207,7 +227,26 @@ describe("layer: vitest", () => {
       `);
     });
 
-    it("runs and passes the generated example tests", { timeout: 300_000 }, async () => {
+    it("runs and passes emitted example tests", { timeout: 300_000 }, async () => {
+      await emit(project, libraryTests("ts"));
+      await installAndTest(project);
+    });
+  });
+
+  describe("TypeScript app", () => {
+    let project: Project;
+
+    beforeAll(async () => {
+      project = await generate({
+        type: "app",
+        name: "my-app",
+        layers: ["typescript", "vitest"],
+      });
+      dirs.push(project.directory);
+    });
+
+    it("runs and passes emitted example tests", { timeout: 300_000 }, async () => {
+      await emit(project, appTests("ts"));
       await installAndTest(project);
     });
   });

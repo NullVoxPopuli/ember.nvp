@@ -26,9 +26,7 @@ const INITIAL_ONLY = new Set<string>([
  * these as layers learn.
  */
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
-  // vitest's wiring targets libraries; ember-vitest's app-level testing
-  // API is experimental (not covered by semver)
-  app: new Set(["vitest"]),
+  app: new Set(),
   // qunit's scripts assume an app (vite build + testem against index.html)
   library: new Set(["qunit"]),
 };
