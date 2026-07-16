@@ -108,6 +108,7 @@ export function emberTransform(): Plugin {
         const fileName = meta?.fileName;
 
         if (fileName) {
+          this.addWatchFile(fileName);
           const source = await readFile(fileName, { encoding: "utf8" });
 
           if (source.includes("<template>")) {
