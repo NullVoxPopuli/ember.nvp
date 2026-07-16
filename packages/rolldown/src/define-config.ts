@@ -1,18 +1,12 @@
 import type { UserConfig } from "tsdown";
 
 /**
- * tsdown's `defineConfig`, preloaded with the settings every Ember v2
- * library wants:
+ * tsdown's config, set up for an Ember v2 library: builds your entry to
+ * `dist/*.js` and `dist/*.d.ts` with sourcemaps, cleaning `dist/` between
+ * builds and leaving the ember virtual packages to the consuming app.
  *
- * - `dts: true`, `sourcemap: true`, `clean: true`
- * - `outExtensions` pinning `.js`/`.d.ts`: tsdown emits `.mjs`/`.d.mts` by
- *   default (even in type-module packages), and the exports map points at
- *   `.js`/`.d.ts`.
- * - `neverBundle` for the ember virtual packages, which the consuming app
- *   provides.
- *
- * You still choose the `entry` and the `plugins` (e.g. `ember()`), and
- * anything you pass overrides the defaults.
+ * You choose the `entry` and the `plugins` (e.g. `ember()`); any tsdown
+ * option you pass wins.
  *
  * ```js
  * import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
@@ -28,7 +22,10 @@ export function defineConfig(config: UserConfig): UserConfig {
     sourcemap: true,
     clean: true,
     dts: true,
+    // tsdown's extensions are .mjs/.d.mts otherwise, even in type-module
+    // packages; exports maps conventionally point at .js/.d.ts
     outExtensions: () => ({ js: ".js", dts: ".d.ts" }),
+    // provided by the consuming app
     neverBundle: ["node:*", "@ember/*", "@glimmer/*"],
     ...config,
   };

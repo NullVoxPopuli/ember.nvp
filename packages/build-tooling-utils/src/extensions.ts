@@ -1,12 +1,9 @@
 /**
  * The file extensions ember source can be authored in.
  *
- * This mirrors embroider's canonical list, which today is only exported from
- * `@embroider/vite` (see its `src/ember.ts`: `export let extensions = [...]`).
- * We intentionally copy it rather than depend on `@embroider/vite`, so this
- * shared tooling stays bundler-agnostic (usable from both the vite and
- * rolldown/tsdown meta-plugins). Keep in sync if embroider's list changes
- * (it rarely does).
+ * Mirrors embroider's canonical list, which is only exported from
+ * `@embroider/vite` (its `src/ember.ts`) — copied rather than depended on so
+ * this shared tooling stays bundler-agnostic. Keep in sync.
  */
 export const extensions = [
   ".mjs",

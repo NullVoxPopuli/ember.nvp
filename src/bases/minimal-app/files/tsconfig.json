@@ -2,8 +2,7 @@
   "extends": "@ember/app-tsconfig",
   "compilerOptions": {
     "allowJs": true,
-    // @ember/app-tsconfig's target (es2024) predates APIs node 24 and
-    // evergreen browsers ship (e.g. RegExp.escape)
+    // current platform APIs (node 24+, evergreen browsers)
     "lib": ["esnext", "dom", "dom.iterable"],
     "types": [
       "ember-source/types",

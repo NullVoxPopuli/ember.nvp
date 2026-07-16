@@ -12,8 +12,8 @@ import { removeConfiguredPlugin } from "#utils/babel.js";
  * - type: "module" in package.json
  * - built with tsdown + @nullvoxpopuli/ember-rolldown
  * - a sample `<template>` component and a plain module
- * - No babel.config.js: @nullvoxpopuli/ember-rolldown's built-in default
- *   babel config covers TS stripping, template compilation, and decorators
+ * - No babel.config.js: ember() covers TS stripping, template compilation,
+ *   and decorators
  * - No testing framework
  * - No linting or formatting
  *
