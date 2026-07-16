@@ -14,6 +14,7 @@ describe("discoverLayers", () => {
         "eslint-bundled-nvp",
         "git",
         "github-actions",
+        "inspector-support",
         "prettier",
         "qunit",
         "renovate",
