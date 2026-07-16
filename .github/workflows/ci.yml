@@ -39,8 +39,10 @@ jobs:
         slice:
           - name: app permutations
             args: test/ember.nvp/permutations/app.test.ts
-          - name: library permutations
-            args: test/ember.nvp/permutations/library.test.ts
+          - name: library permutations 1/2
+            args: test/ember.nvp/permutations/library-1.test.ts
+          - name: library permutations 2/2
+            args: test/ember.nvp/permutations/library-2.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 
