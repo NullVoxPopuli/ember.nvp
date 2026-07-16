@@ -50,7 +50,13 @@ describe("layers: publint + are-the-types-wrong", () => {
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
 
-      let build = await execa("pnpm build", { cwd: project.directory, shell: true, all: true });
+      let build = await execa("pnpm build", {
+        cwd: project.directory,
+        shell: true,
+        all: true,
+        // assertions match the report lines as plain text
+        env: { FORCE_COLOR: "0" },
+      });
       expect(build.exitCode).toBe(0);
 
       expect(build.all).toContain("[publint] No issues found");
@@ -81,7 +87,13 @@ describe("layers: publint + are-the-types-wrong", () => {
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
 
-      let build = await execa("pnpm build", { cwd: project.directory, shell: true, all: true });
+      let build = await execa("pnpm build", {
+        cwd: project.directory,
+        shell: true,
+        all: true,
+        // assertions match the report lines as plain text
+        env: { FORCE_COLOR: "0" },
+      });
       expect(build.exitCode).toBe(0);
 
       expect(build.all).toContain("[publint] No issues found");
