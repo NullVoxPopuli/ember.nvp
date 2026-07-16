@@ -1,3 +1,4 @@
+import { buildMacros } from "@embroider/macros/babel";
 import { ember as embroiderEmber, extensions, resolver, templateTag } from "@embroider/vite";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -12,6 +13,71 @@ const emberConfig = embroiderEmber()[3]!;
 const cwd = process.cwd();
 function absolutePath(relativePath: string) {
   return join(cwd, relativePath);
+}
+
+/**
+ * Everything a project without its own babel config needs:
+ *
+ * - TypeScript stripping
+ * - template compilation (wire format: vite serves/bundles for the
+ *   project's own ember-source, so the final compile happens here)
+ * - build macros, evaluated at build time
+ * - decorator-transforms, with its runtime left as a bare specifier so it
+ *   resolves from the project (which depends on `decorator-transforms`)
+ *
+ * The plugins are named, not imported: babel resolves them from the
+ * project, which carries them as its own dependencies.
+ */
+function defaultBabelPlugins() {
+  const macros = buildMacros();
+
+  return [
+    [
+      "@babel/plugin-transform-typescript",
+      {
+        allExtensions: true,
+        onlyRemoveTypeImports: true,
+        allowDeclareFields: true,
+      },
+    ],
+    ["babel-plugin-ember-template-compilation", { transforms: [...macros.templateMacros] }],
+    ["module:decorator-transforms", { runtime: { import: "decorator-transforms/runtime-esm" } }],
+    ...macros.babelMacros,
+  ];
+}
+
+type BabelOptions =
+  | { configFile: string }
+  | {
+      configFile: false;
+      babelrc: false;
+      babelHelpers: "inline";
+      plugins: ReturnType<typeof defaultBabelPlugins>;
+    };
+
+/**
+ * The project's babel config wins when it exists -- `babel.configFile`
+ * selects which one (e.g. a test-only `config/test/babel.config.js`).
+ * Without one (libraries), `defaultBabelPlugins` covers TypeScript,
+ * templates, macros, and decorators, so no config file is required --
+ * helpers are inlined because projects without a babel config don't
+ * carry `@babel/runtime`.
+ */
+function babelOptions(nvpConfig: Config): BabelOptions {
+  const configFile = resolve(
+    join(process.cwd(), nvpConfig.babel?.configFile ?? "./babel.config.js"),
+  );
+
+  if (existsSync(configFile)) {
+    return { configFile };
+  }
+
+  return {
+    configFile: false,
+    babelrc: false,
+    babelHelpers: "inline",
+    plugins: defaultBabelPlugins(),
+  };
 }
 
 /**
@@ -84,9 +150,7 @@ interface Config {
 }
 
 export function ember(nvpConfig: Config = {}) {
-  const babelConfigFile = resolve(
-    join(process.cwd(), nvpConfig.babel?.configFile ?? "./babel.config.js"),
-  );
+  const babel = babelOptions(nvpConfig);
   const filter = babelFilter(nvpConfig);
 
   /*
@@ -134,7 +198,7 @@ export function ember(nvpConfig: Config = {}) {
           // and we need to compile that away using this app's
           // template compiler
           maybeBabel({
-            configFile: babelConfigFile,
+            ...babel,
             parallel: nvpConfig.babel?.parallel,
             filter,
           }),
@@ -145,7 +209,7 @@ export function ember(nvpConfig: Config = {}) {
     templateTag(),
     testHtml(),
     maybeBabel({
-      configFile: babelConfigFile,
+      ...babel,
       parallel: nvpConfig.babel?.parallel,
       filter,
     }),
