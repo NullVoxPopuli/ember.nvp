@@ -6,6 +6,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   dts: true,
+  // tsdown emits .mjs/.d.mts by default (even in type-module packages);
+  // package.json's exports map points at .js/.d.ts
   outExtensions() {
     return { js: ".js", dts: ".d.ts" };
   },
