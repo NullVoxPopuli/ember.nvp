@@ -101,7 +101,7 @@ async function removeTypesExports(project) {
 
 /**
  * Rewrites the tsdown config so it builds the JavaScript entry and stops
- * emitting declarations.
+ * emitting declarations (defineConfig defaults to `dts: true`).
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -109,9 +109,10 @@ async function pointBuildAtJavaScript(project) {
   let configPath = project.path("tsdown.config.js");
   let contents = await readFile(configPath, "utf-8");
 
-  contents = contents
-    .replace("./src/index.ts", "./src/index.js")
-    .replace("dts: true", "dts: false");
+  contents = contents.replace(
+    `entry: ["./src/index.ts"],`,
+    `entry: ["./src/index.js"],\n  // Declarations can't be produced without types\n  dts: false,`,
+  );
 
   await writeFile(configPath, contents);
 }
