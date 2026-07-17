@@ -1,6 +1,7 @@
 import type { Plugin } from "rolldown";
 
 import { emberBabel, type BabelOptions } from "./src/babel.ts";
+import { emberConfig } from "./src/config.ts";
 import { emberExternals } from "./src/externals.ts";
 import { emberIsolatedDeclarations } from "./src/isolated-declarations.ts";
 import { emberTransform } from "./src/transform.ts";
@@ -21,6 +22,9 @@ interface Config {
  * It bundles everything needed to compile `.gts`/`.gjs` and template-tag
  * (`<template>`) source into publishable output:
  *
+ * - `emberConfig()` — applies sensible tsdown defaults for a library build
+ *   (sourcemaps, `clean`, `dts`, `.js`/`.d.ts` extensions, quiet logging);
+ *   anything you set explicitly still wins.
  * - `emberIsolatedDeclarations()` — errors when a tsconfig.json is present
  *   without `isolatedDeclarations: true` (required: it is the only
  *   declaration pipeline that can see compiled template-tag modules).
@@ -48,6 +52,7 @@ interface Config {
  */
 export function ember(config: Config = {}): Plugin[] {
   return [
+    emberConfig(),
     emberIsolatedDeclarations(),
     emberExternals(),
     emberTransform(),
