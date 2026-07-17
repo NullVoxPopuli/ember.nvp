@@ -4,6 +4,9 @@
   "description": "Shared build tooling for @nullvoxpopuli ember meta-plugins: maybeBabel (run babel only where needed) and the ember file extensions list.",
   "type": "module",
   "main": "index.ts",
+  "publishConfig": {
+    "main": "dist/index.js"
+  },
   "keywords": [
     "ember",
     "babel",
@@ -19,6 +22,10 @@
     "url": "https://github.com/NullVoxPopuli/ember.nvp",
     "directory": "packages/build-tooling-utils"
   },
+  "scripts": {
+    "build": "rolldown --config",
+    "prepack": "pnpm build"
+  },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
     "@babel/core": "^7.28.10",
@@ -29,6 +36,7 @@
     "node": ">= 24"
   },
   "devDependencies": {
+    "rolldown": "^1.1.2",
     "typescript": "^6.0.3"
   }
 }
