@@ -1,6 +1,6 @@
 {
   "name": "@nullvoxpopuli/ember-build-tooling-utils",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Shared build tooling for @nullvoxpopuli ember meta-plugins: maybeBabel (run babel only where needed) and the ember file extensions list.",
   "type": "module",
   "main": "index.ts",

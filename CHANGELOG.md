@@ -1,5 +1,62 @@
 # Changelog
 
+## Release (2026-07-17)
+
+* ember.nvp 0.7.0 (minor)
+* @nullvoxpopuli/ember-build-tooling-utils 1.1.0 (minor)
+* @nullvoxpopuli/ember-rolldown 1.1.0 (minor)
+* @nullvoxpopuli/ember-vite 1.1.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#78](https://github.com/NullVoxPopuli/ember.nvp/pull/78) publint and are-the-types-wrong layers ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#77](https://github.com/NullVoxPopuli/ember.nvp/pull/77) TypeScript is the default for libraries ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#73](https://github.com/NullVoxPopuli/ember.nvp/pull/73) Implement the vitest layer for libraries ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#71](https://github.com/NullVoxPopuli/ember.nvp/pull/71) Add inspector-support layer (Ember Inspector wiring via ember-estree codemod) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#72](https://github.com/NullVoxPopuli/ember.nvp/pull/72) qunit layer: support libraries (tests without any index.html) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#61](https://github.com/NullVoxPopuli/ember.nvp/pull/61) Update maybeBabel ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember.nvp`, `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`
+  * [#63](https://github.com/NullVoxPopuli/ember.nvp/pull/63) Library support via rolldown ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#66](https://github.com/NullVoxPopuli/ember.nvp/pull/66) Lean on node 24: RegExp.escape, import.meta.dirname, fs.rm ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#67](https://github.com/NullVoxPopuli/ember.nvp/pull/67) Export our own defineConfig, preloaded with ember library defaults ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#64](https://github.com/NullVoxPopuli/ember.nvp/pull/64) Make both library flavors build: isolated declarations, hbs targetFormat, real tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#65](https://github.com/NullVoxPopuli/ember.nvp/pull/65) No generated babel.config.js; drop the plugin packages' dist build ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-vite`
+  * [#62](https://github.com/NullVoxPopuli/ember.nvp/pull/62) Cleanup maybeBabel ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#83](https://github.com/NullVoxPopuli/ember.nvp/pull/83) Can't publish TS, build with rolldown ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `@nullvoxpopuli/ember-rolldown`
+  * [#82](https://github.com/NullVoxPopuli/ember.nvp/pull/82) Fix watching in the rolldown plugin ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember.nvp`
+  * [#79](https://github.com/NullVoxPopuli/ember.nvp/pull/79) The library base generates an empty src ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#74](https://github.com/NullVoxPopuli/ember.nvp/pull/74) Generated TS libraries type check: drop allowJs, load ember/glint types ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#70](https://github.com/NullVoxPopuli/ember.nvp/pull/70) Library template is private; generated libraries are publishable ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#58](https://github.com/NullVoxPopuli/ember.nvp/pull/58) Fix lint:types in generated qunit apps: import #app/app.ts with extension ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#59](https://github.com/NullVoxPopuli/ember.nvp/pull/59) Make freshly generated apps pass their own pnpm lint ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#75](https://github.com/NullVoxPopuli/ember.nvp/pull/75) packages/vite: built-in babel fallback when no config file exists ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :memo: Documentation
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#68](https://github.com/NullVoxPopuli/ember.nvp/pull/68) Docs pass: outcome-focused, timeless READMEs and comments ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#81](https://github.com/NullVoxPopuli/ember.nvp/pull/81) Split the app permutations CI slice in two ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#80](https://github.com/NullVoxPopuli/ember.nvp/pull/80) Split the app and library permutations CI slices in two ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#76](https://github.com/NullVoxPopuli/ember.nvp/pull/76) Shard CI: per-base permutation files, parallel Node Tests jobs ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#69](https://github.com/NullVoxPopuli/ember.nvp/pull/69) Remove comments from config files (generated and in READMEs) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 2
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-04)
 
 * ember.nvp 0.6.0 (minor)
