@@ -16,16 +16,13 @@ import type { TsdownPlugin, UserConfig } from "tsdown";
  * - `outExtensions` — `.js`/`.d.ts` rather than tsdown's default `.mjs`/`.d.mts`,
  *   since exports maps conventionally point at `.js`/`.d.ts`.
  * - `report` — off; the size report is noise for a library build.
- * - `logLevel` — `warn`, to keep the build output quiet.
  * - `deps.neverBundle` — leave node builtins and the ember virtual packages to
  *   the consuming app (`emberExternals()` handles the rest).
  *
  * A plain rolldown build has no notion of `clean`/`dts`/`outExtensions`/`report`
  * (those are tsdown-level concepts), so only the options with rolldown
- * equivalents are applied there, via rolldown's own `options`/`outputOptions`
- * hooks:
+ * equivalents are applied there, via rolldown's own `outputOptions` hook:
  *
- * - `logLevel` — `warn` (input option).
  * - `output.sourcemap` — on (output option).
  *
  * Externals are handled by `emberExternals()` (a `resolveId` hook) in both cases.
@@ -40,15 +37,9 @@ export function emberConfig(): TsdownPlugin {
       config.dts ??= true;
       config.outExtensions ??= () => ({ js: ".js", dts: ".d.ts" });
       config.report ??= false;
-      config.logLevel ??= "warn";
 
       config.deps ??= {};
       config.deps.neverBundle ??= ["node:*", "@ember/*", "@glimmer/*"];
-    },
-
-    options(options) {
-      options.logLevel ??= "warn";
-      return options;
     },
 
     outputOptions(options) {

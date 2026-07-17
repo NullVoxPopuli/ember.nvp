@@ -2,7 +2,7 @@ import { execa } from "execa";
 import { join } from "node:path";
 import { styleText } from "node:util";
 import { Readable, Writable } from "node:stream";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { generateProject, Project } from "ember.nvp";
 import { discoverLayers } from "#layers";
@@ -65,6 +65,31 @@ export function permutate(toPermutate: string[]): string[][] {
 
 export async function mktemp(name = "ember.nvp_test-") {
   return await mkdtemp(join(tmpdir(), `${name}-`));
+}
+
+/**
+ * Temporary: `rolldown-plugin-dts` (used by tsdown for `.d.ts` generation)
+ * imports `walk` from `yuku-parser`, but yuku-parser >= 0.6.6 moved `walk` to
+ * `yuku-ast`. Its dependency range still floats to the broken versions, so a
+ * fresh install of a generated library crashes when tsdown builds.
+ *
+ * The yuku toolchain publishes in lockstep on a shared `@yuku-toolchain/types`,
+ * so `yuku-parser` and `yuku-codegen` must be pinned together (pinning only one
+ * splits the toolchain and the dts/publint pipeline silently bails). Pin the
+ * last working set before install -- here in the test harness only, so the
+ * generated blueprint stays override-free. Remove once the plugin is fixed:
+ * https://github.com/sxzz/rolldown-plugin-dts/issues/277
+ */
+export async function pinYukuParser(project: Project): Promise<void> {
+  const manifestPath = join(project.directory, "package.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf-8"));
+
+  manifest.pnpm ??= {};
+  manifest.pnpm.overrides ??= {};
+  manifest.pnpm.overrides["yuku-parser"] = "0.6.5";
+  manifest.pnpm.overrides["yuku-codegen"] = "0.6.5";
+
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 }
 
 export async function reapply(project: Project, layers: string[]) {

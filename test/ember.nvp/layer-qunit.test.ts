@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate } from "#test-helpers";
+import { generate, pinYukuParser } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -23,6 +23,8 @@ async function read(project: Project, filePath: string): Promise<string> {
 }
 
 async function installAndTest(project: Project) {
+  await pinYukuParser(project);
+
   let install = await execa("pnpm install", { cwd: project.directory, shell: true });
   expect(install.exitCode).toBe(0);
 
