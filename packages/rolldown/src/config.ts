@@ -1,13 +1,14 @@
 import type { TsdownPlugin, UserConfig } from "tsdown";
 
 /**
- * Sensible tsdown defaults for an Ember v2 library, applied via tsdown's
- * `tsdownConfig` hook (analogous to Vite's `config` hook). Because these live
- * on a plugin returned by `ember()`, they travel with the meta-plugin — you
- * get them whether you use this package's `defineConfig`, tsdown's, or a plain
- * `tsdown.config.js`.
+ * Sensible defaults for an Ember v2 library, applied through plugin hooks so
+ * they travel with `ember()` — you get them whether you use this package's
+ * `defineConfig`, tsdown's, or a plain `tsdown.config.js` / `rolldown.config.js`.
  *
  * Every value is applied with `??=`, so anything you set explicitly wins.
+ *
+ * Under tsdown, the full set applies via the `tsdownConfig` hook (analogous to
+ * Vite's `config` hook):
  *
  * - `sourcemap` — emit sourcemaps alongside the output.
  * - `clean` — wipe `dist/` between builds.
@@ -19,8 +20,15 @@ import type { TsdownPlugin, UserConfig } from "tsdown";
  * - `deps.neverBundle` — leave node builtins and the ember virtual packages to
  *   the consuming app (`emberExternals()` handles the rest).
  *
- * This hook only runs under tsdown; a plain `rolldown.config.js` build ignores
- * it (rolldown doesn't know about tsdown-level options).
+ * A plain rolldown build has no notion of `clean`/`dts`/`outExtensions`/`report`
+ * (those are tsdown-level concepts), so only the options with rolldown
+ * equivalents are applied there, via rolldown's own `options`/`outputOptions`
+ * hooks:
+ *
+ * - `logLevel` — `warn` (input option).
+ * - `output.sourcemap` — on (output option).
+ *
+ * Externals are handled by `emberExternals()` (a `resolveId` hook) in both cases.
  */
 export function emberConfig(): TsdownPlugin {
   return {
@@ -36,6 +44,16 @@ export function emberConfig(): TsdownPlugin {
 
       config.deps ??= {};
       config.deps.neverBundle ??= ["node:*", "@ember/*", "@glimmer/*"];
+    },
+
+    options(options) {
+      options.logLevel ??= "warn";
+      return options;
+    },
+
+    outputOptions(options) {
+      options.sourcemap ??= true;
+      return options;
     },
   };
 }
