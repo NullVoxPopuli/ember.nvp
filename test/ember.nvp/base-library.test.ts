@@ -171,6 +171,7 @@ describe("base: minimal-library", () => {
 
     it("type checks", async () => {
       await writeLibrarySource(project, "typescript");
+      await pinYukuParser(project);
 
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
