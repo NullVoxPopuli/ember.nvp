@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-07-18)
+
+* ember.nvp 1.0.0 (major)
+* @nullvoxpopuli/ember-rolldown 2.0.0 (major)
+
+#### :boom: Breaking Change
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#86](https://github.com/NullVoxPopuli/ember.nvp/pull/86) Remove defineConfig ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#84](https://github.com/NullVoxPopuli/ember.nvp/pull/84) Create config plugin for rolldown ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-17)
 
 * ember.nvp 0.7.0 (minor)
