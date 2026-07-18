@@ -277,7 +277,8 @@ describe("layer: qunit", () => {
 
     it("leaves the publish build config alone", async () => {
       expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
-        "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
+        "import { defineConfig } from "tsdown";
+        import { ember } from "@nullvoxpopuli/ember-rolldown";
 
         export default defineConfig({
           entry: ["./src/index.ts"],
@@ -367,7 +368,8 @@ describe("layer: qunit", () => {
         "
       `);
       expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
-        "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
+        "import { defineConfig } from "tsdown";
+        import { ember } from "@nullvoxpopuli/ember-rolldown";
 
         export default defineConfig({
           entry: ["./src/index.js"],

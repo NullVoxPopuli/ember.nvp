@@ -6,8 +6,6 @@ import { emberExternals } from "./src/externals.ts";
 import { emberIsolatedDeclarations } from "./src/isolated-declarations.ts";
 import { emberTransform } from "./src/transform.ts";
 
-export { defineConfig } from "./src/define-config.ts";
-
 interface Config {
   /**
    * Options for the babel step; see `BabelOptions`.
@@ -38,14 +36,15 @@ interface Config {
  *   native transform. The library's own `babel.config.js` is used when it
  *   exists; no config file is required.
  *
- * Usage in `tsdown.config.js` / `rolldown.config.js`:
+ * Usage in `tsdown.config.js` (import `defineConfig` from `tsdown` — or from
+ * `rolldown` for a `rolldown.config.js` — so it carries the correct types):
  *
  * ```js
+ * import { defineConfig } from "tsdown";
  * import { ember } from "@nullvoxpopuli/ember-rolldown";
  *
  * export default defineConfig({
  *   entry: ["./src/index.ts"],
- *   dts: true,
  *   plugins: [ember()],
  * });
  * ```

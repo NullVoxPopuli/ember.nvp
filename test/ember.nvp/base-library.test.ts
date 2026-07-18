@@ -88,7 +88,8 @@ describe("base: minimal-library", () => {
       expect(JSON.stringify(manifest.exports)).not.toContain("types");
 
       expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
-        "import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
+        "import { defineConfig } from "tsdown";
+        import { ember } from "@nullvoxpopuli/ember-rolldown";
 
         export default defineConfig({
           entry: ["./src/index.js"],

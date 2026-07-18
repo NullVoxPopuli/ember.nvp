@@ -20,10 +20,15 @@ modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
 
 ## Usage
 
+Import `defineConfig` from the bundler you're using — `tsdown` or `rolldown` —
+so it carries that tool's own config types; `@nullvoxpopuli/ember-rolldown`
+provides `ember()` (the defaults travel with the plugin, not `defineConfig`).
+
 In your `tsdown.config.js` (recommended — emits declarations):
 
 ```js
-import { defineConfig, ember } from "@nullvoxpopuli/ember-rolldown";
+import { defineConfig } from "tsdown";
+import { ember } from "@nullvoxpopuli/ember-rolldown";
 
 export default defineConfig({
   entry: ["./src/index.ts"],
