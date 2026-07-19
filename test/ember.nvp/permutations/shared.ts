@@ -40,28 +40,63 @@ const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
   "minimal-extension": "extension",
 };
 
+/**
+ * Layers that only add lint / format / publish checks. They don't affect
+ * the runtime shape of a project, so they permutate among themselves in a
+ * small "checks" matrix instead of multiplying the main one. ("apply anew"
+ * still applies each of them on top of every main permutation, so linear
+ * cross-group coverage remains.)
+ */
+const CHECK_LAYERS = new Set<string>([
+  "eslint-bundled-ember",
+  "eslint-bundled-nvp",
+  "eslint-ejected",
+  "prettier",
+  "publint",
+  "are-the-types-wrong",
+]);
+
+type PermutationGroup = "main" | "checks";
+
 const eachBase = bases.map((base) => {
   const type = TYPE_FOR_BASE[base]!;
 
   const applicableLayers = layers.filter((layer) => !NOT_YET_SUPPORTED[type].has(layer.name));
 
-  const permutations = permutate(applicableLayers.map((layer) => layer.name));
-  permutations.push([baseline]);
+  const toPermutations = (layerNames: string[], withBaseline: boolean) => {
+    const permutations = permutate(layerNames);
 
-  const eachPermutation = permutations
-    .filter((permutation) => {
-      if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
-        return;
-      }
+    if (withBaseline) {
+      permutations.push([baseline]);
+    }
 
-      // Not implemented yet
-      if (permutation.some((x) => TODO.has(x))) {
-        return;
-      }
+    return permutations
+      .filter((permutation) => {
+        if (INITIAL_ONLY.size > 0 && !permutation.some((x) => INITIAL_ONLY.has(x))) {
+          return;
+        }
 
-      return true;
-    })
-    .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+        // Not implemented yet
+        if (permutation.some((x) => TODO.has(x))) {
+          return;
+        }
+
+        return true;
+      })
+      .map((permutation) => ({ permutation, name: permutation.join(", ") }));
+  };
+
+  const applicableNames = applicableLayers.map((layer) => layer.name);
+  const eachPermutation: Record<PermutationGroup, ReturnType<typeof toPermutations>> = {
+    main: toPermutations(
+      applicableNames.filter((name) => !CHECK_LAYERS.has(name)),
+      true,
+    ),
+    checks: toPermutations(
+      applicableNames.filter((name) => CHECK_LAYERS.has(name)),
+      false,
+    ),
+  };
 
   return { name: base, type, applicableLayers, eachPermutation };
 });
@@ -70,14 +105,20 @@ const eachBase = bases.map((base) => {
  * The permutation matrix grows exponentially with the layer count, so
  * each base runs from its own test file(s) -- CI runs them as separate,
  * parallel jobs. A base whose matrix outgrows one job's budget runs from
- * several files, each taking a deterministic 1-of-N slice.
+ * several files, each taking a deterministic 1-of-N slice. The "checks"
+ * group (CHECK_LAYERS) runs from its own file(s) the same way.
  *
  * @param base which base's permutations this file runs
- * @param slice which 1-of-N slice of the permutations this file runs
+ * @param options.index / options.total which 1-of-N slice of the permutations this file runs
+ * @param options.group which permutation group this file runs
  */
 export function testPermutations(
   base: (typeof bases)[number],
-  slice: { index: number; total: number } = { index: 0, total: 1 },
+  {
+    index = 0,
+    total = 1,
+    group = "main",
+  }: { index?: number; total?: number; group?: PermutationGroup } = {},
 ) {
   const {
     type,
@@ -85,7 +126,7 @@ export function testPermutations(
     eachPermutation: allPermutations,
   } = eachBase.find((b) => b.name === base)!;
 
-  const eachPermutation = allPermutations.filter((_, i) => i % slice.total === slice.index);
+  const eachPermutation = allPermutations[group].filter((_, i) => i % total === index);
 
   describe(base, () => {
     describe.each(eachPermutation)("layers: $name", ({ permutation }) => {
