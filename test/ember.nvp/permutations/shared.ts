@@ -30,10 +30,18 @@ const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   app: new Set(["publint", "are-the-types-wrong"]),
   // libraries have no Application to wire inspector support into
   library: new Set(["inspector-support"]),
+  // publish checks: extensions aren't published (to npm)
+  extension: new Set(["publint", "are-the-types-wrong"]),
+};
+
+const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
+  "minimal-app": "app",
+  "minimal-library": "library",
+  "minimal-extension": "extension",
 };
 
 const eachBase = bases.map((base) => {
-  const type: ProjectType = base === "minimal-app" ? "app" : "library";
+  const type = TYPE_FOR_BASE[base]!;
 
   const applicableLayers = layers.filter((layer) => !NOT_YET_SUPPORTED[type].has(layer.name));
 

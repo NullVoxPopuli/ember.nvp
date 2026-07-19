@@ -3,12 +3,13 @@ import { answers, printArgInUse } from "#args";
 
 /**
  * addon is alias for library
+ * web-extension is alias for extension
  */
-const SUPPORTED = new Set(["app", "library", "addon"]);
+const SUPPORTED = new Set(["app", "library", "addon", "extension", "web-extension"]);
 
 /**
  * @param {string | undefined} selected
- * @returns {selected is "app" | "library" | "addon"}
+ * @returns {selected is "app" | "library" | "addon" | "extension" | "web-extension"}
  */
 function isValid(selected) {
   if (!selected) return false;
@@ -25,6 +26,7 @@ export async function askProjectType() {
     printArgInUse("type", answers.type);
 
     if (answers.type === "addon") return "library";
+    if (answers.type === "web-extension") return "extension";
 
     return answers.type;
   }
@@ -37,6 +39,11 @@ export async function askProjectType() {
         value: "library",
         label: "library",
         hint: "sharable code, usable by other libraries and apps alike",
+      },
+      {
+        value: "extension",
+        label: "browser extension",
+        hint: "Manifest V3 extension whose popup is an Ember app",
       },
     ],
   });

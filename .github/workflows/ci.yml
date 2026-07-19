@@ -45,6 +45,10 @@ jobs:
             args: test/ember.nvp/permutations/library-1.test.ts
           - name: library permutations 2/2
             args: test/ember.nvp/permutations/library-2.test.ts
+          - name: extension permutations 1/2
+            args: test/ember.nvp/permutations/extension-1.test.ts
+          - name: extension permutations 2/2
+            args: test/ember.nvp/permutations/extension-2.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 

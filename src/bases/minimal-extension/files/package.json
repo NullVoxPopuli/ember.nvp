@@ -1,0 +1,58 @@
+{
+  "name": "minimal-extension",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Your Browser Extension's description here",
+  "repository": "",
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "imports": {
+    "#app/*": "./app/*",
+    "#config": "./app/config.ts",
+    "#components/*": "./app/components/*",
+    "#services/*": "./app/services/*",
+    "#test-helpers/*": "./tests/helpers/*",
+    "#utils/*": "./app/utils/*"
+  },
+  "exports": {
+    "./tests/*": "./tests/*",
+    "./*": "./app/*"
+  },
+  "scripts": {
+    "build": "vite build",
+    "build:watch": "vite build --watch --mode development",
+    "dev": "vite",
+    "start": "vite"
+  },
+  "dependencies": {
+    "@embroider/macros": "^1.20.3",
+    "@embroider/router": "^3.0.6",
+    "@glimmer/component": "^2.1.1",
+    "decorator-transforms": "^2.3.2",
+    "ember-source": "~7.0.0",
+    "ember-strict-application-resolver": "^0.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-runtime": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "@ember/app-tsconfig": "^2.0.0",
+    "@embroider/core": "^4.4.2",
+    "@glint/ember-tsc": "^1.7.5",
+    "@glint/template": "^1.7.7",
+    "@glint/tsserver-plugin": "^2.5.5",
+    "@nullvoxpopuli/ember-vite": "workspace:*",
+    "@rollup/plugin-babel": "^7.1.0",
+    "babel-plugin-ember-template-compilation": "^4.0.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.14"
+  },
+  "engines": {
+    "node": ">= 24"
+  },
+  "ember": {
+    "edition": "octane"
+  }
+}

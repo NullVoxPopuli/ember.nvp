@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "minimal-extension",
+  "version": "0.0.0",
+  "description": "Your Browser Extension's description here",
+  "action": {
+    "default_popup": "index.html"
+  }
+}
