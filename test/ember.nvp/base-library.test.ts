@@ -1,9 +1,9 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, mktemp, pinYukuParser } from "#test-helpers";
+import { generate, listFiles, mktemp, pinYukuParser } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join, relative, sep } from "node:path";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import type { Project } from "ember.nvp";
 
@@ -13,20 +13,6 @@ import type { Project } from "ember.nvp";
  * generated files, and run the real `pnpm build` (tsdown + rolldown) against
  * them.
  */
-
-async function listFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
-
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => relative(directory, join(entry.parentPath, entry.name)))
-    .filter((path) => !path.split(sep).includes("node_modules"))
-    .sort();
-}
-
-async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
 
 async function installAndBuild(project: Project) {
   await pinYukuParser(project);
@@ -68,11 +54,11 @@ describe("base: minimal-library", () => {
         ]
       `);
 
-      expect(await read(project, "src/index.js")).toBe("");
+      expect(await project.read("src/index.js")).toBe("");
     });
 
     it("is publishable", async () => {
-      let manifest = JSON.parse(await read(project, "package.json"));
+      let manifest = JSON.parse((await project.read("package.json"))!);
 
       // The template is private (it lives in a workspace); the generated
       // library must not be
@@ -80,14 +66,14 @@ describe("base: minimal-library", () => {
     });
 
     it("has no TypeScript leftovers", async () => {
-      let manifest = JSON.parse(await read(project, "package.json"));
+      let manifest = JSON.parse((await project.read("package.json"))!);
 
       expect(manifest.devDependencies).not.toHaveProperty("typescript");
       expect(manifest.devDependencies).not.toHaveProperty("@ember/library-tsconfig");
       // No declarations are emitted without types
       expect(JSON.stringify(manifest.exports)).not.toContain("types");
 
-      expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
+      expect(await project.read("tsdown.config.js")).toMatchInlineSnapshot(`
         "import { defineConfig } from "tsdown";
         import { ember } from "@nullvoxpopuli/ember-rolldown";
 
@@ -131,7 +117,7 @@ describe("base: minimal-library", () => {
       await writeLibrarySource(project, "javascript");
       await installAndBuild(project);
 
-      let output = await read(project, "dist/index.js");
+      let output = await project.read("dist/index.js");
 
       // Published libraries ship precompileTemplate (the consuming app does
       // the final compile), never wire format
@@ -167,7 +153,7 @@ describe("base: minimal-library", () => {
         ]
       `);
 
-      expect(await read(project, "src/index.ts")).toBe("");
+      expect(await project.read("src/index.ts")).toBe("");
     });
 
     it("type checks", async () => {
@@ -184,12 +170,12 @@ describe("base: minimal-library", () => {
     it("builds, including declarations", async () => {
       await installAndBuild(project);
 
-      let output = await read(project, "dist/index.js");
+      let output = await project.read("dist/index.js");
 
       expect(output).toContain("precompileTemplate");
       expect(output).not.toContain("createTemplateFactory");
 
-      let declarations = await read(project, "dist/index.d.ts");
+      let declarations = await project.read("dist/index.d.ts");
 
       expect(declarations).toMatchInlineSnapshot(`
         "import { TOC } from "@ember/component/template-only";

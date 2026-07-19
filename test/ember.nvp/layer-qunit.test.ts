@@ -1,26 +1,11 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, pinYukuParser } from "#test-helpers";
+import { generate, listFiles, pinYukuParser } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 import type { Project } from "ember.nvp";
-
-async function listFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
-
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => relative(directory, join(entry.parentPath, entry.name)))
-    .filter((path) => !path.split(sep).includes("node_modules"))
-    .filter((path) => !path.startsWith(`dist${sep}`))
-    .sort();
-}
-
-async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
 
 async function installAndTest(project: Project) {
   await pinYukuParser(project);
@@ -169,7 +154,7 @@ describe("layer: qunit", () => {
     });
 
     it("generates the expected files, without any index.html", async () => {
-      let files = await listFiles(project.directory);
+      let files = await listFiles(project.directory, { includeDist: false });
 
       expect(files.some((file) => file.endsWith("index.html"))).toBe(false);
       expect(files).toMatchInlineSnapshot(`
@@ -191,7 +176,7 @@ describe("layer: qunit", () => {
     });
 
     it("generates the test build config", async () => {
-      expect(await read(project, "vite.config.mjs")).toMatchInlineSnapshot(`
+      expect(await project.read("vite.config.mjs")).toMatchInlineSnapshot(`
         "import { defineConfig } from "vite";
         import { ember } from "@nullvoxpopuli/ember-vite";
 
@@ -200,7 +185,7 @@ describe("layer: qunit", () => {
         });
         "
       `);
-      expect(await read(project, "config/test/babel.config.js")).toMatchInlineSnapshot(`
+      expect(await project.read("config/test/babel.config.js")).toMatchInlineSnapshot(`
         "import { buildMacros } from "@embroider/macros/babel";
 
         const macros = buildMacros({
@@ -244,7 +229,7 @@ describe("layer: qunit", () => {
         };
         "
       `);
-      expect(await read(project, "config/test/testem.cjs")).toMatchInlineSnapshot(`
+      expect(await project.read("config/test/testem.cjs")).toMatchInlineSnapshot(`
         ""use strict";
 
         if (typeof module !== "undefined") {
@@ -276,7 +261,7 @@ describe("layer: qunit", () => {
     });
 
     it("leaves the publish build config alone", async () => {
-      expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
+      expect(await project.read("tsdown.config.js")).toMatchInlineSnapshot(`
         "import { defineConfig } from "tsdown";
         import { ember } from "@nullvoxpopuli/ember-rolldown";
 
@@ -298,7 +283,7 @@ describe("layer: qunit", () => {
       let build = await execa("pnpm build", { cwd: project.directory, shell: true });
       expect(build.exitCode).toBe(0);
 
-      let output = await read(project, "dist/index.js");
+      let output = await project.read("dist/index.js");
 
       expect(output).toContain("precompileTemplate");
       expect(output).not.toContain("createTemplateFactory");
@@ -314,7 +299,7 @@ describe("layer: qunit", () => {
     });
 
     it("generates the expected files, without any index.html", async () => {
-      let files = await listFiles(project.directory);
+      let files = await listFiles(project.directory, { includeDist: false });
 
       expect(files.some((file) => file.endsWith("index.html"))).toBe(false);
       expect(files).toMatchInlineSnapshot(`
@@ -335,7 +320,7 @@ describe("layer: qunit", () => {
     });
 
     it("has no TypeScript leftovers in the test build config", async () => {
-      expect(await read(project, "config/test/babel.config.js")).toMatchInlineSnapshot(`
+      expect(await project.read("config/test/babel.config.js")).toMatchInlineSnapshot(`
         "import { buildMacros } from "@embroider/macros/babel";
 
         const macros = buildMacros({
@@ -367,7 +352,7 @@ describe("layer: qunit", () => {
         };
         "
       `);
-      expect(await read(project, "tsdown.config.js")).toMatchInlineSnapshot(`
+      expect(await project.read("tsdown.config.js")).toMatchInlineSnapshot(`
         "import { defineConfig } from "tsdown";
         import { ember } from "@nullvoxpopuli/ember-rolldown";
 
@@ -390,7 +375,7 @@ describe("layer: qunit", () => {
       let build = await execa("pnpm build", { cwd: project.directory, shell: true });
       expect(build.exitCode).toBe(0);
 
-      let output = await read(project, "dist/index.js");
+      let output = await project.read("dist/index.js");
 
       expect(output).toContain("precompileTemplate");
       expect(output).not.toContain("createTemplateFactory");
