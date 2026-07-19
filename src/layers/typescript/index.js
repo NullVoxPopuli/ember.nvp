@@ -7,6 +7,7 @@ import { getLatest } from "#utils/npm.js";
 
 const bases = join(import.meta.dirname, "../../bases");
 const appBase = join(bases, "minimal-app/files");
+const extensionBase = join(bases, "minimal-extension/files");
 const libraryBase = join(bases, "minimal-library/files");
 
 const sharedDeps = {
@@ -146,6 +147,11 @@ async function addTSConfig(project) {
 
   if (project.type === "app") {
     await cp(join(appBase, "tsconfig.json"), project.path("tsconfig.json"));
+    return;
+  }
+
+  if (project.type === "extension") {
+    await cp(join(extensionBase, "tsconfig.json"), project.path("tsconfig.json"));
     return;
   }
 

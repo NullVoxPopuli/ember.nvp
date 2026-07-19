@@ -1,6 +1,6 @@
 import { Project } from "./project.js";
 export type PackageManager = "pnpm" | "npm";
-export type ProjectType = "app" | "library";
+export type ProjectType = "app" | "library" | "extension";
 
 export interface Layer {
   /**

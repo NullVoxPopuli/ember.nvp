@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Minimal Extension</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <!--
+      Unlike a web app, this boot script cannot be inlined:
+      extension pages are served with a Content-Security-Policy of
+      `script-src 'self'`, which forbids inline scripts.
+    -->
+    <script type="module" src="./app/boot.ts"></script>
+  </body>
+</html>
