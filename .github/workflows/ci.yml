@@ -49,6 +49,8 @@ jobs:
             args: test/ember.nvp/permutations/extension-1.test.ts
           - name: extension permutations 2/2
             args: test/ember.nvp/permutations/extension-2.test.ts
+          - name: check-layer permutations
+            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 
