@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, pinYukuParser } from "#test-helpers";
+import { generate } from "#test-helpers";
 import { execa } from "execa";
 import { rm } from "node:fs/promises";
 
@@ -43,8 +43,6 @@ describe("layers: publint + are-the-types-wrong", () => {
     });
 
     it("both checks run and pass in the build", async () => {
-      await pinYukuParser(project);
-
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
 
@@ -83,8 +81,6 @@ describe("layers: publint + are-the-types-wrong", () => {
     });
 
     it("publint runs and passes in the build", async () => {
-      await pinYukuParser(project);
-
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
 
