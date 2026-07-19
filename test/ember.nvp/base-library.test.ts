@@ -194,8 +194,12 @@ describe("base: minimal-library", () => {
       let greetingDeclaration = declarations.match(
         /declare class Greeting extends Component<GreetingSignature>/,
       );
-      expect(greetingDeclaration).not.toBeNull();
-      expect(greetingDeclaration![0]).toMatchInlineSnapshot(
+
+      if (!greetingDeclaration) {
+        throw new Error("Expected Greeting class declaration in generated declarations");
+      }
+
+      expect(greetingDeclaration[0]).toMatchInlineSnapshot(
         `"declare class Greeting extends Component<GreetingSignature>"`,
       );
       expect(declarations).toContain("declare const Badge: TOC<BadgeSignature>");
