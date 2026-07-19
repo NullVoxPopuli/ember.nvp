@@ -191,9 +191,13 @@ describe("base: minimal-library", () => {
 
       let declarations = await read(project, "dist/index.d.ts");
 
-      expect(
-        declarations.match(/declare class Greeting extends Component<GreetingSignature>/)?.[0],
-      ).toMatchInlineSnapshot(`"declare class Greeting extends Component<GreetingSignature>"`);
+      let greetingDeclaration = declarations.match(
+        /declare class Greeting extends Component<GreetingSignature>/,
+      );
+      expect(greetingDeclaration).not.toBeNull();
+      expect(greetingDeclaration![0]).toMatchInlineSnapshot(
+        `"declare class Greeting extends Component<GreetingSignature>"`,
+      );
       expect(declarations).toContain("declare const Badge: TOC<BadgeSignature>");
       expect(declarations).toContain("declare function add(a: number, b: number): number");
 
