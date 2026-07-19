@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, listFiles, mktemp, pinYukuParser } from "#test-helpers";
+import { generate, listFiles, mktemp } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -15,8 +15,6 @@ import type { Project } from "ember.nvp";
  */
 
 async function installAndBuild(project: Project) {
-  await pinYukuParser(project);
-
   let install = await execa("pnpm install", { cwd: project.directory, shell: true });
   expect(install.exitCode).toBe(0);
 
@@ -158,7 +156,6 @@ describe("base: minimal-library", () => {
 
     it("type checks", async () => {
       await writeLibrarySource(project, "typescript");
-      await pinYukuParser(project);
 
       let install = await execa("pnpm install", { cwd: project.directory, shell: true });
       expect(install.exitCode).toBe(0);
