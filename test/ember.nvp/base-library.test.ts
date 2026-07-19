@@ -191,9 +191,33 @@ describe("base: minimal-library", () => {
 
       let declarations = await read(project, "dist/index.d.ts");
 
-      expect(declarations).toContain("declare class Greeting extends Component<GreetingSignature>");
-      expect(declarations).toContain("declare const Badge: TOC<BadgeSignature>");
-      expect(declarations).toContain("declare function add(a: number, b: number): number");
+      expect(declarations).toMatchInlineSnapshot(`
+        "import { TOC } from "@ember/component/template-only";
+        import Component from "@glimmer/component";
+        //#region src/components/badge.d.ts
+        interface BadgeSignature {
+          Element: HTMLSpanElement;
+          Blocks: {
+            default: [];
+          };
+        }
+        declare const Badge: TOC<BadgeSignature>;
+        //#endregion
+        //#region src/components/greeting.d.ts
+        interface GreetingSignature {
+          Element: HTMLParagraphElement;
+          Args: {
+            name: string;
+          };
+        }
+        declare class Greeting extends Component<GreetingSignature> {}
+        //#endregion
+        //#region src/utils/math.d.ts
+        declare function add(a: number, b: number): number;
+        //#endregion
+        export { Badge, type BadgeSignature, Greeting, type GreetingSignature, add };
+        //# sourceMappingURL=index.d.ts.map"
+      `);
 
       expect(await listFiles(join(project.directory, "dist"))).toMatchInlineSnapshot(`
         [
