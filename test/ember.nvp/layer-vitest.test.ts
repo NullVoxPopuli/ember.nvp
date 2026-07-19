@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, listFiles, read } from "#test-helpers";
+import { generate, listFiles } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -186,7 +186,7 @@ describe("layer: vitest", () => {
     });
 
     it("generates the vitest config", async () => {
-      expect(await read(project, "vitest.config.mjs")).toMatchInlineSnapshot(`
+      expect(await project.read("vitest.config.mjs")).toMatchInlineSnapshot(`
         "import { ember } from "@nullvoxpopuli/ember-vite";
         import { webdriverio } from "@vitest/browser-webdriverio";
         import { defineConfig } from "vitest/config";

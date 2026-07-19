@@ -230,10 +230,3 @@ export async function listFiles(
     .filter((path) => includeDist || !path.startsWith(`dist${sep}`))
     .sort();
 }
-
-/**
- * Read a file from the generated project as UTF-8 text.
- */
-export async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
