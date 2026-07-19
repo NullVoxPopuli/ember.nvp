@@ -1,9 +1,9 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, mktemp, pinYukuParser } from "#test-helpers";
+import { generate, listFiles, mktemp, pinYukuParser, read } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { join, relative, sep } from "node:path";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import type { Project } from "ember.nvp";
 
@@ -13,20 +13,6 @@ import type { Project } from "ember.nvp";
  * generated files, and run the real `pnpm build` (tsdown + rolldown) against
  * them.
  */
-
-async function listFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
-
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => relative(directory, join(entry.parentPath, entry.name)))
-    .filter((path) => !path.split(sep).includes("node_modules"))
-    .sort();
-}
-
-async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
 
 async function installAndBuild(project: Project) {
   await pinYukuParser(project);

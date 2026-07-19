@@ -1,8 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, pinYukuParser } from "#test-helpers";
+import { generate, pinYukuParser, read } from "#test-helpers";
 import { execa } from "execa";
-import { readFile, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { rm } from "node:fs/promises";
 
 import type { Project } from "ember.nvp";
 
@@ -11,10 +10,6 @@ import type { Project } from "ember.nvp";
  * (tsdown), so the real assertion is their report lines in `pnpm build`
  * output.
  */
-
-async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
 
 describe("layers: publint + are-the-types-wrong", () => {
   const dirs: string[] = [];

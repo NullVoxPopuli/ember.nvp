@@ -1,8 +1,8 @@
 import { execa } from "execa";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 import { styleText } from "node:util";
 import { Readable, Writable } from "node:stream";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { generateProject, Project } from "ember.nvp";
 import { discoverLayers } from "#layers";
@@ -210,4 +210,30 @@ export async function expectIsSetup(project: Project, layer: DiscoveredLayer) {
   }
 
   expect(result, `${layer.name} is setup`).toBe(true);
+}
+
+/**
+ * List every file under `directory` (recursively) as sorted paths relative
+ * to `directory`. `node_modules` is always excluded; pass
+ * `{ includeDist: false }` to also exclude the `dist/` build output.
+ */
+export async function listFiles(
+  directory: string,
+  { includeDist = true }: { includeDist?: boolean } = {},
+): Promise<string[]> {
+  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
+
+  return entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => relative(directory, join(entry.parentPath, entry.name)))
+    .filter((path) => !path.split(sep).includes("node_modules"))
+    .filter((path) => includeDist || !path.startsWith(`dist${sep}`))
+    .sort();
+}
+
+/**
+ * Read a file from the generated project as UTF-8 text.
+ */
+export async function read(project: Project, filePath: string): Promise<string> {
+  return readFile(join(project.directory, filePath), "utf-8");
 }

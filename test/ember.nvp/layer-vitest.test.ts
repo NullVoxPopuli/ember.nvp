@@ -1,9 +1,9 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate } from "#test-helpers";
+import { generate, listFiles, read } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 
 import type { Project } from "ember.nvp";
 
@@ -13,20 +13,6 @@ import type { Project } from "ember.nvp";
  * each project's real exports, and run the real `pnpm test` (vitest in
  * headless-browser mode), asserting the specs genuinely run and pass.
  */
-
-async function listFiles(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true, recursive: true });
-
-  return entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => relative(directory, join(entry.parentPath, entry.name)))
-    .filter((path) => !path.split(sep).includes("node_modules"))
-    .sort();
-}
-
-async function read(project: Project, filePath: string): Promise<string> {
-  return readFile(join(project.directory, filePath), "utf-8");
-}
 
 async function emit(project: Project, files: Record<string, string>) {
   for (let [path, contents] of Object.entries(files)) {
