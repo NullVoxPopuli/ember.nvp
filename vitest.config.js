@@ -4,10 +4,6 @@ export default defineConfig({
   test: {
     testTimeout: 60_000,
     hookTimeout: 60_000,
-    include: [
-      "test/**/*.test.ts",
-      "src/**/*.test.ts",
-      "packages/*/src/**/*.test.ts",
-    ],
+    include: ["test/**/*.test.ts", "src/**/*.test.ts", "packages/*/src/**/*.test.ts"],
   },
 });

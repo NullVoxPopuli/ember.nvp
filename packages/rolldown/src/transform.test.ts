@@ -22,8 +22,7 @@ async function bundle(files: Record<string, string>): Promise<string> {
     await writeFile(full, source, "utf8");
   }
 
-  const isLocal = (id: string) =>
-    id.startsWith(".") || id.startsWith("/") || path.isAbsolute(id);
+  const isLocal = (id: string) => id.startsWith(".") || id.startsWith("/") || path.isAbsolute(id);
 
   const build = await rolldown({
     input: path.join(dir, "index.ts"),
