@@ -34,7 +34,7 @@ export function emberConfig(): TsdownPlugin {
     tsdownConfig(config: UserConfig) {
       config.sourcemap ??= true;
       config.clean ??= true;
-      config.dts ??= true;
+      config.dts ??= { sourcemap: true };
       config.outExtensions ??= () => ({ js: ".js", dts: ".d.ts" });
       config.report ??= false;
 
