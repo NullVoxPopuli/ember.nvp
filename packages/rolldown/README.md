@@ -82,6 +82,27 @@ import type { TOC } from "@ember/component/template-only";
 export const Badge: TOC<BadgeSignature> = <template>...</template>;
 ```
 
+## CSS
+
+Components that import co-located CSS (`import './popup.css'`) need
+[`@tsdown/css`](https://www.npmjs.com/package/@tsdown/css) installed in your
+library — tsdown auto-detects it and bundles every imported stylesheet into a
+single CSS file in `dist/`. Install the version matching your `tsdown`
+version (they're released in lockstep):
+
+```bash
+npm add --save-dev @tsdown/css
+```
+
+Without it, tsdown's css-guard fails the build on the first CSS import — and
+because the importing component module never loads, any declaration that
+references that component dangles, surfacing as misleading
+`UNLOADABLE_DEPENDENCY` errors on `<component>.d.ts` files.
+
+Scoping/transforming the CSS itself (e.g.
+[ember-scoped-css](https://github.com/soxhub/ember-scoped-css)) is separate
+from bundling and runs via its own plugins.
+
 ## What `ember()` does
 
 `ember()` returns an array of rolldown plugins:
