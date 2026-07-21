@@ -114,6 +114,36 @@ ember({
 
 Each option is documented on `BabelOptions`.
 
+## App re-exports
+
+For libraries whose modules must appear in the consuming app's namespace
+(classic resolution: `{{a-component}}`, services and helpers looked up by
+name), `appReexports()` does the same job as `@embroider/addon-dev`'s
+`appReexports` rollup plugin. It's a separate import because most libraries
+don't need it:
+
+```js
+import { defineConfig } from "tsdown";
+import { ember } from "@nullvoxpopuli/ember-rolldown";
+import { appReexports } from "@nullvoxpopuli/ember-rolldown/app-reexports";
+
+export default defineConfig({
+  entry: ["./src/index.ts", "./src/components/**/*.gts"],
+  plugins: [ember(), appReexports({ include: ["components/**"] })],
+});
+```
+
+For every built file matching `include` (minus `exclude` and `.d.ts` files),
+it writes a module under `dist/_app_/` re-exporting from the library's own
+name, and records the set in `package.json` under `ember-addon.app-js`.
+`mapFilename` renames a re-export; `exports` picks which bindings it forwards
+(default `["default"]`).
+
+Unlike the embroider plugin, nothing is written unless its content actually
+differs from what is on disk — `_app_/` modules are compared byte-for-byte
+and `package.json` is only rewritten when the `app-js` map itself changed —
+so rebuilds don't re-trigger file watchers.
+
 ## Credit
 
 The `emberExternals` and `emberTransform` plugins are derived from
