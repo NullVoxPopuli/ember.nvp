@@ -4,8 +4,16 @@
   "description": "Meta plugin for building ember v2 libraries/addons with rolldown & tsdown.",
   "type": "module",
   "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./app-reexports": "./src/app-reexports.ts"
+  },
   "publishConfig": {
-    "main": "dist/index.js"
+    "main": "dist/index.js",
+    "exports": {
+      ".": "./dist/index.js",
+      "./app-reexports": "./dist/app-reexports.js"
+    }
   },
   "keywords": [
     "rolldown",

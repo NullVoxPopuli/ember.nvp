@@ -8,11 +8,13 @@ const deps = [
 ];
 
 export default defineConfig({
-  input: "index.ts",
+  input: {
+    index: "index.ts",
+    "app-reexports": "src/app-reexports.ts",
+  },
   output: {
     format: "esm",
-    file: "dist/index.js",
-    codeSplitting: false,
+    dir: "dist",
   },
   external(id) {
     if (id.startsWith("node:")) return true;
