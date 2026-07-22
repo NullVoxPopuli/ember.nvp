@@ -2,21 +2,13 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.0.0",
-      "newVersion": "1.1.0",
+      "oldVersion": "1.1.0",
+      "newVersion": "1.2.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -26,8 +18,8 @@
     },
     "@nullvoxpopuli/ember-rolldown": {
       "impact": "minor",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.1.0",
+      "oldVersion": "2.1.0",
+      "newVersion": "2.2.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -36,11 +28,7 @@
         },
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :memo: Documentation"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./packages/rolldown/package.json"
@@ -49,5 +37,5 @@
       "oldVersion": "1.1.0"
     }
   },
-  "description": "## Release (2026-07-22)\n\n* ember.nvp 1.1.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`\n  * [#97](https://github.com/NullVoxPopuli/ember.nvp/pull/97) Add appReexports plugin as a separate ember-rolldown entrypoint ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#95](https://github.com/NullVoxPopuli/ember.nvp/pull/95) enable declaration maps in the rolldown plugin ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember.nvp`\n  * [#91](https://github.com/NullVoxPopuli/ember.nvp/pull/91) Add a browser extension project type (minimal-extension base) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :memo: Documentation\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#96](https://github.com/NullVoxPopuli/ember.nvp/pull/96) rolldown: document + test co-located CSS support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#93](https://github.com/NullVoxPopuli/ember.nvp/pull/93) More tests ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember.nvp`\n  * [#92](https://github.com/NullVoxPopuli/ember.nvp/pull/92) Move check layers into their own permutation matrix ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#90](https://github.com/NullVoxPopuli/ember.nvp/pull/90) Remove pinYukuParser test helper ([@Copilot](https://github.com/apps/copilot-swe-agent))\n  * [#89](https://github.com/NullVoxPopuli/ember.nvp/pull/89) refactor(test): extract shared listFiles/read helpers to #test-helpers ([@Copilot](https://github.com/apps/copilot-swe-agent))\n  * [#87](https://github.com/NullVoxPopuli/ember.nvp/pull/87) Convert Greeting declaration check to inline snapshot assertion ([@Copilot](https://github.com/apps/copilot-swe-agent))\n\n#### Committers: 3\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-07-22)\n\n* ember.nvp 1.2.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#98](https://github.com/NullVoxPopuli/ember.nvp/pull/98) Integration-test ember-scoped-css; add babel.templateTransforms ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-rolldown`\n  * [#99](https://github.com/NullVoxPopuli/ember.nvp/pull/99) rolldown: fix virtual .gts declaration resolution + specifier-rewrite sourcemaps ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
