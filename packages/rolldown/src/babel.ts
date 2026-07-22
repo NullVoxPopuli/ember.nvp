@@ -4,6 +4,7 @@ import templateCompilation from "babel-plugin-ember-template-compilation";
 import decoratorTransforms from "decorator-transforms";
 import { loadPartialConfigSync } from "@babel/core";
 import type { PluginItem } from "@babel/core";
+import type { Transform } from "babel-plugin-ember-template-compilation";
 import type { Plugin } from "rolldown";
 
 export interface BabelOptions {
@@ -24,6 +25,15 @@ export interface BabelOptions {
    * Extra babel plugins to run, appended after the config's plugins.
    */
   plugins?: PluginItem[];
+  /**
+   * Template AST transforms (e.g. ember-scoped-css's `scopedCSS.template()`)
+   * passed to the default `babel-plugin-ember-template-compilation` entry.
+   *
+   * Only valid without a babel config file: with your own config, you list
+   * `babel-plugin-ember-template-compilation` yourself, so its `transforms`
+   * belong there.
+   */
+  templateTransforms?: Transform[];
   /**
    * Opt additional files into babel (see maybeBabel's `filter`). Use this to
    * cover addons that ship code needing babel (e.g. `ember-concurrency`).
@@ -63,7 +73,7 @@ function detectConfigFile(): string | undefined {
  *   consuming app resolves it (the library keeps `decorator-transforms` as
  *   a real dependency).
  */
-function defaultPlugins(): PluginItem[] {
+function defaultPlugins(templateTransforms?: Transform[]): PluginItem[] {
   return [
     [
       transformTypeScript,
@@ -73,7 +83,7 @@ function defaultPlugins(): PluginItem[] {
         allowDeclareFields: true,
       },
     ],
-    [templateCompilation, { targetFormat: "hbs" }],
+    [templateCompilation, { targetFormat: "hbs", transforms: templateTransforms ?? [] }],
     [
       decoratorTransforms,
       {
@@ -118,6 +128,14 @@ export function emberBabel(options: BabelOptions = {}): Plugin {
   };
 
   if (configFile) {
+    if (options.templateTransforms?.length) {
+      throw new Error(
+        `\`babel.templateTransforms\` cannot be combined with a babel config file (found ${configFile}). ` +
+          `Your config lists babel-plugin-ember-template-compilation itself, so pass the transforms ` +
+          `to its \`transforms\` option there instead.`,
+      );
+    }
+
     return maybeBabel({
       ...shared,
       configFile,
@@ -131,6 +149,6 @@ export function emberBabel(options: BabelOptions = {}): Plugin {
     // for one -- we provide the whole plugin list inline.
     configFile: false,
     babelrc: false,
-    plugins: defaultPlugins().concat(options.plugins ?? []),
+    plugins: defaultPlugins(options.templateTransforms).concat(options.plugins ?? []),
   }) as unknown as Plugin;
 }
