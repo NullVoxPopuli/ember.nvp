@@ -1,25 +1,15 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "minor",
-      "oldVersion": "1.1.0",
-      "newVersion": "1.2.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./package.json"
+      "oldVersion": "1.2.0"
     },
     "@nullvoxpopuli/ember-build-tooling-utils": {
       "oldVersion": "1.1.0"
     },
     "@nullvoxpopuli/ember-rolldown": {
       "impact": "minor",
-      "oldVersion": "2.1.0",
-      "newVersion": "2.2.0",
+      "oldVersion": "2.2.0",
+      "newVersion": "2.3.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -37,5 +27,5 @@
       "oldVersion": "1.1.0"
     }
   },
-  "description": "## Release (2026-07-22)\n\n* ember.nvp 1.2.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#98](https://github.com/NullVoxPopuli/ember.nvp/pull/98) Integration-test ember-scoped-css; add babel.templateTransforms ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-rolldown`\n  * [#99](https://github.com/NullVoxPopuli/ember.nvp/pull/99) rolldown: fix virtual .gts declaration resolution + specifier-rewrite sourcemaps ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-07-22)\n\n* @nullvoxpopuli/ember-rolldown 2.3.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`\n  * [#101](https://github.com/NullVoxPopuli/ember.nvp/pull/101) appReexports: accept string[] include and options as second argument ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-rolldown`\n  * [#103](https://github.com/NullVoxPopuli/ember.nvp/pull/103) rolldown: externalize the modules ember-source provides (renamed-modules) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

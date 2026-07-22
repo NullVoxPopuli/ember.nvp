@@ -2,6 +2,22 @@
 
 ## Release (2026-07-22)
 
+* @nullvoxpopuli/ember-rolldown 2.3.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`
+  * [#101](https://github.com/NullVoxPopuli/ember.nvp/pull/101) appReexports: accept string[] include and options as second argument ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-rolldown`
+  * [#103](https://github.com/NullVoxPopuli/ember.nvp/pull/103) rolldown: externalize the modules ember-source provides (renamed-modules) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-07-22)
+
 * ember.nvp 1.2.0 (minor)
 * @nullvoxpopuli/ember-rolldown 2.2.0 (minor)
 
