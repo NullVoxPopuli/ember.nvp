@@ -1,18 +1,22 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "major",
-      "oldVersion": "0.7.0",
-      "newVersion": "1.0.0",
+      "impact": "minor",
+      "oldVersion": "1.0.0",
+      "newVersion": "1.1.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :memo: Documentation"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -21,18 +25,22 @@
       "oldVersion": "1.1.0"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "impact": "major",
-      "oldVersion": "1.1.0",
-      "newVersion": "2.0.0",
+      "impact": "minor",
+      "oldVersion": "2.0.0",
+      "newVersion": "2.1.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "major",
-          "reason": "Appears in changelog section :boom: Breaking Change"
-        },
-        {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :memo: Documentation"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
         }
       ],
       "pkgJSONPath": "./packages/rolldown/package.json"
@@ -41,5 +49,5 @@
       "oldVersion": "1.1.0"
     }
   },
-  "description": "## Release (2026-07-18)\n\n* ember.nvp 1.0.0 (major)\n* @nullvoxpopuli/ember-rolldown 2.0.0 (major)\n\n#### :boom: Breaking Change\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#86](https://github.com/NullVoxPopuli/ember.nvp/pull/86) Remove defineConfig ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#84](https://github.com/NullVoxPopuli/ember.nvp/pull/84) Create config plugin for rolldown ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-07-22)\n\n* ember.nvp 1.1.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`\n  * [#97](https://github.com/NullVoxPopuli/ember.nvp/pull/97) Add appReexports plugin as a separate ember-rolldown entrypoint ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#95](https://github.com/NullVoxPopuli/ember.nvp/pull/95) enable declaration maps in the rolldown plugin ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember.nvp`\n  * [#91](https://github.com/NullVoxPopuli/ember.nvp/pull/91) Add a browser extension project type (minimal-extension base) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :memo: Documentation\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#96](https://github.com/NullVoxPopuli/ember.nvp/pull/96) rolldown: document + test co-located CSS support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### :house: Internal\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#93](https://github.com/NullVoxPopuli/ember.nvp/pull/93) More tests ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n* `ember.nvp`\n  * [#92](https://github.com/NullVoxPopuli/ember.nvp/pull/92) Move check layers into their own permutation matrix ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#90](https://github.com/NullVoxPopuli/ember.nvp/pull/90) Remove pinYukuParser test helper ([@Copilot](https://github.com/apps/copilot-swe-agent))\n  * [#89](https://github.com/NullVoxPopuli/ember.nvp/pull/89) refactor(test): extract shared listFiles/read helpers to #test-helpers ([@Copilot](https://github.com/apps/copilot-swe-agent))\n  * [#87](https://github.com/NullVoxPopuli/ember.nvp/pull/87) Convert Greeting declaration check to inline snapshot assertion ([@Copilot](https://github.com/apps/copilot-swe-agent))\n\n#### Committers: 3\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
