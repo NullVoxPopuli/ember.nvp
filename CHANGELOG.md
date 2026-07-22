@@ -1,5 +1,35 @@
 # Changelog
 
+## Release (2026-07-22)
+
+* ember.nvp 1.1.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.1.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`
+  * [#97](https://github.com/NullVoxPopuli/ember.nvp/pull/97) Add appReexports plugin as a separate ember-rolldown entrypoint ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#95](https://github.com/NullVoxPopuli/ember.nvp/pull/95) enable declaration maps in the rolldown plugin ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember.nvp`
+  * [#91](https://github.com/NullVoxPopuli/ember.nvp/pull/91) Add a browser extension project type (minimal-extension base) ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :memo: Documentation
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#96](https://github.com/NullVoxPopuli/ember.nvp/pull/96) rolldown: document + test co-located CSS support ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#93](https://github.com/NullVoxPopuli/ember.nvp/pull/93) More tests ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `ember.nvp`
+  * [#92](https://github.com/NullVoxPopuli/ember.nvp/pull/92) Move check layers into their own permutation matrix ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#90](https://github.com/NullVoxPopuli/ember.nvp/pull/90) Remove pinYukuParser test helper ([@Copilot](https://github.com/apps/copilot-swe-agent))
+  * [#89](https://github.com/NullVoxPopuli/ember.nvp/pull/89) refactor(test): extract shared listFiles/read helpers to #test-helpers ([@Copilot](https://github.com/apps/copilot-swe-agent))
+  * [#87](https://github.com/NullVoxPopuli/ember.nvp/pull/87) Convert Greeting declaration check to inline snapshot assertion ([@Copilot](https://github.com/apps/copilot-swe-agent))
+
+#### Committers: 3
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- Copilot [Bot] ([@copilot-swe-agent](https://github.com/apps/copilot-swe-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-18)
 
 * ember.nvp 1.0.0 (major)
