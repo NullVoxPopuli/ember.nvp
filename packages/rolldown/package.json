@@ -1,6 +1,6 @@
 {
   "name": "@nullvoxpopuli/ember-rolldown",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Meta plugin for building ember v2 libraries/addons with rolldown & tsdown.",
   "type": "module",
   "main": "index.ts",
