@@ -65,16 +65,27 @@ export interface AppReexportsOptions {
  * ```
  *
  * With no arguments, top-level services (`services/*`) are re-exported. A
- * string argument is an include glob; an object gives full control:
+ * string or array of strings is the include glob(s), optionally followed by
+ * the remaining options; an object gives full control:
  *
  * ```js
  * appReexports();                          // services/*
  * appReexports("components/**");           // one include glob
+ * appReexports(["services/*", "helpers/*"]);
+ * appReexports("components/**", { exclude: ["components/-private/**"] });
  * appReexports({ include: ["services/*", "helpers/*"], exclude: [...] });
  * ```
  */
-export function appReexports(options: string | AppReexportsOptions = {}): Plugin {
-  const resolved = typeof options === "string" ? { include: [options] } : options;
+export function appReexports(
+  includeOrOptions: string | string[] | AppReexportsOptions = {},
+  options: Omit<AppReexportsOptions, "include"> = {},
+): Plugin {
+  const resolved =
+    typeof includeOrOptions === "string"
+      ? { ...options, include: [includeOrOptions] }
+      : Array.isArray(includeOrOptions)
+        ? { ...options, include: includeOrOptions }
+        : includeOrOptions;
   const include = resolved.include ?? ["services/*"];
 
   return {

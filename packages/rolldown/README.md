@@ -194,12 +194,14 @@ export default defineConfig({
 
 With no arguments, top-level services (`services/*`) are re-exported — under
 strict mode, components and helpers are imported, but services are still
-injected by name. A string argument is an include glob, and an object gives
-full control:
+injected by name. A string or array of strings is the include glob(s),
+optionally followed by the remaining options; an object gives full control:
 
 ```js
 appReexports(); // services/*
 appReexports("components/**"); // one include glob
+appReexports(["services/*", "helpers/*"]);
+appReexports("components/**", { exclude: ["components/-private/**"] });
 appReexports({ include: ["services/*", "helpers/*"], exclude: [...] });
 ```
 
