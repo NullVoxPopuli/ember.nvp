@@ -2,6 +2,23 @@
 
 ## Release (2026-07-22)
 
+* ember.nvp 1.2.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.2.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#98](https://github.com/NullVoxPopuli/ember.nvp/pull/98) Integration-test ember-scoped-css; add babel.templateTransforms ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-rolldown`
+  * [#99](https://github.com/NullVoxPopuli/ember.nvp/pull/99) rolldown: fix virtual .gts declaration resolution + specifier-rewrite sourcemaps ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-07-22)
+
 * ember.nvp 1.1.0 (minor)
 * @nullvoxpopuli/ember-rolldown 2.1.0 (minor)
 
