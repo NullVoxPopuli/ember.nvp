@@ -1,4 +1,6 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import path from "node:path";
 
 import type { Plugin } from "rolldown";
 
@@ -34,6 +36,38 @@ function resolvableDependencies(): Set<string> {
 }
 
 /**
+ * The module names ember-source provides by renaming them into itself — the
+ * keys of its `ember-addon.renamed-modules`, normalized from file paths to
+ * import specifiers (`@glimmer/runtime/index.js` → `@glimmer/runtime`).
+ *
+ * This is the authoritative list of ember's provided modules, including
+ * private API that @embroider/core's emberVirtualPackages doesn't cover
+ * (e.g. `@glimmer/runtime`). It deliberately does NOT include real packages
+ * like `@glimmer/component`, which a library may want bundled.
+ *
+ * Resolved from the library's own dependency graph; empty when ember-source
+ * isn't resolvable there.
+ */
+function emberSourceRenamedModules(): Set<string> {
+  const provided = new Set<string>();
+
+  try {
+    const require = createRequire(path.resolve("package.json"));
+    const manifest = require("ember-source/package.json") as {
+      "ember-addon"?: { "renamed-modules"?: Record<string, string> };
+    };
+
+    for (const key of Object.keys(manifest["ember-addon"]?.["renamed-modules"] ?? {})) {
+      provided.add(key.replace(/\.js$/, "").replace(/\/index$/, ""));
+    }
+  } catch {
+    // The library doesn't have ember-source in its graph; nothing to provide.
+  }
+
+  return provided;
+}
+
+/**
  * Keeps the library's declared dependencies and the ember virtual packages
  * (things like `@ember/component`, `@glimmer/tracking`, the template compiler,
  * …) external, so the app that consumes the library resolves them instead of
@@ -41,6 +75,7 @@ function resolvableDependencies(): Set<string> {
  */
 export function emberExternals(): Plugin {
   let deps: Set<string>;
+  let renamedModules: Set<string>;
 
   return {
     name: "ember:externals",
@@ -48,6 +83,7 @@ export function emberExternals(): Plugin {
     buildStart() {
       this.addWatchFile("package.json");
       deps = resolvableDependencies();
+      renamedModules = emberSourceRenamedModules();
     },
 
     resolveId: {
@@ -73,6 +109,15 @@ export function emberExternals(): Plugin {
           compilationModules.has(pkgName)
         ) {
           // `false` tells rolldown to treat the id as external.
+          return false;
+        }
+
+        // Modules ember-source provides by renaming them into itself
+        // (`ember-addon.renamed-modules`) — private API like
+        // `@glimmer/runtime` that only exists inside the app's ember-source.
+        // Matched on the full specifier: the renamed modules are module
+        // paths, not packages.
+        if (renamedModules.has(source)) {
           return false;
         }
 
