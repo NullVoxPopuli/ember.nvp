@@ -51,7 +51,7 @@ describe("appReexports", () => {
     await rm(projectDir, { recursive: true, force: true });
   });
 
-  async function build(options: AppReexportsOptions) {
+  async function build(options?: string | AppReexportsOptions) {
     const bundle = await rolldown({
       input: {
         "components/foo": "./src/components/foo.js",
@@ -90,6 +90,39 @@ describe("appReexports", () => {
 
     // utils/math.js didn't match include
     await expect(stat("dist/_app_/utils/math.js")).rejects.toThrow();
+  });
+
+  it("accepts a string argument as the include glob", async () => {
+    await build("components/**");
+
+    const manifest = await readJson("package.json");
+
+    expect(Object.keys(manifest["ember-addon"]["app-js"])).toEqual(["./components/foo.js"]);
+  });
+
+  it("defaults to top-level services", async () => {
+    await mkdir(join(projectDir, "src/services/nested"), { recursive: true });
+    await writeFile(join(projectDir, "src/services/session.js"), "export default class {}\n");
+    await writeFile(join(projectDir, "src/services/nested/deep.js"), "export default class {}\n");
+
+    const bundle = await rolldown({
+      input: {
+        "components/foo": "./src/components/foo.js",
+        "services/session": "./src/services/session.js",
+        "services/nested/deep": "./src/services/nested/deep.js",
+      },
+      plugins: [appReexports()],
+    });
+
+    await bundle.write({ dir: "dist" });
+    await bundle.close();
+
+    const manifest = await readJson("package.json");
+
+    // services/* is not deep: nested services (and everything else) stay out
+    expect(manifest["ember-addon"]["app-js"]).toEqual({
+      "./services/session.js": "./dist/_app_/services/session.js",
+    });
   });
 
   it("respects exclude", async () => {

@@ -128,9 +128,20 @@ import { ember } from "@nullvoxpopuli/ember-rolldown";
 import { appReexports } from "@nullvoxpopuli/ember-rolldown/app-reexports";
 
 export default defineConfig({
-  entry: ["./src/index.ts", "./src/components/**/*.gts"],
-  plugins: [ember(), appReexports({ include: ["components/**"] })],
+  entry: ["./src/index.ts", "./src/services/session.ts"],
+  plugins: [ember(), appReexports()],
 });
+```
+
+With no arguments, top-level services (`services/*`) are re-exported — under
+strict mode, components and helpers are imported, but services are still
+injected by name. A string argument is an include glob, and an object gives
+full control:
+
+```js
+appReexports(); // services/*
+appReexports("components/**"); // one include glob
+appReexports({ include: ["services/*", "helpers/*"], exclude: [...] });
 ```
 
 For every built file matching `include` (minus `exclude` and `.d.ts` files),

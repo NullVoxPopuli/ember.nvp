@@ -8,13 +8,14 @@ export interface AppReexportsOptions {
    * Globs, matched against each built filename (relative to the output
    * directory), selecting which modules get an app re-export.
    *
-   * `.d.ts` files never match.
+   * Defaults to `["services/*"]` -- top-level services only. Under strict
+   * mode, components and helpers are imported, but services are still
+   * injected by name, so they are the one thing an app must always be able
+   * to resolve.
    *
-   * ```js
-   * appReexports({ include: ["components/**"] });
-   * ```
+   * `.d.ts` files never match.
    */
-  include: string[];
+  include?: string[];
 
   /**
    * Globs removing files that `include` matched.
@@ -58,12 +59,24 @@ export interface AppReexportsOptions {
  * import { appReexports } from "@nullvoxpopuli/ember-rolldown/app-reexports";
  *
  * export default defineConfig({
- *   entry: ["./src/index.ts", "./src/components/badge.gts"],
- *   plugins: [ember(), appReexports({ include: ["components/**"] })],
+ *   entry: ["./src/index.ts", "./src/services/session.ts"],
+ *   plugins: [ember(), appReexports()],
  * });
  * ```
+ *
+ * With no arguments, top-level services (`services/*`) are re-exported. A
+ * string argument is an include glob; an object gives full control:
+ *
+ * ```js
+ * appReexports();                          // services/*
+ * appReexports("components/**");           // one include glob
+ * appReexports({ include: ["services/*", "helpers/*"], exclude: [...] });
+ * ```
  */
-export function appReexports(options: AppReexportsOptions): Plugin {
+export function appReexports(options: string | AppReexportsOptions = {}): Plugin {
+  const resolved = typeof options === "string" ? { include: [options] } : options;
+  const include = resolved.include ?? ["services/*"];
+
   return {
     name: "ember:app-reexports",
 
@@ -75,10 +88,10 @@ export function appReexports(options: AppReexportsOptions): Plugin {
       // Sorted so the app-js map (and therefore package.json) is stable
       // across builds regardless of chunk emission order.
       for (const builtFilename of Object.keys(bundle).sort()) {
-        if (!isIncluded(builtFilename, options)) continue;
+        if (!isIncluded(builtFilename, include, resolved.exclude)) continue;
 
-        const appFilename = options.mapFilename?.(builtFilename) ?? builtFilename;
-        const names = options.exports?.(builtFilename) || ["default"];
+        const appFilename = resolved.mapFilename?.(builtFilename) ?? builtFilename;
+        const names = resolved.exports?.(builtFilename) || ["default"];
         const clause = typeof names === "string" ? names : `{ ${names.join(", ")} }`;
         const withoutExtension = builtFilename.slice(0, -extname(builtFilename).length);
         const reexportPath = join(outDir, "_app_", appFilename);
@@ -105,10 +118,10 @@ function readJsonSync(path: string) {
   return JSON.parse(readFileSync(path, { encoding: "utf8" }));
 }
 
-function isIncluded(filename: string, options: AppReexportsOptions): boolean {
+function isIncluded(filename: string, include: string[], exclude?: string[]): boolean {
   if (matchesGlob(filename, "**/*.d.ts")) return false;
-  if (!options.include.some((glob) => matchesGlob(filename, glob))) return false;
-  if (options.exclude?.some((glob) => matchesGlob(filename, glob))) return false;
+  if (!include.some((glob) => matchesGlob(filename, glob))) return false;
+  if (exclude?.some((glob) => matchesGlob(filename, glob))) return false;
 
   return true;
 }
