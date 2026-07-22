@@ -170,4 +170,39 @@ describe("emberTransform (full plugin via rolldown)", () => {
       "
     `);
   });
+
+  it("emits sourcemaps for the specifier rewrite (no SOURCEMAP_BROKEN warnings)", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "ember-rolldown-map-"));
+
+    const files = {
+      // index.ts contains a `.gts` specifier, so it goes through the rewrite.
+      "index.ts": `export { default as Foo } from './foo.gts';`,
+      "foo.gts": `<template>Foo</template>`,
+    };
+
+    for (const [relative, source] of Object.entries(files)) {
+      await writeFile(path.join(dir, relative), source, "utf8");
+    }
+
+    const warnings: string[] = [];
+    const build = await rolldown({
+      input: path.join(dir, "index.ts"),
+      plugins: [emberTransform()],
+      external: (id) => !(id.startsWith(".") || path.isAbsolute(id)),
+      onwarn(warning) {
+        warnings.push(warning.code ?? String(warning));
+      },
+    });
+
+    const { output } = await build.generate({ format: "es", sourcemap: true });
+
+    expect(warnings.filter((code) => code === "SOURCEMAP_BROKEN")).toEqual([]);
+
+    const chunk = output.find((entry) => entry.type === "chunk" && "map" in entry);
+    expect(chunk).toBeDefined();
+    // The composed map traces through the rewrite back to the original .gts
+    // source (content-tag's map survives the specifier-rewrite pass).
+    const sources = (chunk as { map?: { sources: string[] } }).map?.sources ?? [];
+    expect(sources.some((source) => source.endsWith("foo.gts"))).toBe(true);
+  });
 });
