@@ -99,9 +99,42 @@ because the importing component module never loads, any declaration that
 references that component dangles, surfacing as misleading
 `UNLOADABLE_DEPENDENCY` errors on `<component>.d.ts` files.
 
-Scoping/transforming the CSS itself (e.g.
-[ember-scoped-css](https://github.com/soxhub/ember-scoped-css)) is separate
-from bundling and runs via its own plugins.
+### ember-scoped-css
+
+[ember-scoped-css](https://github.com/auditboard/ember-scoped-css) works with
+this pipeline: its template transform rides along via `ember()`'s
+`babel.templateTransforms` option, and its unplugin (`ember-scoped-css/rollup`)
+resolves the scoped CSS requests the transform injects:
+
+```js
+import { defineConfig } from "tsdown";
+import { ember } from "@nullvoxpopuli/ember-rolldown";
+import { scopedCSS } from "ember-scoped-css/rollup";
+import { scopedCSS as scopedCssBabel } from "ember-scoped-css/babel";
+
+export default defineConfig({
+  entry: ["./src/index.ts"],
+  css: { inject: true },
+  plugins: [
+    ember({
+      babel: {
+        plugins: [scopedCssBabel()],
+        templateTransforms: [scopedCssBabel.template({})],
+      },
+    }),
+    scopedCSS(),
+  ],
+});
+```
+
+This scopes co-located `.css` files, inline `<style scoped>` blocks, and the
+`scopedClass` pseudo-helper (that last one is what the `babel.plugins` entry
+handles — leave it off if you don't use `scopedClass` in module code).
+
+`css.inject` matters for libraries: it keeps the `import "./style.css"`
+statement in `dist/index.js`, so consuming apps pull the styles in through
+the module graph — without it the bundled CSS is emitted but nothing loads
+it.
 
 ## What `ember()` does
 
@@ -128,12 +161,17 @@ ember({
     configFile: "./babel.config.js",
     babelHelpers: "bundled",
     plugins: [],
+    templateTransforms: [],
     filter: { include: { imports: ["ember-concurrency"], code: [] } },
   },
 });
 ```
 
-Each option is documented on `BabelOptions`.
+Each option is documented on `BabelOptions`. `templateTransforms` feeds
+template AST transforms to the default template-compilation step; it can't be
+combined with a babel config file — a config lists
+`babel-plugin-ember-template-compilation` itself, so its transforms belong
+there.
 
 ## App re-exports
 
