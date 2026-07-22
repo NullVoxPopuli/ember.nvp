@@ -51,13 +51,16 @@ describe("appReexports", () => {
     await rm(projectDir, { recursive: true, force: true });
   });
 
-  async function build(options?: string | AppReexportsOptions) {
+  async function build(
+    include?: string | string[] | AppReexportsOptions,
+    options?: Omit<AppReexportsOptions, "include">,
+  ) {
     const bundle = await rolldown({
       input: {
         "components/foo": "./src/components/foo.js",
         "utils/math": "./src/utils/math.js",
       },
-      plugins: [appReexports(options)],
+      plugins: [appReexports(include, options)],
     });
 
     await bundle.write({ dir: "dist" });
@@ -98,6 +101,36 @@ describe("appReexports", () => {
     const manifest = await readJson("package.json");
 
     expect(Object.keys(manifest["ember-addon"]["app-js"])).toEqual(["./components/foo.js"]);
+  });
+
+  it("accepts an array of include globs", async () => {
+    await build(["components/**", "utils/**"]);
+
+    const manifest = await readJson("package.json");
+
+    expect(Object.keys(manifest["ember-addon"]["app-js"])).toEqual([
+      "./components/foo.js",
+      "./utils/math.js",
+    ]);
+  });
+
+  it("accepts options as the second argument alongside a string or array include", async () => {
+    await build("**/*.js", { exclude: ["utils/**"] });
+
+    let manifest = await readJson("package.json");
+
+    expect(Object.keys(manifest["ember-addon"]["app-js"])).toEqual(["./components/foo.js"]);
+
+    await build(["components/**", "utils/**"], {
+      mapFilename: (name) => name.replace("math", "arithmetic"),
+    });
+
+    manifest = await readJson("package.json");
+
+    expect(manifest["ember-addon"]["app-js"]).toEqual({
+      "./components/foo.js": "./dist/_app_/components/foo.js",
+      "./utils/arithmetic.js": "./dist/_app_/utils/arithmetic.js",
+    });
   });
 
   it("defaults to top-level services", async () => {
