@@ -8,17 +8,13 @@
     },
     "@nullvoxpopuli/ember-rolldown": {
       "impact": "minor",
-      "oldVersion": "2.2.0",
-      "newVersion": "2.3.0",
+      "oldVersion": "2.3.0",
+      "newVersion": "2.4.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./packages/rolldown/package.json"
@@ -27,5 +23,5 @@
       "oldVersion": "1.1.0"
     }
   },
-  "description": "## Release (2026-07-22)\n\n* @nullvoxpopuli/ember-rolldown 2.3.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`\n  * [#101](https://github.com/NullVoxPopuli/ember.nvp/pull/101) appReexports: accept string[] include and options as second argument ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-rolldown`\n  * [#103](https://github.com/NullVoxPopuli/ember.nvp/pull/103) rolldown: externalize the modules ember-source provides (renamed-modules) ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-07-24)\n\n* @nullvoxpopuli/ember-rolldown 2.4.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`\n  * [#104](https://github.com/NullVoxPopuli/ember.nvp/pull/104) rolldown: support .gts/.gjs build entries ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }

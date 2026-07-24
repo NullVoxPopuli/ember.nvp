@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-07-24)
+
+* @nullvoxpopuli/ember-rolldown 2.4.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`
+  * [#104](https://github.com/NullVoxPopuli/ember.nvp/pull/104) rolldown: support .gts/.gjs build entries ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-22)
 
 * @nullvoxpopuli/ember-rolldown 2.3.0 (minor)
