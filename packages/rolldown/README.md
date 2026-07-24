@@ -58,6 +58,25 @@ A `babel.config.js` is optional. Without one, `ember()` compiles templates
 [decorator-transforms](https://github.com/ef4/decorator-transforms)), and
 TypeScript; with one, your config runs instead.
 
+### Entrypoints
+
+Entries may be any extension — `.ts`, `.js`, `.gts`, `.gjs`:
+
+```js
+export default defineConfig({
+  entry: ["./src/index.ts", "./src/components/menu.gts"],
+  plugins: [ember()],
+});
+```
+
+Whatever the source extension, the emitted `.js` and `.d.ts` paths mirror the
+entry paths (that's how tsdown's dts support works): the example emits
+`dist/index.js` + `dist/index.d.ts` and `dist/components/menu.js` +
+`dist/components/menu.d.ts`. Type imports resolve against those emitted
+paths, so your entries — together with your `exports` map — _are_ your
+public API: a module that isn't an entry has no stable `dist/` path of its
+own and is only reachable through the entrypoints that re-export it.
+
 ### Declarations
 
 Declarations are emitted with isolated declarations — the only declaration
