@@ -13,7 +13,10 @@ import { emberTransform } from "./transform.ts";
  * `.gts`/`.gjs`/`.ts` handling and doesn't need real dependencies installed.
  * Returns the concatenated code of every emitted chunk.
  */
-async function bundle(files: Record<string, string>): Promise<string> {
+async function bundle(
+  files: Record<string, string>,
+  { input = ["index.ts"] }: { input?: string[] } = {},
+): Promise<string> {
   const dir = await mkdtemp(path.join(tmpdir(), "ember-rolldown-build-"));
 
   for (const [relative, source] of Object.entries(files)) {
@@ -25,7 +28,7 @@ async function bundle(files: Record<string, string>): Promise<string> {
   const isLocal = (id: string) => id.startsWith(".") || id.startsWith("/") || path.isAbsolute(id);
 
   const build = await rolldown({
-    input: path.join(dir, "index.ts"),
+    input: input.map((relative) => path.join(dir, relative)),
     plugins: [emberTransform()],
     external: (id) => !isLocal(id),
     onwarn() {},
@@ -167,6 +170,54 @@ describe("emberTransform (full plugin via rolldown)", () => {
       };
       //#endregion
       export { Page };
+      "
+    `);
+  });
+
+  it("compiles a .gts module used directly as an entry (no importer)", async () => {
+    const code = await bundle(
+      {
+        // Both an entry .gts and a .ts entry importing it: the shared module
+        // must resolve to ONE id (the entry resolution realpaths, matching
+        // rolldown's own resolver) so it lands in the entry chunk and the
+        // index chunk imports it, rather than duplicating the code.
+        "index.ts": `export { default as Foo } from './foo.gts';`,
+        "foo.gts": [
+          `import Component from '@glimmer/component';`,
+          `export default class Foo extends Component {`,
+          `  <template>Entry</template>`,
+          `}`,
+        ].join("\n"),
+      },
+      { input: ["index.ts", "foo.gts"] },
+    );
+
+    expect(code).not.toContain("<template>");
+    expect(code).toContain("template(");
+    expect(code).toContain(`from "@glimmer/component"`);
+    // deduplicated: the class body appears exactly once, in foo's own chunk
+    expect(code.match(/extends Component/g)).toHaveLength(1);
+    expect(code).toContain(`from "./foo.js"`);
+
+    expect(code).toMatchInlineSnapshot(`
+      "import { template } from "@ember/template-compiler";
+      import Component from "@glimmer/component";
+      //#region foo.ts
+      var Foo = class extends Component {
+      	static {
+      		template(\`Entry\`, {
+      			component: this,
+      			eval() {
+      				return eval(arguments[0]);
+      			}
+      		});
+      	}
+      };
+      //#endregion
+      export { Foo as default };
+
+      import Foo from "./foo.js";
+      export { Foo };
       "
     `);
   });

@@ -1,5 +1,5 @@
 import { Preprocessor } from "content-tag";
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { readFile, writeFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import type { Plugin } from "rolldown";
@@ -70,7 +70,28 @@ export function emberTransform(): Plugin {
     resolveId: {
       order: "pre",
       handler(id, importer) {
-        if (!importer) return null;
+        // Entries have no importer: their ids come straight from the build
+        // config (tsdown expands entry globs to on-disk paths). Resolve a
+        // `.gts`/`.gjs` entry to the same virtual `.ts`/`.js` id an imported
+        // module gets, so the load hook compiles it via content-tag instead
+        // of the raw `<template>` source hitting the parser. Entries may be
+        // any extension — the emitted `.js`/`.d.ts` paths mirror the entry
+        // paths either way (that's how tsdown's dts support works).
+        if (!importer) {
+          if (!id.endsWith(".gts") && !id.endsWith(".gjs")) return null;
+          if (!existsSync(id)) return null;
+
+          // rolldown's default resolver realpaths entry ids (e.g. macOS
+          // /var -> /private/var). Match it, or this same file imported from
+          // another entry resolves to a second module id and gets duplicated
+          // into both chunks.
+          const fileName = realpathSync(path.resolve(id));
+
+          return {
+            id: fileName.replace(/\.gts$/, ".ts").replace(/\.gjs$/, ".js"),
+            meta: { fileName },
+          };
+        }
 
         const fileName = path.join(path.dirname(importer), id);
 
