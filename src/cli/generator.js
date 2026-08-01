@@ -76,7 +76,8 @@ async function runLap(project) {
       continue;
     }
 
-    await layer.run(project);
+    const options = project.getLayerOptions(layer.name);
+    await layer.run(project, options);
   }
 
   await consolidateLintingScripts(project);
