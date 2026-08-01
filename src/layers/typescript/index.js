@@ -4,6 +4,7 @@ import { cp } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { hasConfiguredTSBabel, prependPlugin } from "#utils/babel.js";
 import { getLatest } from "#utils/npm.js";
+import { renderLayerReadme } from "#utils/readme.js";
 
 const bases = join(import.meta.dirname, "../../bases");
 const appBase = join(bases, "minimal-app/files");
@@ -119,6 +120,13 @@ export default {
     }
 
     return reasons.length === 0;
+  },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async readme(project) {
+    return await renderLayerReadme(import.meta.dirname, project);
   },
 };
 

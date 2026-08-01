@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { getLatest } from "#utils/npm.js";
 import { formatLabel } from "#utils/cli.js";
 import { maybeLintWithConcurrently } from "#consolidators/linting.js";
+import { renderLayerReadme } from "#utils/readme.js";
 
 /**
  * Prettier Layer
@@ -61,5 +62,12 @@ export default {
     }
 
     return true;
+  },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async readme(project) {
+    return await renderLayerReadme(import.meta.dirname, project);
   },
 };
