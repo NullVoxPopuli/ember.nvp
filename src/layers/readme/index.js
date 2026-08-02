@@ -21,23 +21,23 @@ An Ember application created with \`ember.nvp\`.
 
 ### Installation
 
-\`\`\`sh
+~~~sh
 ${project.packageManager} install
-\`\`\`
+~~~
 
 ### Development
 
 To start the local development server:
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} dev
-\`\`\`
+~~~
 
 or
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} start
-\`\`\`
+~~~
 ${layerDocsMarkdown}`;
 }
 
@@ -61,29 +61,29 @@ A browser extension using Ember created with \`ember.nvp\`.
 
 To start development:
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} dev
-\`\`\`
+~~~
 
 or
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} start
-\`\`\`
+~~~
 
 ### Building
 
 To build the library:
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} build
-\`\`\`
+~~~
 
 or
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} build:watch
-\`\`\`
+~~~
 ${layerDocsMarkdown}`;
 }
 
@@ -107,9 +107,9 @@ An Ember library/addon created with \`ember.nvp\`.
 
 To build the library:
 
-\`\`\`sh
+~~~sh
 ${project.runPrefix} build
-\`\`\`
+~~~
 ${layerDocsMarkdown}`;
 }
 
