@@ -7,7 +7,7 @@ import { formatLabel } from "#utils/cli.js";
  * @param {import('#utils/project.js').Project} project
  * @param {string} layerDocsMarkdown
  */
-function renderAppReadme(project, layerDocsMarkdown) {
+function appReadme(project, layerDocsMarkdown) {
   return `# ${project.name}
 
 An Ember application created with \`ember.nvp\`.
@@ -45,7 +45,7 @@ ${layerDocsMarkdown}`;
  * @param {import('#utils/project.js').Project} project
  * @param {string} layerDocsMarkdown
  */
-function renderExtensionReadme(project, layerDocsMarkdown) {
+function extensionReadme(project, layerDocsMarkdown) {
   return `# ${project.name}
 
 A browser extension using Ember created with \`ember.nvp\`.
@@ -91,7 +91,7 @@ ${layerDocsMarkdown}`;
  * @param {import('#utils/project.js').Project} project
  * @param {string} layerDocsMarkdown
  */
-function renderLibraryReadme(project, layerDocsMarkdown) {
+function libraryReadme(project, layerDocsMarkdown) {
   return `# ${project.name}
 
 An Ember library/addon created with \`ember.nvp\`.
@@ -146,26 +146,25 @@ export default {
 
     let layerDocsMarkdown = "";
     if (layerDocs.length > 0) {
-      layerDocsMarkdown = "\n## Features & Tooling\n\n" + layerDocs.join("\n\n") + "\n";
+      layerDocsMarkdown = `\n## Features & Tooling\n\n${layerDocs.join("\n\n")}\n`;
     }
 
-    let renderFn;
+    // Merge the layers' snippets into the main readme template
+    let content;
     switch (project.type) {
       case "extension":
-        renderFn = renderExtensionReadme;
+        content = extensionReadme(project, layerDocsMarkdown);
         break;
       case "library":
-        renderFn = renderLibraryReadme;
+        content = libraryReadme(project, layerDocsMarkdown);
         break;
       default:
-        renderFn = renderAppReadme;
+        content = appReadme(project, layerDocsMarkdown);
         break;
     }
 
-    const content = renderFn(project, layerDocsMarkdown).trim() + "\n";
-
     const targetPath = join(project.directory, "README.md");
-    await writeFile(targetPath, content, "utf-8");
+    await writeFile(targetPath, `${content.trim()}\n`, "utf-8");
   },
 
   /**
