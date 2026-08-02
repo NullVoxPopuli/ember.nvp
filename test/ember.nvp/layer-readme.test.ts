@@ -28,19 +28,54 @@ describe("layer: readme", () => {
     });
 
     it("generates README.md with project info and selected layer docs", async () => {
-      expect(project.hasFile("README.md")).toBe(true);
+      expect(await project.read("README.md")).toMatchInlineSnapshot(`
+        "# my-app
 
-      const readmeContent = await project.read("README.md");
-      expect(readmeContent).toBeDefined();
+        An Ember application created with \`ember.nvp\`.
 
-      expect(readmeContent).toContain("# my-app");
-      expect(readmeContent).toContain("pnpm install");
-      expect(readmeContent).toContain("pnpm dev");
-      expect(readmeContent).toContain("## Features & Tooling");
-      expect(readmeContent).toContain("### Prettier");
-      expect(readmeContent).toContain("### TypeScript");
-      expect(readmeContent).toContain("pnpm format");
-      expect(readmeContent).toContain("pnpm lint:types");
+        ## Getting Started
+
+        ### Prerequisites
+
+        - Node.js >= 24
+        - pnpm
+
+        ### Installation
+
+        ~~~sh
+        pnpm install
+        ~~~
+
+        ### Development
+
+        To start the local development server:
+
+        ~~~sh
+        pnpm dev
+        ~~~
+
+        or
+
+        ~~~sh
+        pnpm start
+        ~~~
+
+        ## Features & Tooling
+
+        ### Prettier
+
+        Code formatting is managed with [Prettier](https://prettier.io/).
+
+        - \`pnpm format\` - Format code
+        - \`pnpm lint:prettier\` - Check code formatting
+
+        ### TypeScript
+
+        This project uses TypeScript and Glint for static type checking.
+
+        - \`pnpm lint:types\` - Typecheck code with Glint/TypeScript
+        "
+      `);
     });
   });
 
@@ -58,15 +93,103 @@ describe("layer: readme", () => {
     });
 
     it("generates README.md with npm-specific commands for library", async () => {
-      expect(project.hasFile("README.md")).toBe(true);
+      expect(await project.read("README.md")).toMatchInlineSnapshot(`
+        "# my-lib
 
-      const readmeContent = await project.read("README.md");
-      expect(readmeContent).toBeDefined();
+        An Ember library/addon created with \`ember.nvp\`.
 
-      expect(readmeContent).toContain("# my-lib");
-      expect(readmeContent).toContain("npm run build");
-      expect(readmeContent).toContain("### Prettier");
-      expect(readmeContent).toContain("npm run format");
+        ## Getting Started
+
+        ### Prerequisites
+
+        - Node.js >= 24
+        - npm
+
+        ### Development & Building
+
+        To build the library:
+
+        ~~~sh
+        npm run build
+        ~~~
+
+        ## Features & Tooling
+
+        ### Prettier
+
+        Code formatting is managed with [Prettier](https://prettier.io/).
+
+        - \`npm run format\` - Format code
+        - \`npm run lint:prettier\` - Check code formatting
+        "
+      `);
+    });
+  });
+
+  describe("Extension project README generation", () => {
+    let project: Project;
+
+    beforeAll(async () => {
+      project = await generate({
+        type: "extension",
+        name: "my-extension",
+        packageManager: "pnpm",
+        layers: ["readme", "prettier"],
+      });
+      dirs.push(project.directory);
+    });
+
+    it("generates README.md for browser extension project", async () => {
+      expect(await project.read("README.md")).toMatchInlineSnapshot(`
+        "# my-extension
+
+        A browser extension using Ember created with \`ember.nvp\`.
+
+        ## Getting Started
+
+        ### Prerequisites
+
+        - Node.js >= 24
+        - pnpm
+
+        ### Development
+
+        To start development:
+
+        ~~~sh
+        pnpm dev
+        ~~~
+
+        or
+
+        ~~~sh
+        pnpm start
+        ~~~
+
+        ### Building
+
+        To build the library:
+
+        ~~~sh
+        pnpm build
+        ~~~
+
+        or
+
+        ~~~sh
+        pnpm build:watch
+        ~~~
+
+        ## Features & Tooling
+
+        ### Prettier
+
+        Code formatting is managed with [Prettier](https://prettier.io/).
+
+        - \`pnpm format\` - Format code
+        - \`pnpm lint:prettier\` - Check code formatting
+        "
+      `);
     });
   });
 });
