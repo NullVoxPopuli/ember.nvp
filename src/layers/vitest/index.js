@@ -2,7 +2,6 @@ import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 import { packageJson } from "ember-apply";
 import { join } from "node:path";
-import { renderLayerReadme } from "#utils/readme.js";
 
 const deps = {
   "@ember/test-helpers": "^5.4.3",
@@ -106,7 +105,11 @@ export default {
   /**
    * @param {import('#utils/project.js').Project} project
    */
-  async readme(project) {
-    return await renderLayerReadme(import.meta.dirname, project);
+  readme(project) {
+    return `### Testing (Vitest)
+
+Testing is configured with [Vitest](https://vitest.dev/).
+
+- \`${project.runPrefix} test\` - Run tests`;
   },
 };

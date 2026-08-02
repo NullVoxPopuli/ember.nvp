@@ -4,7 +4,6 @@ import { existsSync } from "node:fs";
 import { getLatest } from "#utils/npm.js";
 import { formatLabel } from "#utils/cli.js";
 import { maybeLintWithConcurrently } from "#consolidators/linting.js";
-import { renderLayerReadme } from "#utils/readme.js";
 
 /**
  * Prettier Layer
@@ -67,7 +66,12 @@ export default {
   /**
    * @param {import('#utils/project.js').Project} project
    */
-  async readme(project) {
-    return await renderLayerReadme(import.meta.dirname, project);
+  readme(project) {
+    return `### Prettier
+
+Code formatting is managed with [Prettier](https://prettier.io/).
+
+- \`${project.runPrefix} format\` - Format code
+- \`${project.runPrefix} lint:prettier\` - Check code formatting`;
   },
 };

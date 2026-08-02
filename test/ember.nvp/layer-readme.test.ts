@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { generate } from "#test-helpers";
 import { rm } from "node:fs/promises";
 import type { Project } from "ember.nvp";
-import { renderTemplate } from "#utils/readme.js";
 
 describe("layer: readme", () => {
   const dirs: string[] = [];
@@ -13,34 +12,6 @@ describe("layer: readme", () => {
     for (const dir of dirs) {
       await rm(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     }
-  });
-
-  describe("renderTemplate token substitution", () => {
-    it("substitutes @@NAME@@, @@TYPE@@, @@PM@@, @@RUN@@ for pnpm", () => {
-      const mockProject = {
-        name: "my-cool-app",
-        type: "app",
-        packageManager: "pnpm",
-      } as unknown as Project;
-
-      const template = "Name: @@NAME@@ | Type: @@TYPE@@ | PM: @@PM@@ | Run: @@RUN@@";
-      const result = renderTemplate(template, mockProject);
-
-      expect(result).toBe("Name: my-cool-app | Type: app | PM: pnpm | Run: pnpm");
-    });
-
-    it("substitutes @@RUN@@ for npm", () => {
-      const mockProject = {
-        name: "my-cool-lib",
-        type: "library",
-        packageManager: "npm",
-      } as unknown as Project;
-
-      const template = "Run: @@RUN@@";
-      const result = renderTemplate(template, mockProject);
-
-      expect(result).toBe("Run: npm run");
-    });
   });
 
   describe("App project README generation", () => {
