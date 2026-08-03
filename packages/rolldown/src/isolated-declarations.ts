@@ -1,10 +1,39 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 import type { Plugin } from "rolldown";
+import type { UserConfig } from "tsdown";
 
 /**
- * Errors the build when a `tsconfig.json` is present without
+ * Resolve the tsconfig the build will actually use, mirroring tsdown's own
+ * `tsconfig` option (`string | boolean`):
+ *
+ * - `undefined` / `true`: `tsconfig.json` in the cwd.
+ * - a path to a file: that file.
+ * - a path to a directory: `tsconfig.json` inside it.
+ * - `false`: no tsconfig at all.
+ *
+ * Under plain rolldown there is no such option, so the cwd's `tsconfig.json`
+ * is all there is.
+ */
+function resolveTsconfigPath(option: string | boolean | undefined): string | undefined {
+  if (option === false) return undefined;
+
+  if (typeof option === "string") {
+    const asPath = resolve(option);
+
+    if (existsSync(asPath) && statSync(asPath).isDirectory()) {
+      return resolve(asPath, "tsconfig.json");
+    }
+
+    return asPath;
+  }
+
+  return resolve("tsconfig.json");
+}
+
+/**
+ * Errors the build when the tsconfig it builds with does not set
  * `isolatedDeclarations: true`.
  *
  * This is required: declarations for `.gts`/`.gjs` (template tag) modules can
@@ -18,18 +47,34 @@ import type { Plugin } from "rolldown";
  * same rules the build enforces (exported values need explicit type
  * annotations, e.g. `export const X: TOC<Sig> = <template>...`).
  *
- * Projects without a `tsconfig.json` (JavaScript libraries) or without the
- * `typescript` package have no declarations to emit, so there is nothing to
- * check.
+ * The tsconfig checked is the one tsdown's `tsconfig` option points at, not
+ * necessarily `tsconfig.json`. A library whose package also holds dev-only code
+ * (a demo app, in-package tests) can therefore keep a permissive
+ * `tsconfig.json` covering everything for editors and `tsc --noEmit`, and point
+ * the build at a `tsconfig.publish.json` that covers only the publishable
+ * sources -- isolated declarations then constrain exactly the code that gets
+ * declarations emitted for it, and nothing else.
+ *
+ * Projects with no tsconfig (JavaScript libraries, or `tsconfig: false`) or
+ * without the `typescript` package have no declarations to emit, so there is
+ * nothing to check.
  */
 export function emberIsolatedDeclarations(): Plugin {
+  let tsconfigOption: string | boolean | undefined;
+
   return {
     name: "ember:isolated-declarations",
 
-    async buildStart() {
-      const tsconfigPath = resolve("tsconfig.json");
+    // Not called under plain rolldown, which leaves `tsconfigOption` undefined
+    // -- i.e. the cwd's tsconfig.json, the only thing it could mean there.
+    tsdownConfig(config: UserConfig) {
+      tsconfigOption = config.tsconfig;
+    },
 
-      if (!existsSync(tsconfigPath)) return;
+    async buildStart() {
+      const tsconfigPath = resolveTsconfigPath(tsconfigOption);
+
+      if (!tsconfigPath || !existsSync(tsconfigPath)) return;
 
       let ts: typeof import("typescript");
 
@@ -57,7 +102,10 @@ export function emberIsolatedDeclarations(): Plugin {
             `isolated-declarations pipeline, which reads compiled modules from the bundler's ` +
             `module graph -- the tsc-based pipeline reads from disk and cannot see them.\n\n` +
             `Isolated declarations require exported values to have explicit type annotations, ` +
-            `e.g. \`export const X: TOC<Sig> = <template>...\`.`,
+            `e.g. \`export const X: TOC<Sig> = <template>...\`.\n\n` +
+            `If this tsconfig also covers dev-only code (a demo app, in-package tests) that ` +
+            `should not be constrained this way, point tsdown's \`tsconfig\` option at a ` +
+            `publish-only tsconfig that sets the flag and covers just the published sources.`,
         );
       }
     },

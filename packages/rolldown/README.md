@@ -81,7 +81,7 @@ own and is only reachable through the entrypoints that re-export it.
 
 Declarations are emitted with isolated declarations — the only declaration
 pipeline that can see `<template>` (`.gts`/`.gjs`) modules, which exist only
-inside the bundler's module graph. Your `tsconfig.json` must enable it
+inside the bundler's module graph. The tsconfig your build uses must enable it
 (`ember()` errors otherwise):
 
 ```jsonc
@@ -100,6 +100,33 @@ import type { TOC } from "@ember/component/template-only";
 
 export const Badge: TOC<BadgeSignature> = <template>...</template>;
 ```
+
+#### Keeping the constraint off dev-only code
+
+`isolatedDeclarations` is a constraint on how _published_ code is written, so it
+should cover only the code you emit declarations for. If your package also holds
+dev-only code — a demo app, in-package tests — putting the flag on the single
+`tsconfig.json` that covers everything would force explicit annotations on demo
+components and test helpers that never get a `.d.ts` emitted for them.
+
+The tsconfig `ember()` checks is the one
+[tsdown's `tsconfig` option](https://tsdown.dev/options/tsconfig) points at, so
+point the build at a publish-only config and leave `tsconfig.json` alone for
+editors and `tsc --noEmit`:
+
+```js
+// tsdown.config.js
+export default defineConfig({
+  entry: ["./src/index.ts"],
+  // include: ["src/**/*"], isolatedDeclarations: true
+  tsconfig: "./tsconfig.publish.json",
+  plugins: [ember()],
+});
+```
+
+The tradeoff: isolated-declaration errors in `src` then surface when you build
+rather than in your editor, since the editor uses `tsconfig.json`. Run the build
+(or `tsc --noEmit -p tsconfig.publish.json`) in CI so nothing lands unchecked.
 
 ## CSS
 
@@ -159,8 +186,9 @@ it.
 
 `ember()` returns an array of rolldown plugins:
 
-- **`emberIsolatedDeclarations()`** — errors when a `tsconfig.json` is present
-  without `isolatedDeclarations: true`.
+- **`emberIsolatedDeclarations()`** — errors when the tsconfig the build uses
+  (tsdown's `tsconfig` option, defaulting to `tsconfig.json`) is present without
+  `isolatedDeclarations: true`.
 - **`emberExternals()`** — keeps your `dependencies`, `peerDependencies`, and
   the ember virtual packages (e.g. `@ember/component`, `@glimmer/tracking`, the
   template compiler) external, so the consuming app resolves them.
