@@ -101,4 +101,15 @@ export default {
 
     return reasons.length === 0;
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  readme(project) {
+    return `### Testing (Vitest)
+
+Testing is configured with [Vitest](https://vitest.dev/).
+
+- \`${project.runPrefix} test\` - Run tests`;
+  },
 };

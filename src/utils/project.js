@@ -50,6 +50,13 @@ export class Project {
   /**
    * @type {string}
    */
+  get runPrefix() {
+    return this.packageManager === "npm" ? "npm run" : "pnpm";
+  }
+
+  /**
+   * @type {string}
+   */
   get directory() {
     return this.#directory;
   }

@@ -120,6 +120,17 @@ export default {
 
     return reasons.length === 0;
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  readme(project) {
+    return `### TypeScript
+
+This project uses TypeScript and Glint for static type checking.
+
+- \`${project.runPrefix} lint:types\` - Typecheck code with Glint/TypeScript`;
+  },
 };
 
 /**

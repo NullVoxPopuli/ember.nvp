@@ -14,6 +14,11 @@ export interface Layer {
    */
   defaultValue?: (projectType: ProjectType) => unknown;
   /**
+   * Optional README documentation snippet or function. Whatever is returned
+   * will show up in the generated project's README file.
+   */
+  readme?: string | ((project: Project) => string | undefined | Promise<string | undefined>);
+  /**
    * The function that applies the codemod
    *
    * run _may_ be invoked multiple times,

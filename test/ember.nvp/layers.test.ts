@@ -19,6 +19,7 @@ describe("discoverLayers", () => {
         "prettier",
         "publint",
         "qunit",
+        "readme",
         "renovate",
         "typescript",
         "vitest",

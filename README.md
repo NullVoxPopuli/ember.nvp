@@ -198,6 +198,11 @@ export default {
 
     await packageJson.addScripts({ "my-script": 'echo "Hello"' }, project.directory);
   },
+
+  // Optionally add something to the README.md file
+  readme() {
+    return "### My Feature\n\nHere's what my feature brings to the table.";
+  },
 };
 ```
 

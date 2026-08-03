@@ -62,4 +62,16 @@ export default {
 
     return true;
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  readme(project) {
+    return `### Prettier
+
+Code formatting is managed with [Prettier](https://prettier.io/).
+
+- \`${project.runPrefix} format\` - Format code
+- \`${project.runPrefix} lint:prettier\` - Check code formatting`;
+  },
 };

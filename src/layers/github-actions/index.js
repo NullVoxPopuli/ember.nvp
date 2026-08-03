@@ -49,6 +49,9 @@ export default {
 
     return reasons.length === 0;
   },
+  readme() {
+    return "### GitHub Actions\n\nContinuous Integration (CI) is configured under `.github/workflows/ci.yml` for automated testing and linting.";
+  },
 };
 
 /**
