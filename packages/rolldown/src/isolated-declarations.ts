@@ -55,12 +55,15 @@ function resolveTsconfigPath(option: string | boolean | undefined): string | und
  * sources -- isolated declarations then constrain exactly the code that gets
  * declarations emitted for it, and nothing else.
  *
- * Projects with no tsconfig (JavaScript libraries, or `tsconfig: false`) or
- * without the `typescript` package have no declarations to emit, so there is
- * nothing to check.
+ * Projects with no tsconfig (JavaScript libraries) or without the `typescript`
+ * package have no declarations to emit, so there is nothing to check.
+ * `tsconfig: false` is different: it is an explicit opt-out, and combined with
+ * declaration emit it produces a confusing "Source file not found" from the
+ * tsc-based pipeline, so it errors here instead.
  */
 export function emberIsolatedDeclarations(): Plugin {
   let tsconfigOption: string | boolean | undefined;
+  let emitsDeclarations = true;
 
   return {
     name: "ember:isolated-declarations",
@@ -69,9 +72,31 @@ export function emberIsolatedDeclarations(): Plugin {
     // -- i.e. the cwd's tsconfig.json, the only thing it could mean there.
     tsdownConfig(config: UserConfig) {
       tsconfigOption = config.tsconfig;
+      // `emberConfig()` turns dts on unless the library turned it off, so an
+      // explicit `false` is the only "no declarations" signal. Hook order
+      // between plugins isn't guaranteed, so don't rely on it having run.
+      emitsDeclarations = config.dts !== false;
     },
 
     async buildStart() {
+      if (tsconfigOption === false) {
+        if (!emitsDeclarations) return;
+
+        // Without a tsconfig there is no `isolatedDeclarations`, so tsdown
+        // falls back to the tsc-based declaration pipeline -- which reads
+        // source files from disk and dies with "Source file not found" on
+        // every `.gts`/`.gjs`, since those only exist compiled in the module
+        // graph. Say so here instead of leaving that to be decoded.
+        this.error(
+          `\`tsconfig: false\` cannot be combined with declaration emit.\n\n` +
+            `Declarations are emitted by the isolated-declarations pipeline, which needs a ` +
+            `tsconfig setting "compilerOptions.isolatedDeclarations": true -- it is the only ` +
+            `pipeline that can see compiled .gts/.gjs modules.\n\n` +
+            `Either point tsdown's \`tsconfig\` option at such a config, or set \`dts: false\` ` +
+            `if this library ships no types.`,
+        );
+      }
+
       const tsconfigPath = resolveTsconfigPath(tsconfigOption);
 
       if (!tsconfigPath || !existsSync(tsconfigPath)) return;

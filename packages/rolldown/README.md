@@ -130,6 +130,11 @@ Any path works, so the publish config can live wherever you keep build
 configuration — `tsconfig: "./config/tsconfig.publish.json"`. (A directory works
 too: `tsconfig: "./config"` picks up `config/tsconfig.json`.)
 
+`tsconfig: false` is rejected while declarations are on: with no tsconfig there
+is no `isolatedDeclarations`, and the fallback pipeline can't see compiled
+`.gts`, so it would fail later with "Source file not found". Set `dts: false`
+alongside it if the library ships no types.
+
 A tsconfig's relative paths resolve against the file itself, so a config kept in
 `config/` wants `"include": ["../src/**/*"]` and `"rootDir": "../src"`. The build
 won't tell you if you get that wrong — tsdown drives declaration emit from

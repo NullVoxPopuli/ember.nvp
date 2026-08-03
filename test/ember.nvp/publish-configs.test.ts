@@ -80,13 +80,14 @@ function publishTsconfig(directory: "." | "config"): string {
 `;
 }
 
-function tsdownConfig(tsconfigPath: string): string {
+/** `tsconfigOption` is a literal expression: a quoted path, or `false`. */
+function tsdownConfig(tsconfigOption: string): string {
   return `import { defineConfig } from "tsdown";
 import { ember } from "@nullvoxpopuli/ember-rolldown";
 
 export default defineConfig({
   entry: ["./src/index.ts"],
-  tsconfig: "${tsconfigPath}",
+  tsconfig: ${tsconfigOption},
   plugins: [ember()],
 });
 `;
@@ -94,7 +95,12 @@ export default defineConfig({
 
 /** Every place a publish config can be found, so each layout starts clean. */
 const BABEL_CONFIG_PATHS = ["babel.publish.config.js", "config/babel.publish.config.js"];
-const TSCONFIG_PATHS = ["tsconfig.publish.json", "config/tsconfig.publish.json"];
+const TSCONFIG_PATHS = [
+  "tsconfig.publish.json",
+  "config/tsconfig.publish.json",
+  "config/tsconfig.json",
+  "tsconfig.base.json",
+];
 
 describe("publish configs", () => {
   let project: Project;
@@ -139,10 +145,28 @@ describe("publish configs", () => {
     await rm(project.directory, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
   });
 
-  /**
-   * Puts the publish configs in the requested places -- clearing the others so
-   * one layout can't satisfy the next -- and runs the real build.
-   */
+  /** Clears every publish config, so one test's layout can't satisfy the next. */
+  async function resetConfigs() {
+    for (const relative of [...BABEL_CONFIG_PATHS, ...TSCONFIG_PATHS]) {
+      await rm(join(project.directory, relative), { force: true });
+    }
+
+    await rm(join(project.directory, "dist"), { recursive: true, force: true });
+    await mkdir(join(project.directory, "config"), { recursive: true });
+  }
+
+  async function runBuild() {
+    const build = await execa("pnpm build", {
+      cwd: project.directory,
+      shell: true,
+      reject: false,
+      all: true,
+    });
+
+    return { build, output: await project.read("dist/index.js") };
+  }
+
+  /** Puts the publish configs in the requested places and runs the real build. */
   async function buildWith({
     babel,
     tsconfig,
@@ -150,12 +174,7 @@ describe("publish configs", () => {
     babel: "." | "config" | false;
     tsconfig: "." | "config";
   }) {
-    for (const relative of [...BABEL_CONFIG_PATHS, ...TSCONFIG_PATHS]) {
-      await rm(join(project.directory, relative), { force: true });
-    }
-
-    await rm(join(project.directory, "dist"), { recursive: true, force: true });
-    await mkdir(join(project.directory, "config"), { recursive: true });
+    await resetConfigs();
 
     if (babel !== false) {
       const relative = join(babel, "babel.publish.config.js");
@@ -168,18 +187,11 @@ describe("publish configs", () => {
     await writeFile(join(project.directory, tsconfigRelative), publishTsconfig(tsconfig), "utf-8");
     await writeFile(
       join(project.directory, "tsdown.config.js"),
-      tsdownConfig(`./${tsconfigRelative}`),
+      tsdownConfig(`"./${tsconfigRelative}"`),
       "utf-8",
     );
 
-    const build = await execa("pnpm build", {
-      cwd: project.directory,
-      shell: true,
-      reject: false,
-      all: true,
-    });
-
-    return { build, output: await project.read("dist/index.js") };
+    return await runBuild();
   }
 
   for (const babel of [".", "config"] as const) {
@@ -216,6 +228,110 @@ describe("publish configs", () => {
     // artifact you don't want to publish, which is why the preference exists.
     expect(output).toContain("@ember/template-compiler");
     expect(output).not.toContain("precompileTemplate");
+  });
+
+  /**
+   * Writes `files` into the project and builds with `tsconfigOption` as tsdown's
+   * `tsconfig`, for the cases about *which* tsconfig the guard ends up reading.
+   * The publish babel config is always present so these fail for tsconfig
+   * reasons only.
+   */
+  async function buildWithTsconfigOption(
+    tsconfigOption: string,
+    files: Record<string, string> = {},
+  ) {
+    await resetConfigs();
+
+    await writeFile(
+      join(project.directory, "babel.publish.config.js"),
+      publishBabelConfig,
+      "utf-8",
+    );
+
+    for (const [relative, contents] of Object.entries(files)) {
+      await writeFile(join(project.directory, relative), contents, "utf-8");
+    }
+
+    await writeFile(
+      join(project.directory, "tsdown.config.js"),
+      tsdownConfig(tsconfigOption),
+      "utf-8",
+    );
+
+    return await runBuild();
+  }
+
+  it("fails when the publish tsconfig itself lacks isolatedDeclarations", async () => {
+    const { build } = await buildWithTsconfigOption(`"./tsconfig.publish.json"`, {
+      "tsconfig.publish.json": publishTsconfig(".").replace(
+        `"isolatedDeclarations": true,\n    `,
+        "",
+      ),
+    });
+
+    expect(build.exitCode).not.toBe(0);
+    expect(build.all).toContain('"compilerOptions.isolatedDeclarations": true');
+    expect(build.all).toContain("tsconfig.publish.json");
+  });
+
+  it("accepts a directory, reading the tsconfig.json inside it", async () => {
+    const { build } = await buildWithTsconfigOption(`"./config"`, {
+      "config/tsconfig.json": publishTsconfig("config"),
+    });
+
+    expect(build.exitCode, build.all).toBe(0);
+  });
+
+  it("takes the flag from an extends chain", async () => {
+    const { build } = await buildWithTsconfigOption(`"./tsconfig.publish.json"`, {
+      "tsconfig.base.json": `{ "compilerOptions": { "isolatedDeclarations": true } }\n`,
+      "tsconfig.publish.json": publishTsconfig(".").replace(
+        `"extends": "@ember/library-tsconfig"`,
+        `"extends": ["@ember/library-tsconfig", "./tsconfig.base.json"]`,
+      ),
+    });
+
+    expect(build.exitCode, build.all).toBe(0);
+  });
+
+  it("rejects tsconfig: false while declarations are on", async () => {
+    // No tsconfig means no isolatedDeclarations, so tsdown falls back to the
+    // tsc-based pipeline, which can't see compiled .gts and dies with
+    // "Source file not found". Fail with something actionable instead.
+    const { build } = await buildWithTsconfigOption("false");
+
+    expect(build.exitCode).not.toBe(0);
+    expect(build.all).toContain("`tsconfig: false` cannot be combined with declaration emit");
+    expect(build.all).not.toContain("Source file not found");
+  });
+
+  it("allows tsconfig: false for a library that ships no types", async () => {
+    await resetConfigs();
+
+    await writeFile(
+      join(project.directory, "babel.publish.config.js"),
+      publishBabelConfig,
+      "utf-8",
+    );
+    await writeFile(
+      join(project.directory, "tsdown.config.js"),
+      `import { defineConfig } from "tsdown";
+import { ember } from "@nullvoxpopuli/ember-rolldown";
+
+export default defineConfig({
+  entry: ["./src/index.ts"],
+  tsconfig: false,
+  dts: false,
+  plugins: [ember()],
+});
+`,
+      "utf-8",
+    );
+
+    const { build } = await runBuild();
+
+    expect(build.exitCode, build.all).toBe(0);
+    expect(await listFiles(join(project.directory, "dist"))).not.toContain("index.d.ts");
   });
 
   it("keeps dev-only source out of the build", async () => {
