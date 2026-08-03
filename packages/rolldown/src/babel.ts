@@ -3,6 +3,8 @@ import transformTypeScript from "@babel/plugin-transform-typescript";
 import templateCompilation from "babel-plugin-ember-template-compilation";
 import decoratorTransforms from "decorator-transforms";
 import { loadPartialConfigSync } from "@babel/core";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import type { PluginItem } from "@babel/core";
 import type { Transform } from "babel-plugin-ember-template-compilation";
 import type { Plugin } from "rolldown";
@@ -12,8 +14,9 @@ export interface BabelOptions {
   /**
    * The babel config file to use.
    *
-   * - `undefined`: auto-detect the project's babel config (via babel's own
-   *   config resolution).
+   * - `undefined`: auto-detect. A `babel.publish.config.*` wins, because this
+   *   is a publish build; otherwise babel's own config resolution applies
+   *   (see `detectConfigFile`).
    * - a string: use that config file.
    * - `false`: ignore config files entirely.
    *
@@ -46,14 +49,46 @@ export interface BabelOptions {
   };
 }
 
+/** Tried in order, so an ESM config wins over a JSON one of the same name. */
+const PUBLISH_CONFIG_EXTENSIONS = ["mjs", "cjs", "js", "mts", "cts", "ts", "json"];
+
 /**
- * Resolve the project's root babel config the way babel itself does
- * (`babel.config.{js,cjs,mjs,cts,json}`, honoring `rootMode` semantics).
+ * A `babel.publish.config.*` next to package.json, if there is one.
+ *
+ * A library's plain `babel.config.*` is its *development* config: it typically
+ * compiles `@embroider/macros` away, targets the wire format, and wires up
+ * whatever the in-package demo app or test suite needs. None of that belongs in
+ * a published artifact -- macros must stay for the consuming app to evaluate,
+ * and the wire format is private between one template compiler and one glimmer
+ * runtime. Babel's own resolution can't tell the two apart (it finds whatever
+ * `babel.config.*` exists), so a publish build has to prefer the config named
+ * for publishing.
+ */
+function detectPublishConfigFile(): string | undefined {
+  for (const extension of PUBLISH_CONFIG_EXTENSIONS) {
+    const candidate = resolve(`babel.publish.config.${extension}`);
+
+    if (existsSync(candidate)) return candidate;
+  }
+
+  return undefined;
+}
+
+/**
+ * The config this publish build should use: a `babel.publish.config.*` when the
+ * library has one, else the project's root babel config resolved the way babel
+ * itself does (`babel.config.{js,cjs,mjs,cts,json}`, honoring `rootMode`
+ * semantics) -- which for a library whose only config *is* its publish config
+ * is the same file either way.
  *
  * The sync API evaluates the config file; on node 24+ that works for native
  * ESM configs too (require(esm)).
  */
 function detectConfigFile(): string | undefined {
+  const publishConfig = detectPublishConfigFile();
+
+  if (publishConfig) return publishConfig;
+
   const partial = loadPartialConfigSync({ cwd: process.cwd() });
 
   return partial?.config ?? undefined;
@@ -112,9 +147,10 @@ function defaultPlugins(templateTransforms?: Transform[]): PluginItem[] {
  * to only the files that actually need it (template-tag, decorators, template
  * imports). Everything else stays on the native transform.
  *
- * The library's own babel config is used when it exists; without one,
- * `defaultPlugins` covers templates, decorators, and TypeScript, so no
- * config file is required.
+ * The library's own babel config is used when it exists -- its
+ * `babel.publish.config.*` in preference to its `babel.config.*`, since this is
+ * a publish build. Without one, `defaultPlugins` covers templates, decorators,
+ * and TypeScript, so no config file is required.
  *
  * Libraries default to `babelHelpers: "bundled"` so the emitted output is
  * self-contained.

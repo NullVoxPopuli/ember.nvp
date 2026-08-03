@@ -53,10 +53,12 @@ export default defineConfig({
 });
 ```
 
-A `babel.config.js` is optional. Without one, `ember()` compiles templates
+A babel config is optional. Without one, `ember()` compiles templates
 (to `precompileTemplate`), decorators (via
 [decorator-transforms](https://github.com/ef4/decorator-transforms)), and
-TypeScript; with one, your config runs instead.
+TypeScript; with one, your config runs instead. A `babel.publish.config.*` is
+preferred over a `babel.config.*` — see
+[Publish vs. development babel config](#publish-vs-development-babel-config).
 
 ### Entrypoints
 
@@ -198,7 +200,8 @@ it.
   `.gts` specifiers in emitted `.d.ts` files.
 - **`emberBabel()`** — runs babel with `babelHelpers: "bundled"`, but only on
   the files that actually need it (template-tag, decorators, template imports);
-  everything else stays on rolldown's fast native (oxc) transform.
+  everything else stays on rolldown's fast native (oxc) transform. Uses your
+  `babel.publish.config.*` in preference to your `babel.config.*`.
 
 ## Configuration
 
@@ -219,6 +222,35 @@ template AST transforms to the default template-compilation step; it can't be
 combined with a babel config file — a config lists
 `babel-plugin-ember-template-compilation` itself, so its transforms belong
 there.
+
+### Publish vs. development babel config
+
+A library's plain `babel.config.*` is usually its _development_ config: it
+compiles `@embroider/macros` away, targets the wire format, and wires up
+whatever the in-package demo app or test suite needs. None of that belongs in a
+published artifact — macros must survive for the consuming app to evaluate, and
+the wire format is private between one template compiler and one glimmer
+runtime of the same version.
+
+Babel's own resolution can't tell those apart, so `ember()` looks for a config
+named for publishing first. With no explicit `configFile`, detection is:
+
+1. `babel.publish.config.{mjs,cjs,js,mts,cts,ts,json}`
+2. otherwise babel's own resolution (`babel.config.*`, honoring `rootMode`)
+3. otherwise no config file — templates, decorators and TypeScript are still
+   handled by the built-in defaults
+
+So a library that keeps both configs needs no `babel` option at all:
+
+```
+my-addon/
+  babel.config.mjs          # dev: macros compiled, wire format, test-app wiring
+  babel.publish.config.mjs  # what ember() uses
+```
+
+Set `configFile` explicitly to override that (`configFile: false` ignores config
+files entirely, which is what you want when your publish config would just
+restate the built-in defaults).
 
 ## App re-exports
 
