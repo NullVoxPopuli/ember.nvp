@@ -2,6 +2,24 @@
 
 ## Release (2026-08-03)
 
+* ember.nvp 1.4.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.6.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#111](https://github.com/NullVoxPopuli/ember.nvp/pull/111) rolldown: find publish configs in config/ too ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+* `@nullvoxpopuli/ember-rolldown`
+  * [#109](https://github.com/NullVoxPopuli/ember.nvp/pull/109) rolldown: prefer babel.publish.config over babel.config ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :house: Internal
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#112](https://github.com/NullVoxPopuli/ember.nvp/pull/112) rolldown: test the isolated-declarations guard through generated libraries ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
+## Release (2026-08-03)
+
 * ember.nvp 1.3.0 (minor)
 * @nullvoxpopuli/ember-rolldown 2.5.0 (minor)
 
