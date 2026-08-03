@@ -127,10 +127,14 @@ export default defineConfig({
 ```
 
 Any path works, so the publish config can live wherever you keep build
-configuration — `tsconfig: "./config/tsconfig.publish.json"`. Remember that a
-tsconfig's relative paths resolve against the file itself, so a config in
-`config/` needs `"include": ["../src/**/*"]` and `"rootDir": "../src"`. (A
-directory also works: `tsconfig: "./config"` picks up `config/tsconfig.json`.)
+configuration — `tsconfig: "./config/tsconfig.publish.json"`. (A directory works
+too: `tsconfig: "./config"` picks up `config/tsconfig.json`.)
+
+A tsconfig's relative paths resolve against the file itself, so a config kept in
+`config/` wants `"include": ["../src/**/*"]` and `"rootDir": "../src"`. The build
+won't tell you if you get that wrong — tsdown drives declaration emit from
+`entry`, not from the tsconfig's `include` — but `tsc`/`ember-tsc` and your
+editor will, if you ever point them at that config.
 
 The tradeoff: isolated-declaration errors in `src` then surface when you build
 rather than in your editor, since the editor uses `tsconfig.json`. Run the build
