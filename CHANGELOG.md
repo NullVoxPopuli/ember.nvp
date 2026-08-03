@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-08-03)
+
+* ember.nvp 1.3.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.5.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#106](https://github.com/NullVoxPopuli/ember.nvp/pull/106) README layer ([@tcjr](https://github.com/tcjr))
+* `@nullvoxpopuli/ember-rolldown`
+  * [#107](https://github.com/NullVoxPopuli/ember.nvp/pull/107) rolldown: check the tsconfig the build uses, not always tsconfig.json ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Tom Carter ([@tcjr](https://github.com/tcjr))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-07-24)
 
 * @nullvoxpopuli/ember-rolldown 2.4.0 (minor)
