@@ -14,9 +14,9 @@ export interface BabelOptions {
   /**
    * The babel config file to use.
    *
-   * - `undefined`: auto-detect. A `babel.publish.config.*` wins, because this
-   *   is a publish build; otherwise babel's own config resolution applies
-   *   (see `detectConfigFile`).
+   * - `undefined`: auto-detect. A `babel.publish.config.*` (in the package root
+   *   or `config/`) wins, because this is a publish build; otherwise babel's own
+   *   config resolution applies (see `detectConfigFile`).
    * - a string: use that config file.
    * - `false`: ignore config files entirely.
    *
@@ -53,7 +53,14 @@ export interface BabelOptions {
 const PUBLISH_CONFIG_EXTENSIONS = ["mjs", "cjs", "js", "mts", "cts", "ts", "json"];
 
 /**
- * A `babel.publish.config.*` next to package.json, if there is one.
+ * Tried in order: next to package.json first, then `config/` for libraries that
+ * keep their build configuration out of the package root.
+ */
+const PUBLISH_CONFIG_DIRECTORIES = [".", "config"];
+
+/**
+ * A `babel.publish.config.*` (in the package root or `config/`), if there is
+ * one.
  *
  * A library's plain `babel.config.*` is its *development* config: it typically
  * compiles `@embroider/macros` away, targets the wire format, and wires up
@@ -65,10 +72,12 @@ const PUBLISH_CONFIG_EXTENSIONS = ["mjs", "cjs", "js", "mts", "cts", "ts", "json
  * for publishing.
  */
 function detectPublishConfigFile(): string | undefined {
-  for (const extension of PUBLISH_CONFIG_EXTENSIONS) {
-    const candidate = resolve(`babel.publish.config.${extension}`);
+  for (const directory of PUBLISH_CONFIG_DIRECTORIES) {
+    for (const extension of PUBLISH_CONFIG_EXTENSIONS) {
+      const candidate = resolve(directory, `babel.publish.config.${extension}`);
 
-    if (existsSync(candidate)) return candidate;
+      if (existsSync(candidate)) return candidate;
+    }
   }
 
   return undefined;
@@ -148,8 +157,8 @@ function defaultPlugins(templateTransforms?: Transform[]): PluginItem[] {
  * imports). Everything else stays on the native transform.
  *
  * The library's own babel config is used when it exists -- its
- * `babel.publish.config.*` in preference to its `babel.config.*`, since this is
- * a publish build. Without one, `defaultPlugins` covers templates, decorators,
+ * `babel.publish.config.*` (root or `config/`) in preference to its
+ * `babel.config.*`, since this is a publish build. Without one, `defaultPlugins` covers templates, decorators,
  * and TypeScript, so no config file is required.
  *
  * Libraries default to `babelHelpers: "bundled"` so the emitted output is

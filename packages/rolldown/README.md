@@ -126,6 +126,16 @@ export default defineConfig({
 });
 ```
 
+Any path works, so the publish config can live wherever you keep build
+configuration — `tsconfig: "./config/tsconfig.publish.json"`. (A directory works
+too: `tsconfig: "./config"` picks up `config/tsconfig.json`.)
+
+A tsconfig's relative paths resolve against the file itself, so a config kept in
+`config/` wants `"include": ["../src/**/*"]` and `"rootDir": "../src"`. The build
+won't tell you if you get that wrong — tsdown drives declaration emit from
+`entry`, not from the tsconfig's `include` — but `tsc`/`ember-tsc` and your
+editor will, if you ever point them at that config.
+
 The tradeoff: isolated-declaration errors in `src` then surface when you build
 rather than in your editor, since the editor uses `tsconfig.json`. Run the build
 (or `tsc --noEmit -p tsconfig.publish.json`) in CI so nothing lands unchecked.
@@ -201,7 +211,8 @@ it.
 - **`emberBabel()`** — runs babel with `babelHelpers: "bundled"`, but only on
   the files that actually need it (template-tag, decorators, template imports);
   everything else stays on rolldown's fast native (oxc) transform. Uses your
-  `babel.publish.config.*` in preference to your `babel.config.*`.
+  `babel.publish.config.*` (root or `config/`) in preference to your
+  `babel.config.*`.
 
 ## Configuration
 
@@ -235,9 +246,10 @@ runtime of the same version.
 Babel's own resolution can't tell those apart, so `ember()` looks for a config
 named for publishing first. With no explicit `configFile`, detection is:
 
-1. `babel.publish.config.{mjs,cjs,js,mts,cts,ts,json}`
-2. otherwise babel's own resolution (`babel.config.*`, honoring `rootMode`)
-3. otherwise no config file — templates, decorators and TypeScript are still
+1. `babel.publish.config.{mjs,cjs,js,mts,cts,ts,json}` in the package root
+2. the same names in `config/`
+3. otherwise babel's own resolution (`babel.config.*`, honoring `rootMode`)
+4. otherwise no config file — templates, decorators and TypeScript are still
    handled by the built-in defaults
 
 So a library that keeps both configs needs no `babel` option at all:
@@ -246,6 +258,16 @@ So a library that keeps both configs needs no `babel` option at all:
 my-addon/
   babel.config.mjs          # dev: macros compiled, wire format, test-app wiring
   babel.publish.config.mjs  # what ember() uses
+```
+
+...and so does one that keeps build configuration out of its root:
+
+```
+my-addon/
+  babel.config.mjs
+  config/
+    babel.publish.config.mjs  # what ember() uses
+    tsconfig.publish.json     # see below
 ```
 
 Set `configFile` explicitly to override that (`configFile: false` ignores config
