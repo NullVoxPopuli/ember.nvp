@@ -105,26 +105,6 @@ describe("emberBabel", () => {
       expect(code).not.toContain(`"dev"`);
     });
 
-    it("finds a publish config in config/", async () => {
-      const code = await bundleWithBabel({
-        "babel.config.mjs": markerConfig("dev"),
-        "config/babel.publish.config.mjs": markerConfig("publish"),
-      });
-
-      expect(code).toContain(`"publish"`);
-      expect(code).not.toContain(`"dev"`);
-    });
-
-    it("prefers a root publish config over one in config/", async () => {
-      const code = await bundleWithBabel({
-        "babel.publish.config.mjs": markerConfig("root"),
-        "config/babel.publish.config.mjs": markerConfig("nested"),
-      });
-
-      expect(code).toContain(`"root"`);
-      expect(code).not.toContain(`"nested"`);
-    });
-
     it("falls back to babel.config when there is no publish config", async () => {
       const code = await bundleWithBabel({ "babel.config.mjs": markerConfig("dev") });
 

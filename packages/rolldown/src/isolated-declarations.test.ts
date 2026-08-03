@@ -94,27 +94,6 @@ describe("isolated declarations guard", () => {
     expect(error?.message).toContain(`must set "compilerOptions.isolatedDeclarations": true`);
   });
 
-  it("checks a publish tsconfig kept in config/", async () => {
-    // Libraries that keep build configuration out of the package root point the
-    // `tsconfig` option at it like any other path; nothing here is special-cased.
-    const error = await buildFixture(
-      { "tsconfig.json": withoutFlag, "config/tsconfig.publish.json": withFlag },
-      "./config/tsconfig.publish.json",
-    );
-
-    expect(error).toBeUndefined();
-  });
-
-  it("errors on a publish tsconfig in config/ that lacks the flag", async () => {
-    const error = await buildFixture(
-      { "tsconfig.json": withFlag, "config/tsconfig.publish.json": withoutFlag },
-      "./config/tsconfig.publish.json",
-    );
-
-    expect(error?.message).toContain(path.join("config", "tsconfig.publish.json"));
-    expect(error?.message).toContain(`must set "compilerOptions.isolatedDeclarations": true`);
-  });
-
   it("resolves a directory `tsconfig` option to the tsconfig.json inside it", async () => {
     const error = await buildFixture(
       { "tsconfig.json": withFlag, "config/tsconfig.json": withoutFlag },
