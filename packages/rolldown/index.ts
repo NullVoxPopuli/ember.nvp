@@ -21,8 +21,10 @@ interface Config {
  * (`<template>`) source into publishable output:
  *
  * - `emberConfig()` — applies sensible tsdown defaults for a library build
- *   (sourcemaps, `clean`, `dts`, `.js`/`.d.ts` extensions, quiet logging);
- *   anything you set explicitly still wins.
+ *   (sourcemaps, `clean`, `dts`, `.js`/`.d.ts` extensions, quiet logging), and
+ *   turns rolldown's constant inlining off — it substitutes literals into
+ *   `precompileTemplate` scope objects, which must stay direct references.
+ *   Anything you set explicitly still wins.
  * - `emberIsolatedDeclarations()` — errors when a tsconfig.json is present
  *   without `isolatedDeclarations: true` (required: it is the only
  *   declaration pipeline that can see compiled template-tag modules).
