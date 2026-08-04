@@ -73,65 +73,34 @@ export const answers = {
 };
 
 /**
- * Parse CLI args for layer options in format:
- * --<layerName>.<optionKey> <val>
+ * Extract layer options from parsed CLI values.
  *
  * @param {import('#types').DiscoveredLayer[]} layers
- * @param {string[]} [argv]
+ * @param {Record<string, any>} [parsedValues] Defaults to module-level `values` from parseArgs
  * @returns {Record<string, Record<string, any>>}
  */
-export function parseLayerOptionsFromArgv(layers = [], argv = process.argv.slice(2)) {
+export function parseLayerOptionsFromParsedArgs(layers = [], parsedValues = values) {
   /** @type {Record<string, Record<string, any>>} */
   const result = {};
 
-  const camelize = (/** @type {string} */ str) =>
-    str.replace(/[-_]([a-z])/gi, (/** @type {string} */ _, /** @type {string} */ letter) =>
-      letter.toUpperCase(),
-    );
+  for (const layer of layers) {
+    if (!layer.options) continue;
 
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (!arg || !arg.startsWith("--")) continue;
+    for (const [optionKey, schema] of Object.entries(layer.options)) {
+      const flagKey = `${layer.name}.${optionKey}`;
+      const rawVal = parsedValues[flagKey];
 
-    let flagName = arg.slice(2);
-    /** @type {string | undefined} */
-    let val = undefined;
-
-    if (flagName.includes("=")) {
-      const parts = flagName.split("=");
-      flagName = parts[0] ?? "";
-      val = parts.slice(1).join("=");
-    } else if (i + 1 < argv.length && !argv[i + 1]?.startsWith("--")) {
-      val = argv[i + 1];
-    } else {
-      val = "true";
-    }
-
-    for (const layer of layers) {
-      if (!layer.options) continue;
-
-      if (!flagName.startsWith(`${layer.name}.`)) continue;
-      const optionKey = flagName.slice(layer.name.length + 1);
-
-      const camelKey = camelize(optionKey);
-      const matchedKey = Object.keys(layer.options).find(
-        (k) => k === optionKey || k === camelKey || k.toLowerCase() === optionKey.toLowerCase(),
-      );
-
-      if (matchedKey) {
-        const schema = layer.options[matchedKey];
-        if (!schema) continue;
-
+      if (rawVal !== undefined) {
         /** @type {any} */
-        let parsedVal = val;
+        let parsedVal = rawVal;
         if (schema.type === "number") {
-          parsedVal = Number(val);
+          parsedVal = Number(rawVal);
         } else if (schema.type === "confirm") {
-          parsedVal = val === "true" || val === "yes";
+          parsedVal = Boolean(rawVal);
         }
 
         const layerObj = (result[layer.name] ??= {});
-        layerObj[matchedKey] = parsedVal;
+        layerObj[optionKey] = parsedVal;
       }
     }
   }

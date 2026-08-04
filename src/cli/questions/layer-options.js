@@ -1,6 +1,6 @@
 import { styleText } from "node:util";
 import * as p from "@clack/prompts";
-import { printArgInUse, parseLayerOptionsFromArgv } from "#args";
+import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
 
 /**
  * Prompt the user for options defined on the selected layers.
@@ -10,7 +10,7 @@ import { printArgInUse, parseLayerOptionsFromArgv } from "#args";
  * @returns {Promise<Record<string, Record<string, any>>>}
  */
 export async function askLayerOptions(selectedLayers) {
-  const cliOptions = parseLayerOptionsFromArgv(selectedLayers);
+  const cliOptions = parseLayerOptionsFromParsedArgs(selectedLayers);
   /** @type {Record<string, Record<string, any>>} */
   const result = {};
 
