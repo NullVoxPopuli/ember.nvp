@@ -57,8 +57,6 @@ Demonstration layer options configuration:
    * @param {import('#utils/project.js').Project} project
    */
   async run(project) {
-    console.log("THIS IS WHERE THE KITCHEN SINK WOULD DO SOMETHING");
-
     const opts = project.getLayerOptions("kitchen-sink-temp");
     const contentsLines = [
       "# This is a kitchen sink nonsense file",
