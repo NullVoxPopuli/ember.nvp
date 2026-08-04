@@ -2,6 +2,10 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { formatLabel } from "#utils/cli.js";
 
+/**
+ * This layer is used as a demonstration of the new options behavior.  Once we have a real layer
+ * with options, we can ditch this.  It's disabled (in TODO list).
+ */
 export default {
   label: formatLabel("Kitchen Sink", "demonstrates options"),
   hint: "lots-o-options",

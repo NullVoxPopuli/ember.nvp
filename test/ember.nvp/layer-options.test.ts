@@ -4,23 +4,39 @@ import { parseLayerOptionsFromArgv } from "#args";
 import type { DiscoveredLayer } from "#types";
 
 describe("Layer Options Feature", () => {
-  const dummyLayer: DiscoveredLayer = {
-    name: "prettier",
-    label: "Prettier",
+  const fakeKitchenSinkLayer: DiscoveredLayer = {
+    name: "fake-kitchen-sink",
+    label: "Fake Kitchen Sink Layer",
+    hint: "demonstrates options",
     options: {
-      printWidth: {
+      unitCount: {
         type: "number",
-        prompt: "What print width would you like?",
-        default: 100,
-        validate: (val: number) => val > 0 || "Must be > 0",
+        prompt: "How many units do you want?",
+        default: 7,
+        validate: (val: number) => val > 0 || "Must be greater than 0",
       },
-      useTabs: {
+      customTitle: {
+        type: "text",
+        prompt: "Enter a custom title",
+        default: "My Kitchen Sink",
+        validate: (input: string) => (input.trim().length > 0 ? true : "Title cannot be empty"),
+      },
+      flavor: {
+        type: "select",
+        prompt: "Which kitchen sink flavor do you prefer?",
+        default: "standard",
+        options: [
+          { label: "Standard", value: "standard", hint: "Regular kitchen sink setup" },
+          { label: "Deluxe", value: "deluxe", hint: "Includes extra features" },
+        ],
+      },
+      enableLogging: {
         type: "confirm",
-        prompt: "Use tabs?",
-        default: false,
+        prompt: "Enable detailed sink logging?",
+        default: true,
       },
     },
-    async run(project, options = {}) {
+    async run(_project, _options = {}) {
       // noop
     },
     async isSetup(_project?: Project, explain?: boolean): Promise<any> {
@@ -35,12 +51,14 @@ describe("Layer Options Feature", () => {
         type: "app",
         path: "/tmp/test",
         packageManager: "pnpm",
-        layers: [dummyLayer],
+        layers: [fakeKitchenSinkLayer],
       });
 
-      expect(project.getLayerOptions("prettier")).toEqual({
-        printWidth: 100,
-        useTabs: false,
+      expect(project.getLayerOptions("fake-kitchen-sink")).toEqual({
+        unitCount: 7,
+        customTitle: "My Kitchen Sink",
+        flavor: "standard",
+        enableLogging: true,
       });
     });
 
@@ -50,17 +68,22 @@ describe("Layer Options Feature", () => {
         type: "app",
         path: "/tmp/test",
         packageManager: "pnpm",
-        layers: [dummyLayer],
+        layers: [fakeKitchenSinkLayer],
         options: {
-          prettier: {
-            printWidth: 120,
+          "fake-kitchen-sink": {
+            unitCount: 12,
+            customTitle: "Custom Sink",
+            flavor: "deluxe",
+            enableLogging: false,
           },
         },
       });
 
-      expect(project.getLayerOptions("prettier")).toEqual({
-        printWidth: 120,
-        useTabs: false,
+      expect(project.getLayerOptions("fake-kitchen-sink")).toEqual({
+        unitCount: 12,
+        customTitle: "Custom Sink",
+        flavor: "deluxe",
+        enableLogging: false,
       });
     });
 
@@ -86,22 +109,48 @@ describe("Layer Options Feature", () => {
     });
   });
 
+  describe("Option Validation Schemas", () => {
+    it("validates number schema constraints", () => {
+      const numberSchema = fakeKitchenSinkLayer.options!.unitCount!;
+      expect(numberSchema.validate!(10)).toBe(true);
+      expect(numberSchema.validate!(0)).toBe("Must be greater than 0");
+    });
+
+    it("validates text schema constraints", () => {
+      const textSchema = fakeKitchenSinkLayer.options!.customTitle!;
+      expect(textSchema.validate!("Valid Title")).toBe(true);
+      expect(textSchema.validate!("   ")).toBe("Title cannot be empty");
+    });
+  });
+
   describe("parseLayerOptionsFromArgv", () => {
-    it("parses --<layer>.<option> flags", () => {
-      const argv = ["--layers", "prettier", "--prettier.printWidth", "120", "--prettier.useTabs"];
-      const parsed = parseLayerOptionsFromArgv([dummyLayer], argv);
+    it("parses --<layer>.<option> flags for all option types", () => {
+      const argv = [
+        "--layers",
+        "fake-kitchen-sink",
+        "--fake-kitchen-sink.unitCount",
+        "15",
+        "--fake-kitchen-sink.customTitle",
+        "CLI Title",
+        "--fake-kitchen-sink.flavor",
+        "deluxe",
+        "--fake-kitchen-sink.enableLogging",
+      ];
+      const parsed = parseLayerOptionsFromArgv([fakeKitchenSinkLayer], argv);
 
       expect(parsed).toEqual({
-        prettier: {
-          printWidth: 120,
-          useTabs: true,
+        "fake-kitchen-sink": {
+          unitCount: 15,
+          customTitle: "CLI Title",
+          flavor: "deluxe",
+          enableLogging: true,
         },
       });
     });
 
     it("ignores flags for unknown layers or options", () => {
-      const argv = ["--unknown-flag", "value", "--prettier.unknownOpt", "100"];
-      const parsed = parseLayerOptionsFromArgv([dummyLayer], argv);
+      const argv = ["--unknown-flag", "value", "--fake-kitchen-sink.unknownOpt", "100"];
+      const parsed = parseLayerOptionsFromArgv([fakeKitchenSinkLayer], argv);
 
       expect(parsed).toEqual({});
     });
@@ -112,24 +161,9 @@ describe("Layer Options Feature", () => {
       let receivedOptions: Record<string, any> | undefined;
 
       const layerWithOptions: DiscoveredLayer = {
-        name: "test-layer",
-        label: "Test Layer",
-        options: {
-          theme: {
-            type: "select",
-            prompt: "Select theme",
-            default: "light",
-            options: [
-              { label: "Light", value: "light" },
-              { label: "Dark", value: "dark" },
-            ],
-          },
-        },
+        ...fakeKitchenSinkLayer,
         async run(_project, options) {
           receivedOptions = options;
-        },
-        async isSetup(_project?: Project, explain?: boolean): Promise<any> {
-          return explain ? { isSetup: true, reasons: [] } : true;
         },
       };
 
@@ -140,17 +174,21 @@ describe("Layer Options Feature", () => {
         packageManager: "pnpm",
         layers: [layerWithOptions],
         options: {
-          "test-layer": {
-            theme: "dark",
+          "fake-kitchen-sink": {
+            unitCount: 42,
+            flavor: "deluxe",
           },
         },
       });
 
-      const opts = project.getLayerOptions("test-layer");
+      const opts = project.getLayerOptions("fake-kitchen-sink");
       await layerWithOptions.run(project, opts);
 
       expect(receivedOptions).toEqual({
-        theme: "dark",
+        unitCount: 42,
+        customTitle: "My Kitchen Sink",
+        flavor: "deluxe",
+        enableLogging: true,
       });
     });
   });
