@@ -1,46 +1,73 @@
 import * as p from "@clack/prompts";
 import { styleText, parseArgs } from "node:util";
 
-const { values } = parseArgs({
-  options: {
-    name: {
-      type: "string",
-    },
-
-    path: {
-      type: "string",
-    },
-
-    type: {
-      type: "string",
-      choices: ["app", "addon", "library"],
-    },
-
-    confirm: {
-      type: "string",
-      choices: ["yes", "no"],
-    },
-
-    layers: {
-      type: "string",
-      multiple: true,
-    },
-
-    packageManager: {
-      type: "string",
-      choices: ["npm", "pnpm"],
-    },
-
-    replaceOrUpdate: {
-      type: "string",
-      choices: ["replace", "update"],
-    },
-
-    write: {
-      type: "string",
-      choices: ["yes", "no"],
-    },
+const options = /** @type {const} */ ({
+  name: {
+    type: "string",
   },
+
+  path: {
+    type: "string",
+  },
+
+  type: {
+    type: "string",
+    choices: ["app", "addon", "library"],
+  },
+
+  confirm: {
+    type: "string",
+    choices: ["yes", "no"],
+  },
+
+  layers: {
+    type: "string",
+    multiple: true,
+  },
+
+  packageManager: {
+    type: "string",
+    choices: ["npm", "pnpm"],
+  },
+
+  replaceOrUpdate: {
+    type: "string",
+    choices: ["replace", "update"],
+  },
+
+  write: {
+    type: "string",
+    choices: ["yes", "no"],
+  },
+});
+
+const knownOptions = new Set(Object.keys(options));
+
+function filterKnownArgs(/** @type {string[]} */ argv) {
+  /** @type {string[]} */
+  const filtered = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (!arg) continue;
+
+    if (arg.startsWith("--")) {
+      const flagName = arg.slice(2).split("=")[0] ?? "";
+      if (knownOptions.has(flagName)) {
+        filtered.push(arg);
+        const nextArg = argv[i + 1];
+        if (!arg.includes("=") && nextArg !== undefined && !nextArg.startsWith("--")) {
+          filtered.push(nextArg);
+          i++;
+        }
+      }
+    }
+  }
+  return filtered;
+}
+
+const { values } = parseArgs({
+  args: filterKnownArgs(process.argv.slice(2)),
+  options,
 });
 
 const { replaceOrUpdate, name, type, layers = [], packageManager, path, confirm, write } = values;
