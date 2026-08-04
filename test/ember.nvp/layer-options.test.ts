@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Project } from "#utils/project.js";
-import { parseLayerOptionsFromArgv } from "#args";
+import { parseLayerOptionsFromParsedArgs } from "#args";
 import type { DiscoveredLayer } from "#types";
 
 describe("Layer Options Feature", () => {
@@ -123,20 +123,16 @@ describe("Layer Options Feature", () => {
     });
   });
 
-  describe("parseLayerOptionsFromArgv", () => {
-    it("parses --<layer>.<option> flags for all option types", () => {
-      const argv = [
-        "--layers",
-        "fake-kitchen-sink",
-        "--fake-kitchen-sink.unitCount",
-        "15",
-        "--fake-kitchen-sink.customTitle",
-        "CLI Title",
-        "--fake-kitchen-sink.flavor",
-        "deluxe",
-        "--fake-kitchen-sink.enableLogging",
-      ];
-      const parsed = parseLayerOptionsFromArgv([fakeKitchenSinkLayer], argv);
+  describe("parseLayerOptionsFromParsedArgs", () => {
+    it("parses layer options for all option types", () => {
+      const parsedValues = {
+        layers: ["fake-kitchen-sink"],
+        "fake-kitchen-sink.unitCount": "15",
+        "fake-kitchen-sink.customTitle": "CLI Title",
+        "fake-kitchen-sink.flavor": "deluxe",
+        "fake-kitchen-sink.enableLogging": true,
+      };
+      const parsed = parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
 
       expect(parsed).toEqual({
         "fake-kitchen-sink": {
@@ -149,8 +145,11 @@ describe("Layer Options Feature", () => {
     });
 
     it("ignores flags for unknown layers or options", () => {
-      const argv = ["--unknown-flag", "value", "--fake-kitchen-sink.unknownOpt", "100"];
-      const parsed = parseLayerOptionsFromArgv([fakeKitchenSinkLayer], argv);
+      const parsedValues = {
+        "unknown-flag": "value",
+        "fake-kitchen-sink.unknownOpt": "100",
+      };
+      const parsed = parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
 
       expect(parsed).toEqual({});
     });
