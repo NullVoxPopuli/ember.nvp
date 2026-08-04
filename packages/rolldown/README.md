@@ -206,6 +206,12 @@ module graph. Without it, the bundled CSS is emitted but nothing loads it.
 
 `ember()` returns an array of rolldown plugins:
 
+- **`emberConfig()`** applies the library-build defaults (sourcemaps,
+  `clean`, `dts`, `.js` / `.d.ts` extensions). It also turns off rolldown's
+  constant inlining (`optimization.inlineConst`). The rolldown default puts an
+  imported constant's literal into `precompileTemplate` scope objects, and the
+  consuming app's template compiler accepts only direct references there.
+  Anything you set explicitly still wins.
 - **`emberIsolatedDeclarations()`** errors when the tsconfig the build uses
   (tsdown's `tsconfig` option, defaulting to `tsconfig.json`) is present without
   `isolatedDeclarations: true`.

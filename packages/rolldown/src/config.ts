@@ -29,6 +29,17 @@ import type { TsdownPlugin, UserConfig } from "tsdown";
  *
  * - `output.sourcemap` — on
  *
+ * One default applies through rolldown's `options` hook,
+ * so it holds under both tools:
+ *
+ * - `optimization.inlineConst` — off.
+ *   Rolldown's default (`mode: "smart"`) puts an imported constant's literal
+ *   into `precompileTemplate` scope objects:
+ *   `scope: () => ({ EMPTY })` becomes `scope: () => ({ EMPTY: "—" })`.
+ *   The consuming app's template compiler accepts only direct references there.
+ *   The library still builds, type-checks, and lints clean,
+ *   so the app boot is the first place the error shows.
+ *
  * Externals are handled by `emberExternals()` (a `resolveId` hook) in both cases.
  *
  * Bundle mode flips the dependency defaults.
@@ -64,6 +75,12 @@ export function emberConfig({ bundle = false }: { bundle?: boolean } = {}): Tsdo
       }
 
       config.deps.neverBundle ??= ["node:*", "@ember/*", "@glimmer/*"];
+    },
+
+    options(options) {
+      options.optimization ??= {};
+      options.optimization.inlineConst ??= false;
+      return options;
     },
 
     outputOptions(options) {
