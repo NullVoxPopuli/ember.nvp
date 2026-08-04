@@ -1,3 +1,4 @@
+import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromArgv } from "#args";
 
@@ -29,20 +30,26 @@ export async function askLayerOptions(selectedLayers) {
       }
 
       let answer;
-      const promptMessage = schema.prompt ?? key;
+      const layerNamePrefix = styleText("magentaBright", layer.name);
+      const promptMessage = `${layerNamePrefix}: ${schema.prompt ?? key}`;
 
       switch (schema.type) {
         case "number": {
           const raw = await p.text({
             message: promptMessage,
+            placeholder: schema.default !== undefined ? String(schema.default) : undefined,
             defaultValue: schema.default !== undefined ? String(schema.default) : undefined,
             validate: (input) => {
-              const num = Number(input);
+              const valStr =
+                (!input || input.length === 0) && schema.default !== undefined
+                  ? String(schema.default)
+                  : (input ?? "");
+              const num = Number(valStr);
               if (isNaN(num)) return "Must be a valid number";
               if (schema.validate) {
                 const res = schema.validate(num);
                 if (typeof res === "string") return res;
-                if (!res) return "Invalid value";
+                if (res === false) return "Invalid value";
               }
               return undefined;
             },
@@ -59,12 +66,17 @@ export async function askLayerOptions(selectedLayers) {
         case "text": {
           answer = await p.text({
             message: promptMessage,
+            placeholder: schema.default !== undefined ? String(schema.default) : undefined,
             defaultValue: schema.default !== undefined ? String(schema.default) : undefined,
             validate: schema.validate
               ? (input) => {
-                  const res = schema.validate?.(input);
+                  const valueToValidate =
+                    (!input || input.length === 0) && schema.default !== undefined
+                      ? String(schema.default)
+                      : (input ?? "");
+                  const res = schema.validate?.(valueToValidate);
                   if (typeof res === "string") return res;
-                  if (!res) return "Invalid value";
+                  if (res === false) return "Invalid value";
                   return undefined;
                 }
               : undefined,
