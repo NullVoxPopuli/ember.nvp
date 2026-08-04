@@ -1,7 +1,8 @@
 import * as p from "@clack/prompts";
 import { styleText, parseArgs } from "node:util";
+import { layers as discoveredLayers } from "#layers";
 
-const options = /** @type {const} */ ({
+const coreOptions = /** @type {const} */ ({
   name: {
     type: "string",
   },
@@ -41,46 +42,34 @@ const options = /** @type {const} */ ({
   },
 });
 
-const knownOptions = new Set(Object.keys(options));
+/** @type {Record<string, import("node:util").ParseArgsOptionDescriptor>} */
+const options = { ...coreOptions };
 
-function filterKnownArgs(/** @type {string[]} */ argv) {
-  /** @type {string[]} */
-  const filtered = [];
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-    if (!arg) continue;
-
-    if (arg.startsWith("--")) {
-      const flagName = arg.slice(2).split("=")[0] ?? "";
-      if (knownOptions.has(flagName)) {
-        filtered.push(arg);
-        const nextArg = argv[i + 1];
-        if (!arg.includes("=") && nextArg !== undefined && !nextArg.startsWith("--")) {
-          filtered.push(nextArg);
-          i++;
-        }
-      }
-    }
+for (const layer of discoveredLayers) {
+  if (!layer.options) continue;
+  for (const [optionKey, schema] of Object.entries(layer.options)) {
+    options[`${layer.name}.${optionKey}`] = {
+      type: schema.type === "confirm" ? "boolean" : "string",
+    };
   }
-  return filtered;
 }
 
+/**
+ * The CLI options are parsed by combining the static core flags (--name, --type, etc.) with
+ * dynamic options discovered at startup from each layer in #layers (formatted as
+ * --<layerName>.<optionKey>).  This lets us use Node's `parseArgs` in default strict mode.
+ */
 const { values } = parseArgs({
-  args: filterKnownArgs(process.argv.slice(2)),
+  args: process.argv.slice(2),
   options,
 });
 
-const { replaceOrUpdate, name, type, layers = [], packageManager, path, confirm, write } = values;
+const typedValues =
+  /** @type {ReturnType<typeof parseArgs<{ options: typeof coreOptions }>>['values']} */ (values);
 
 export const answers = {
-  name,
-  type,
-  layers,
-  packageManager,
-  path,
-  confirm,
-  replaceOrUpdate,
-  write,
+  ...typedValues,
+  layers: typedValues.layers ?? [],
 };
 
 /**
