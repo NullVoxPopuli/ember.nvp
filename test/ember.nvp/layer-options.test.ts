@@ -35,6 +35,16 @@ describe("Layer Options Feature", () => {
         prompt: "Enable detailed sink logging?",
         default: true,
       },
+      extras: {
+        type: "multiselect",
+        prompt: "Select optional kitchen sink extras",
+        default: ["soap-dispenser"],
+        options: [
+          { label: "Soap Dispenser", value: "soap-dispenser", hint: "Built-in pump" },
+          { label: "Garbage Disposal", value: "garbage-disposal", hint: "Continuous feed" },
+        ],
+        validate: (val: string[]) => (val.length > 0 ? true : "Select at least one extra"),
+      },
     },
     async run(_project, _options = {}) {
       // noop
@@ -59,6 +69,7 @@ describe("Layer Options Feature", () => {
         customTitle: "My Kitchen Sink",
         flavor: "standard",
         enableLogging: true,
+        extras: ["soap-dispenser"],
       });
     });
 
@@ -75,6 +86,7 @@ describe("Layer Options Feature", () => {
             customTitle: "Custom Sink",
             flavor: "deluxe",
             enableLogging: false,
+            extras: ["garbage-disposal"],
           },
         },
       });
@@ -84,6 +96,7 @@ describe("Layer Options Feature", () => {
         customTitle: "Custom Sink",
         flavor: "deluxe",
         enableLogging: false,
+        extras: ["garbage-disposal"],
       });
     });
 
@@ -121,6 +134,12 @@ describe("Layer Options Feature", () => {
       expect(textSchema.validate!("Valid Title")).toBe(true);
       expect(textSchema.validate!("   ")).toBe("Title cannot be empty");
     });
+
+    it("validates multiselect schema constraints", () => {
+      const multiSchema = fakeKitchenSinkLayer.options!.extras!;
+      expect(multiSchema.validate!(["soap-dispenser"])).toBe(true);
+      expect(multiSchema.validate!([])).toBe("Select at least one extra");
+    });
   });
 
   describe("parseLayerOptionsFromParsedArgs", () => {
@@ -131,6 +150,7 @@ describe("Layer Options Feature", () => {
         "fake-kitchen-sink.customTitle": "CLI Title",
         "fake-kitchen-sink.flavor": "deluxe",
         "fake-kitchen-sink.enableLogging": true,
+        "fake-kitchen-sink.extras": ["soap-dispenser", "garbage-disposal"],
       };
       const parsed = parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
 
@@ -140,6 +160,21 @@ describe("Layer Options Feature", () => {
           customTitle: "CLI Title",
           flavor: "deluxe",
           enableLogging: true,
+          extras: ["soap-dispenser", "garbage-disposal"],
+        },
+      });
+    });
+
+    it("parses multiselect options supplied as comma-separated string", () => {
+      const parsedValues = {
+        layers: ["fake-kitchen-sink"],
+        "fake-kitchen-sink.extras": "soap-dispenser, garbage-disposal",
+      };
+      const parsed = parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
+
+      expect(parsed).toEqual({
+        "fake-kitchen-sink": {
+          extras: ["soap-dispenser", "garbage-disposal"],
         },
       });
     });
@@ -187,6 +222,23 @@ describe("Layer Options Feature", () => {
       expect(exitSpy).toHaveBeenCalledWith(1);
       exitSpy.mockRestore();
     });
+
+    it("exits process when an invalid multiselect item is passed via CLI flag", () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as any);
+
+      const parsedValues = {
+        "fake-kitchen-sink.extras": ["invalid-extra"],
+      };
+
+      expect(() => {
+        parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
+      }).toThrow("process.exit called");
+
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
   });
 
   describe("Layer execution with options", () => {
@@ -210,6 +262,7 @@ describe("Layer Options Feature", () => {
           "fake-kitchen-sink": {
             unitCount: 42,
             flavor: "deluxe",
+            extras: ["soap-dispenser"],
           },
         },
       });
@@ -222,6 +275,7 @@ describe("Layer Options Feature", () => {
         customTitle: "My Kitchen Sink",
         flavor: "deluxe",
         enableLogging: true,
+        extras: ["soap-dispenser"],
       });
     });
   });

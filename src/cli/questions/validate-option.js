@@ -116,6 +116,58 @@ const typeValidators = {
     }
     return { ok: true, value: input };
   },
+
+  multiselect(schema, rawValue) {
+    let input = rawValue;
+    if ((input === undefined || input === null) && schema.default !== undefined) {
+      input = schema.default;
+    } else if (input === undefined || input === null) {
+      input = [];
+    }
+
+    /** @type {any[]} */
+    let items = [];
+    if (Array.isArray(input)) {
+      items = input.flatMap((item) =>
+        typeof item === "string"
+          ? item
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [item],
+      );
+    } else if (typeof input === "string") {
+      items = input
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    } else {
+      items = [input];
+    }
+
+    const optionsList = schema.options ?? [];
+    const validValues = optionsList.map((/** @type {any} */ opt) =>
+      typeof opt === "object" && opt !== null ? opt.value : opt,
+    );
+
+    for (const item of items) {
+      if (!validValues.includes(item)) {
+        const allowedStr = validValues.map((/** @type {any} */ v) => String(v)).join(", ");
+        return {
+          ok: false,
+          error: `Invalid multiselect option '${String(item)}'. Must be one of: ${allowedStr}`,
+        };
+      }
+    }
+
+    if (schema.validate) {
+      const res = schema.validate(items);
+      if (typeof res === "string") return { ok: false, error: res };
+      if (res === false) return { ok: false, error: "Invalid value" };
+    }
+
+    return { ok: true, value: items };
+  },
 };
 
 /**

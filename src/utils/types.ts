@@ -2,7 +2,7 @@ import { Project } from "./project.js";
 export type PackageManager = "pnpm" | "npm";
 export type ProjectType = "app" | "library" | "extension";
 
-export type LayerOptionType = "text" | "number" | "select" | "confirm";
+export type LayerOptionType = "text" | "number" | "select" | "confirm" | "multiselect";
 
 export interface LayerSelectChoice {
   value: any;

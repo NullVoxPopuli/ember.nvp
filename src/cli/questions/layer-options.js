@@ -106,6 +106,32 @@ export async function askLayerOptions(selectedLayers) {
           }
           break;
         }
+        case "multiselect": {
+          // @clack/prompts multiselect does not support inline validate function parameter.
+          // Therefore, if schema.validate is defined, we loop until user selection passes validateOption.
+          while (true) {
+            const rawSelection = await p.multiselect({
+              message: promptMessage,
+              options: schema.options ?? [],
+              initialValues: schema.default ?? [],
+              required: false,
+            });
+
+            if (p.isCancel(rawSelection)) {
+              p.cancel("Operation cancelled");
+              process.exit(0);
+            }
+
+            const validation = validateOption(schema, rawSelection);
+            if (validation.ok) {
+              answer = validation.value;
+              break;
+            } else {
+              p.log.error(validation.error);
+            }
+          }
+          break;
+        }
         default: {
           console.warn(`Unknown option type '${schema.type}' for layer ${layer.name}.${key}`);
           answer = schema.default;

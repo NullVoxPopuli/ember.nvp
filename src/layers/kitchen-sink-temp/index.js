@@ -39,6 +39,18 @@ export default {
       prompt: "Enable detailed sink logging?",
       default: true,
     },
+    extras: {
+      type: "multiselect",
+      prompt: "Select optional kitchen sink extras",
+      default: ["soap-dispenser"],
+      options: [
+        { label: "Soap Dispenser", value: "soap-dispenser", hint: "Built-in pump" },
+        { label: "Garbage Disposal", value: "garbage-disposal", hint: "Continuous feed" },
+        { label: "Water Filter", value: "water-filter", hint: "Under-sink filtration" },
+      ],
+      // validate: (/** @type {string[]} */ val) =>
+      //   Array.isArray(val) && val.length > 0 ? true : "Select at least one extra",
+    },
   },
 
   /**
@@ -54,7 +66,8 @@ Demonstration layer options configuration:
 - **Title**: ${opts.customTitle}
 - **Flavor**: ${opts.flavor}
 - **Unit Count**: ${opts.unitCount}
-- **Logging Enabled**: ${opts.enableLogging}`;
+- **Logging Enabled**: ${opts.enableLogging}
+- **Extras**: ${Array.isArray(opts.extras) ? opts.extras.join(", ") : opts.extras}`;
   },
 
   /**
@@ -69,6 +82,7 @@ Demonstration layer options configuration:
       `TITLE = ${opts.customTitle}`,
       `FLAVOR = ${opts.flavor}`,
       `LOGGING = ${opts.enableLogging}`,
+      `EXTRAS = ${Array.isArray(opts.extras) ? opts.extras.join(",") : opts.extras}`,
       "",
     ];
 

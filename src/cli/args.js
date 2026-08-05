@@ -51,6 +51,7 @@ for (const layer of discoveredLayers) {
   for (const [optionKey, schema] of Object.entries(layer.options)) {
     options[`${layer.name}.${optionKey}`] = {
       type: schema.type === "confirm" ? "boolean" : "string",
+      ...(schema.type === "multiselect" ? { multiple: true } : {}),
     };
   }
 }
