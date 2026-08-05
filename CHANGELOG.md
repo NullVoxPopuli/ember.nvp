@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-08-05)
+
+* @nullvoxpopuli/ember-rolldown 2.6.1 (patch)
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-rolldown`
+  * [#115](https://github.com/NullVoxPopuli/ember.nvp/pull/115) rolldown: don't resolve absolute specifiers against the importer's directory ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-08-03)
 
 * ember.nvp 1.4.0 (minor)
