@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { Project } from "#utils/project.js";
 import { parseLayerOptionsFromParsedArgs } from "#args";
 import type { DiscoveredLayer } from "#types";
@@ -152,6 +152,40 @@ describe("Layer Options Feature", () => {
       const parsed = parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
 
       expect(parsed).toEqual({});
+    });
+
+    it("exits process when a CLI flag fails validation", () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as any);
+
+      const parsedValues = {
+        "fake-kitchen-sink.unitCount": "-5", // schema requires > 0
+      };
+
+      expect(() => {
+        parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
+      }).toThrow("process.exit called");
+
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
+
+    it("exits process when an invalid select value is passed via CLI flag", () => {
+      const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("process.exit called");
+      }) as any);
+
+      const parsedValues = {
+        "fake-kitchen-sink.flavor": "ultra", // allowed options are 'standard' or 'deluxe'
+      };
+
+      expect(() => {
+        parseLayerOptionsFromParsedArgs([fakeKitchenSinkLayer], parsedValues);
+      }).toThrow("process.exit called");
+
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
     });
   });
 

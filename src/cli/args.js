@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 import { styleText, parseArgs } from "node:util";
 import { layers as discoveredLayers } from "#layers";
+import { validateOption } from "./questions/validate-option.js";
 
 const coreOptions = /** @type {const} */ ({
   name: {
@@ -91,16 +92,15 @@ export function parseLayerOptionsFromParsedArgs(layers = [], parsedValues = valu
       const rawVal = parsedValues[flagKey];
 
       if (rawVal !== undefined) {
-        /** @type {any} */
-        let parsedVal = rawVal;
-        if (schema.type === "number") {
-          parsedVal = Number(rawVal);
-        } else if (schema.type === "confirm") {
-          parsedVal = Boolean(rawVal);
+        const validation = validateOption(schema, rawVal);
+        if (!validation.ok) {
+          p.cancel(`Invalid CLI argument '--${flagKey}': ${validation.error}`);
+          process.exit(1);
         }
 
         const layerObj = (result[layer.name] ??= {});
-        layerObj[optionKey] = parsedVal;
+        // validation.value contains the coerced value (e.g. string to number) produced by validateOption
+        layerObj[optionKey] = validation.value;
       }
     }
   }

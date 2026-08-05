@@ -1,6 +1,7 @@
 import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
+import { validateOption } from "./validate-option.js";
 
 /**
  * Prompt the user for options defined on the selected layers.
@@ -40,18 +41,8 @@ export async function askLayerOptions(selectedLayers) {
             placeholder: schema.default !== undefined ? String(schema.default) : undefined,
             defaultValue: schema.default !== undefined ? String(schema.default) : undefined,
             validate: (input) => {
-              const valStr =
-                (!input || input.length === 0) && schema.default !== undefined
-                  ? String(schema.default)
-                  : (input ?? "");
-              const num = Number(valStr);
-              if (isNaN(num)) return "Must be a valid number";
-              if (schema.validate) {
-                const res = schema.validate(num);
-                if (typeof res === "string") return res;
-                if (res === false) return "Invalid value";
-              }
-              return undefined;
+              const res = validateOption(schema, input);
+              return res.ok ? undefined : res.error;
             },
           });
 
@@ -60,32 +51,34 @@ export async function askLayerOptions(selectedLayers) {
             process.exit(0);
           }
 
-          answer = Number(raw);
+          const valStr =
+            (!raw || raw.length === 0) && schema.default !== undefined
+              ? String(schema.default)
+              : raw;
+          // @clack/prompts p.text returns a string, so coerce to a number for schema type "number"
+          answer = Number(valStr);
           break;
         }
         case "text": {
-          answer = await p.text({
+          const raw = await p.text({
             message: promptMessage,
             placeholder: schema.default !== undefined ? String(schema.default) : undefined,
             defaultValue: schema.default !== undefined ? String(schema.default) : undefined,
-            validate: schema.validate
-              ? (input) => {
-                  const valueToValidate =
-                    (!input || input.length === 0) && schema.default !== undefined
-                      ? String(schema.default)
-                      : (input ?? "");
-                  const res = schema.validate?.(valueToValidate);
-                  if (typeof res === "string") return res;
-                  if (res === false) return "Invalid value";
-                  return undefined;
-                }
-              : undefined,
+            validate: (input) => {
+              const res = validateOption(schema, input);
+              return res.ok ? undefined : res.error;
+            },
           });
 
-          if (p.isCancel(answer)) {
+          if (p.isCancel(raw)) {
             p.cancel("Operation cancelled");
             process.exit(0);
           }
+
+          answer =
+            (!raw || raw.length === 0) && schema.default !== undefined
+              ? String(schema.default)
+              : raw;
           break;
         }
         case "confirm": {
