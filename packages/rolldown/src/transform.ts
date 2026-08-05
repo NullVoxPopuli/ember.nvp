@@ -93,7 +93,14 @@ export function emberTransform(): Plugin {
           };
         }
 
-        const fileName = path.join(path.dirname(importer), id);
+        // An absolute specifier already names the file, so it needs no
+        // importer-relative resolution — and joining it onto the importer's
+        // directory would corrupt it. That is not hypothetical: a plugin's
+        // virtual module (id prefixed with `\0`) can generate imports of
+        // on-disk files by absolute path, and `path.dirname("\0./registry")`
+        // is `"\0."`, so joining yields `"\0./Users/.../thing.gts"` — a path
+        // no `existsSync`/`readFile` can accept (it has a null byte in it).
+        const fileName = path.isAbsolute(id) ? id : path.join(path.dirname(importer), id);
 
         if (id.endsWith(".gts")) {
           return {
