@@ -2,6 +2,7 @@ import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { rolldown } from "rolldown";
+import type { Plugin } from "rolldown";
 import { describe, expect, it } from "vitest";
 
 import { emberTransform } from "./transform.ts";
@@ -15,7 +16,10 @@ import { emberTransform } from "./transform.ts";
  */
 async function bundle(
   files: Record<string, string>,
-  { input = ["index.ts"] }: { input?: string[] } = {},
+  {
+    input = ["index.ts"],
+    plugins = () => [],
+  }: { input?: string[]; plugins?: (dir: string) => Plugin[] } = {},
 ): Promise<string> {
   const dir = await mkdtemp(path.join(tmpdir(), "ember-rolldown-build-"));
 
@@ -29,7 +33,7 @@ async function bundle(
 
   const build = await rolldown({
     input: input.map((relative) => path.join(dir, relative)),
-    plugins: [emberTransform()],
+    plugins: [emberTransform(), ...plugins(dir)],
     external: (id) => !isLocal(id),
     onwarn() {},
   });
@@ -172,6 +176,50 @@ describe("emberTransform (full plugin via rolldown)", () => {
       export { Page };
       "
     `);
+  });
+
+  it("resolves an absolute .gts specifier imported from a plugin's virtual module", async () => {
+    /**
+     * The shape a code-generating plugin emits: a virtual module (id prefixed
+     * with `\0`, so it exists nowhere on disk) whose generated source imports
+     * real files by absolute path, because it has no directory to be relative
+     * to. `path.dirname` of such an id is `"\0."`, so the specifier must not be
+     * resolved against the importer's directory.
+     */
+    const registry = (dir: string): Plugin[] => {
+      const source = "./registry?virtual=views";
+      const virtualId = `\0${source}`;
+
+      return [
+        {
+          name: "test:virtual-registry",
+          resolveId(id) {
+            return id === source ? virtualId : null;
+          },
+          load(id) {
+            if (id !== virtualId) return null;
+
+            return [
+              `import example from '${path.join(dir, "components/view/example.gts")}';`,
+              `export const views = { example };`,
+            ].join("\n");
+          },
+        },
+      ];
+    };
+
+    const code = await bundle(
+      {
+        "index.ts": `export { views } from './registry?virtual=views';`,
+        "components/view/example.gts": `<template>example</template>`,
+      },
+      { plugins: registry },
+    );
+
+    // The absolutely-specified .gts got compiled and bundled in.
+    expect(code).not.toContain("<template>");
+    expect(code).toContain("template(");
+    expect(code).toContain("example");
   });
 
   it("compiles a .gts module used directly as an entry (no importer)", async () => {
