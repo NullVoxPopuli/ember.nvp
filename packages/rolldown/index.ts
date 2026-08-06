@@ -1,10 +1,9 @@
-import type { Plugin } from "rolldown";
-
 import { emberBabel, type BabelOptions } from "./src/babel.ts";
 import { emberConfig } from "./src/config.ts";
 import { emberExternals } from "./src/externals.ts";
 import { emberIsolatedDeclarations } from "./src/isolated-declarations.ts";
 import { emberTransform } from "./src/transform.ts";
+import type { RolldownPluginLike } from "./src/plugin-like.ts";
 
 interface Config {
   /**
@@ -49,7 +48,7 @@ interface Config {
  * });
  * ```
  */
-export function ember(config: Config = {}): Plugin[] {
+export function ember(config: Config = {}): RolldownPluginLike[] {
   return [
     emberConfig(),
     emberIsolatedDeclarations(),
