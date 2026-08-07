@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-08-07)
+
+* @nullvoxpopuli/ember-rolldown 2.7.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`
+  * [#118](https://github.com/NullVoxPopuli/ember.nvp/pull/118) rolldown: ship type declarations ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-08-05)
 
 * @nullvoxpopuli/ember-rolldown 2.6.1 (patch)
