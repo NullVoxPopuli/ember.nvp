@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, matchesGlob, relative, resolve, sep } from "node:path";
 
-import type { Plugin } from "rolldown";
+import type { RolldownPluginLike } from "./plugin-like.ts";
 
 export interface AppReexportsOptions {
   /**
@@ -79,7 +79,7 @@ export interface AppReexportsOptions {
 export function appReexports(
   includeOrOptions: string | string[] | AppReexportsOptions = {},
   options: Omit<AppReexportsOptions, "include"> = {},
-): Plugin {
+): RolldownPluginLike {
   const resolved =
     typeof includeOrOptions === "string"
       ? { ...options, include: [includeOrOptions] }

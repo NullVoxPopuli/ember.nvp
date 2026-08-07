@@ -11,9 +11,16 @@
   "publishConfig": {
     "main": "dist/index.js",
     "exports": {
-      ".": "./dist/index.js",
-      "./app-reexports": "./dist/app-reexports.js"
-    }
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./app-reexports": {
+        "types": "./dist/app-reexports.d.ts",
+        "default": "./dist/app-reexports.js"
+      }
+    },
+    "types": "dist/index.d.ts"
   },
   "keywords": [
     "rolldown",
@@ -31,7 +38,7 @@
     "directory": "packages/rolldown"
   },
   "scripts": {
-    "build": "rolldown --config",
+    "build": "tsdown",
     "prepack": "pnpm build"
   },
   "packageManager": "pnpm@10.28.0",
