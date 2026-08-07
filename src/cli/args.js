@@ -1,60 +1,112 @@
 import * as p from "@clack/prompts";
 import { styleText, parseArgs } from "node:util";
+import { layers as discoveredLayers } from "#layers";
+import { validateOption } from "./questions/validate-option.js";
 
-const { values } = parseArgs({
-  options: {
-    name: {
-      type: "string",
-    },
+const coreOptions = /** @type {const} */ ({
+  name: {
+    type: "string",
+  },
 
-    path: {
-      type: "string",
-    },
+  path: {
+    type: "string",
+  },
 
-    type: {
-      type: "string",
-      choices: ["app", "addon", "library"],
-    },
+  type: {
+    type: "string",
+    choices: ["app", "addon", "library"],
+  },
 
-    confirm: {
-      type: "string",
-      choices: ["yes", "no"],
-    },
+  confirm: {
+    type: "string",
+    choices: ["yes", "no"],
+  },
 
-    layers: {
-      type: "string",
-      multiple: true,
-    },
+  layers: {
+    type: "string",
+    multiple: true,
+  },
 
-    packageManager: {
-      type: "string",
-      choices: ["npm", "pnpm"],
-    },
+  packageManager: {
+    type: "string",
+    choices: ["npm", "pnpm"],
+  },
 
-    replaceOrUpdate: {
-      type: "string",
-      choices: ["replace", "update"],
-    },
+  replaceOrUpdate: {
+    type: "string",
+    choices: ["replace", "update"],
+  },
 
-    write: {
-      type: "string",
-      choices: ["yes", "no"],
-    },
+  write: {
+    type: "string",
+    choices: ["yes", "no"],
   },
 });
 
-const { replaceOrUpdate, name, type, layers = [], packageManager, path, confirm, write } = values;
+/** @type {Record<string, import("node:util").ParseArgsOptionDescriptor>} */
+const options = { ...coreOptions };
+
+for (const layer of discoveredLayers) {
+  if (!layer.options) continue;
+  for (const [optionKey, schema] of Object.entries(layer.options)) {
+    options[`${layer.name}.${optionKey}`] = {
+      type: schema.type === "confirm" ? "boolean" : "string",
+    };
+  }
+}
+
+/**
+ * The CLI options are parsed by combining the static core flags (--name, --type, etc.) with
+ * dynamic options discovered at startup from each layer in #layers (formatted as
+ * --<layerName>.<optionKey>).  This lets us use Node's `parseArgs` in default strict mode.
+ */
+const { values } = parseArgs({
+  args: process.argv.slice(2),
+  options,
+});
+
+const typedValues =
+  /** @type {ReturnType<typeof parseArgs<{ options: typeof coreOptions }>>['values']} */ (values);
 
 export const answers = {
-  name,
-  type,
-  layers,
-  packageManager,
-  path,
-  confirm,
-  replaceOrUpdate,
-  write,
+  ...typedValues,
+  layers: typedValues.layers ?? [],
 };
+
+/**
+ * Extract layer options from parsed CLI values.
+ *
+ * @param {import('#types').DiscoveredLayer[]} layers
+ * @param {Record<string, any>} [parsedValues] Defaults to module-level `values` from parseArgs
+ * @returns {Record<string, Record<string, any>>}
+ */
+export function parseLayerOptionsFromParsedArgs(layers = [], parsedValues = values) {
+  /** @type {Record<string, Record<string, any>>} */
+  const result = {};
+
+  for (const layer of layers) {
+    if (!layer.options) continue;
+
+    for (const [optionKey, schema] of Object.entries(layer.options)) {
+      const flagKey = `${layer.name}.${optionKey}`;
+      const rawVal = parsedValues[flagKey];
+
+      if (rawVal !== undefined) {
+        const validation = validateOption(schema, rawVal);
+        if (!validation.ok) {
+          p.cancel(`Invalid CLI argument '--${flagKey}': ${validation.error}`);
+          process.exit(1);
+        }
+
+        const layerObj = (result[layer.name] ??= {});
+        // validation.value contains the coerced value (e.g. string to number) produced by validateOption
+        layerObj[optionKey] = validation.value;
+      }
+    }
+  }
+
+  return result;
+}
 
 /**
  *
