@@ -2,6 +2,8 @@ import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 import { hasConfiguredPlugin, prependPlugin, removeConfiguredPlugin } from "#utils/babel.js";
 import { packageJson } from "ember-apply";
+import { existsSync } from "node:fs";
+import { rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const deps = {
@@ -37,6 +39,32 @@ const libraryTsDeps = {
 };
 
 const TEST_BABEL_CONFIG = "config/test/babel.config.js";
+const TESTS_TSCONFIG = "tests/tsconfig.json";
+
+/**
+ * A library's root tsconfig is its publish config: it only includes
+ * `src`, and turns on `rootDir` and `isolatedDeclarations` for the
+ * declarations tsdown emits. The tests folder is none of those things,
+ * so it needs its own tsconfig, otherwise eslint's TypeScript project
+ * service refuses to parse `tests/*.ts` ("was not found by the project
+ * service"). This tsconfig extends the root one and relaxes the
+ * publish-only settings so tests can import `#src/*` and skip
+ * isolated-declaration rules.
+ */
+const TESTS_TSCONFIG_CONTENTS =
+  JSON.stringify(
+    {
+      extends: "../tsconfig.json",
+      include: ["."],
+      compilerOptions: {
+        rootDir: "..",
+        isolatedDeclarations: false,
+        noEmit: true,
+      },
+    },
+    null,
+    2,
+  ) + "\n";
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -70,6 +98,7 @@ export default {
 
     if (isLibrary) {
       await syncTestBabelConfig(project, ts);
+      await syncTestsTSConfig(project, ts);
     }
 
     await packageJson.addDevDependencies(
@@ -140,6 +169,16 @@ export default {
       }
     }
 
+    if (
+      project.type === "library" &&
+      project.wantsTypeScript &&
+      !existsSync(project.path(TESTS_TSCONFIG))
+    ) {
+      if (!explain) return false;
+
+      reasons.push(`${TESTS_TSCONFIG} is missing`);
+    }
+
     if (explain) {
       return {
         isSetup: reasons.length === 0,
@@ -199,4 +238,30 @@ async function syncTestBabelConfig(project, ts) {
     ]`,
     TEST_BABEL_CONFIG,
   );
+}
+
+/**
+ * A TypeScript library needs a tests-scoped tsconfig so lint tooling can
+ * resolve `tests/*.ts`. A JavaScript library has no tsconfig at all, so
+ * any tests tsconfig left over from a previous TypeScript setup must go
+ * when a project drops back to JavaScript.
+ *
+ * @param {import('#utils/project.js').Project} project
+ * @param {boolean} ts
+ */
+async function syncTestsTSConfig(project, ts) {
+  let path = project.path(TESTS_TSCONFIG);
+
+  if (!ts) {
+    if (existsSync(path)) {
+      await rm(path);
+    }
+    return;
+  }
+
+  if (existsSync(path)) {
+    return;
+  }
+
+  await writeFile(path, TESTS_TSCONFIG_CONTENTS);
 }
