@@ -9,11 +9,11 @@ const expect = hardExpect.soft;
 let layer = layers.find((layer) => layer.name === "qunit")!;
 
 /**
- * A library's root tsconfig only includes `src` (it is the publish
- * config), so `tests/*.ts` needs its own tsconfig or lint tooling cannot
- * resolve those files. These tests cover that tests tsconfig: it exists
- * for TypeScript libraries, is absent for JavaScript ones, and lets a
- * generated TypeScript library actually pass eslint.
+ * A library's root tsconfig type-checks both `src` and `tests`, so lint
+ * tooling can resolve `tests/*.ts` without a tests-scoped tsconfig. These
+ * tests cover that a generated TypeScript library sets up cleanly, a
+ * JavaScript one has no tsconfig at all, and the TypeScript library
+ * actually passes eslint.
  */
 
 describe("TypeScript library", () => {
@@ -29,17 +29,6 @@ describe("TypeScript library", () => {
 
   afterAll(async () => {
     await rm(project.directory, { recursive: true, force: true });
-  });
-
-  it("writes a tests tsconfig", async () => {
-    expect(project.hasFile("tests/tsconfig.json")).toBe(true);
-
-    let contents = JSON.parse((await project.read("tests/tsconfig.json"))!);
-
-    expect(contents.extends).toBe("../tsconfig.json");
-    expect(contents.include).toEqual(["."]);
-    expect(contents.compilerOptions.rootDir).toBe("..");
-    expect(contents.compilerOptions.isolatedDeclarations).toBe(false);
   });
 
   it("is setup", async () => {
@@ -62,8 +51,9 @@ describe("JavaScript library", () => {
     await rm(project.directory, { recursive: true, force: true });
   });
 
-  it("does not write a tests tsconfig", () => {
-    expect(project.hasFile("tests/tsconfig.json")).toBe(false);
+  it("has no tsconfig", () => {
+    expect(project.hasFile("tsconfig.json")).toBe(false);
+    expect(project.hasFile("tsconfig.build.json")).toBe(false);
   });
 
   it("is setup", async () => {
@@ -92,8 +82,9 @@ describe("eslint", () => {
   });
 
   it("lints the tests folder without a project-service error", async () => {
-    // Without the tests tsconfig, eslint's TypeScript project service
-    // cannot parse tests/*.ts and both of these fail before any rule runs.
+    // Without `tests` in the root tsconfig's include, eslint's TypeScript
+    // project service cannot parse tests/*.ts and both of these fail before
+    // any rule runs.
     {
       let { exitCode, stderr, stdout } = await project.run("pnpm lint:eslint --fix");
 

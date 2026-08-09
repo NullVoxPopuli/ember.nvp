@@ -93,6 +93,7 @@ async function makeJavaScript(project) {
   );
 
   await project.removeFile("tsconfig.json");
+  await project.removeFile("tsconfig.build.json");
 
   await removeTypesExports(project);
   await pointBuildAtJavaScript(project);
@@ -116,7 +117,9 @@ async function removeTypesExports(project) {
 
 /**
  * Rewrites the tsdown config so it builds the JavaScript entry and stops
- * emitting declarations (defineConfig defaults to `dts: true`).
+ * emitting declarations (defineConfig defaults to `dts: true`). The
+ * build tsconfig is removed for JavaScript, so the reference to it goes
+ * too.
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -127,6 +130,12 @@ async function pointBuildAtJavaScript(project) {
   contents = contents.replace(
     `entry: ["./src/index.ts"],`,
     `entry: ["./src/index.js"],\n  dts: false,`,
+  );
+
+  // Drop the build tsconfig reference and the comment block explaining it.
+  contents = contents.replace(
+    /(?:^[ \t]*\/\/.*\n)*^[ \t]*tsconfig: "\.\/tsconfig\.build\.json",\n/m,
+    "",
   );
 
   await writeFile(configPath, contents);
