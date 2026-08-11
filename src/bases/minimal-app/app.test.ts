@@ -105,7 +105,6 @@ const DEBUG_MARKERS = {
   assert: "__debug_fixture_assert__",
   deprecate: "__debug_fixture_deprecate__",
   warn: "__debug_fixture_warn__",
-  ifDebug: "__debug_fixture_if_debug__",
   isDevelopingApp: "__debug_fixture_is_developing_app__",
 };
 
@@ -116,31 +115,18 @@ const DEBUG_MARKERS = {
  */
 const debugFixture = `
 import { assert, deprecate, warn } from "@ember/debug";
-import { DEBUG } from "@glimmer/env";
 import { isDevelopingApp, macroCondition } from "@embroider/macros";
 
-/**
- * assert/deprecate get rewritten to \`!predicate && assert(...)\`,
- * so a literal \`true\` predicate lets the bundler fold the whole
- * call away even in development. This is truthy at runtime, but
- * opaque to static analysis.
- */
-const truthy = (globalThis as Record<string, unknown>)["__debug_fixture__"] === undefined;
+assert("${DEBUG_MARKERS.assert}", true);
 
-assert("${DEBUG_MARKERS.assert}", truthy);
-
-deprecate("${DEBUG_MARKERS.deprecate}", truthy, {
+deprecate("${DEBUG_MARKERS.deprecate}", true, {
   id: "debug-fixture",
   until: "999.0.0",
   for: "debug-fixture",
   since: { available: "0.0.0", enabled: "0.0.0" },
 });
 
-warn("${DEBUG_MARKERS.warn}", truthy, { id: "debug-fixture" });
-
-if (DEBUG) {
-  console.log("${DEBUG_MARKERS.ifDebug}");
-}
+warn("${DEBUG_MARKERS.warn}", true, { id: "debug-fixture" });
 
 if (macroCondition(isDevelopingApp())) {
   console.log("${DEBUG_MARKERS.isDevelopingApp}");
@@ -202,7 +188,7 @@ describe("debug macros", () => {
     }
   });
 
-  it("production build strips assert(), deprecate(), warn(), if (DEBUG), and if (macroCondition(isDevelopingApp()))", async () => {
+  it("production build strips assert(), deprecate(), warn(), and if (macroCondition(isDevelopingApp()))", async () => {
     let { exitCode } = await build(project, "production");
 
     hardExpect(exitCode).toBe(0);

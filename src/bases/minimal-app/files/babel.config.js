@@ -42,17 +42,11 @@ export default {
         regenerator: false,
       },
     ],
-    [
+    isProduction && [
       "babel-plugin-debug-macros",
       {
-        flags: [
-          {
-            source: "@glimmer/env",
-            flags: { DEBUG: !isProduction, CI: !!process.env.CI },
-          },
-        ],
         debugTools: {
-          isDebug: !isProduction,
+          isDebug: false,
           source: "@ember/debug",
           assertPredicateIndex: 1,
         },
@@ -63,7 +57,7 @@ export default {
       "@ember/debug stripping",
     ],
     ...macros.babelMacros,
-  ],
+  ].filter(Boolean),
 
   generatorOpts: {
     compact: false,
