@@ -3,8 +3,9 @@ import { generate, build, reapply } from "#test-helpers";
 import { packageJson } from "ember-apply";
 
 import type { Project } from "ember.nvp";
-import { rm } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { globSync } from "node:fs";
+import { join } from "node:path";
 
 const expect = hardExpect.soft;
 
@@ -97,6 +98,120 @@ describe("typescript", () => {
         "app/templates/application.gts",
       }
     `);
+  });
+});
+
+const DEBUG_MARKERS = {
+  assert: "__debug_fixture_assert__",
+  deprecate: "__debug_fixture_deprecate__",
+  warn: "__debug_fixture_warn__",
+  ifDebug: "__debug_fixture_if_debug__",
+  isDevelopingApp: "__debug_fixture_is_developing_app__",
+};
+
+/**
+ * Lives in app/services/ so that app.ts's eager
+ * `import.meta.glob("./services/**\/*")` pulls it into the build
+ * without needing to modify any generated files.
+ */
+const debugFixture = `
+import { assert, deprecate, warn } from "@ember/debug";
+import { DEBUG } from "@glimmer/env";
+import { isDevelopingApp, macroCondition } from "@embroider/macros";
+
+/**
+ * assert/deprecate get rewritten to \`!predicate && assert(...)\`,
+ * so a literal \`true\` predicate lets the bundler fold the whole
+ * call away even in development. This is truthy at runtime, but
+ * opaque to static analysis.
+ */
+const truthy = (globalThis as Record<string, unknown>)["__debug_fixture__"] === undefined;
+
+assert("${DEBUG_MARKERS.assert}", truthy);
+
+deprecate("${DEBUG_MARKERS.deprecate}", truthy, {
+  id: "debug-fixture",
+  until: "999.0.0",
+  for: "debug-fixture",
+  since: { available: "0.0.0", enabled: "0.0.0" },
+});
+
+warn("${DEBUG_MARKERS.warn}", truthy, { id: "debug-fixture" });
+
+if (DEBUG) {
+  console.log("${DEBUG_MARKERS.ifDebug}");
+}
+
+if (macroCondition(isDevelopingApp())) {
+  console.log("${DEBUG_MARKERS.isDevelopingApp}");
+}
+`;
+
+/**
+ * Only .js files -- the sourcemaps (.map) contain the original
+ * source (with markers) even in production builds.
+ */
+async function builtJavaScript(project: Project): Promise<string> {
+  let files = globSync("dist/**/*.js", { cwd: project.directory });
+
+  hardExpect(files.length, "build produced JS files").toBeGreaterThan(0);
+
+  let contents = await Promise.all(
+    files.map((file) => readFile(join(project.directory, file), "utf-8")),
+  );
+
+  return contents.join("\n");
+}
+
+describe("debug macros", () => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({
+      type: "app",
+      layers: ["typescript"],
+    });
+
+    await mkdir(join(project.directory, "app/services"), { recursive: true });
+    await writeFile(join(project.directory, "app/services/debug-fixture.ts"), debugFixture);
+
+    let { exitCode } = await project.install();
+
+    hardExpect(exitCode, "Install succeeds").toBe(0);
+  });
+
+  afterAll(async () => {
+    await rm(project.directory, { recursive: true, force: true });
+  });
+
+  it("has the debug-macros babel plugin", async () => {
+    let content = await project.read("babel.config.js");
+
+    expect(content).toContain("babel-plugin-debug-macros");
+  });
+
+  it("development build keeps debug code", async () => {
+    let { exitCode } = await build(project);
+
+    hardExpect(exitCode).toBe(0);
+
+    let output = await builtJavaScript(project);
+
+    for (let [name, marker] of Object.entries(DEBUG_MARKERS)) {
+      expect(output, `development build contains ${name}`).toContain(marker);
+    }
+  });
+
+  it("production build strips assert(), deprecate(), warn(), if (DEBUG), and if (macroCondition(isDevelopingApp()))", async () => {
+    let { exitCode } = await build(project, "production");
+
+    hardExpect(exitCode).toBe(0);
+
+    let output = await builtJavaScript(project);
+
+    for (let [name, marker] of Object.entries(DEBUG_MARKERS)) {
+      expect(output, `production build strips ${name}`).not.toContain(marker);
+    }
   });
 });
 
