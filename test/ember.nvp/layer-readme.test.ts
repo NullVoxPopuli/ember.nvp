@@ -42,23 +42,23 @@ describe("layer: readme", () => {
 
         ### Installation
 
-        ~~~sh
+        \`\`\`sh
         pnpm install
-        ~~~
+        \`\`\`
 
         ### Development
 
         To start the local development server:
 
-        ~~~sh
+        \`\`\`sh
         pnpm dev
-        ~~~
+        \`\`\`
 
         or
 
-        ~~~sh
+        \`\`\`sh
         pnpm start
-        ~~~
+        \`\`\`
 
         ## Features & Tooling
 
@@ -109,9 +109,9 @@ describe("layer: readme", () => {
 
         To build the library:
 
-        ~~~sh
+        \`\`\`sh
         npm run build
-        ~~~
+        \`\`\`
 
         ## Features & Tooling
 
@@ -156,29 +156,29 @@ describe("layer: readme", () => {
 
         To start development:
 
-        ~~~sh
+        \`\`\`sh
         pnpm dev
-        ~~~
+        \`\`\`
 
         or
 
-        ~~~sh
+        \`\`\`sh
         pnpm start
-        ~~~
+        \`\`\`
 
         ### Building
 
         To build the library:
 
-        ~~~sh
+        \`\`\`sh
         pnpm build
-        ~~~
+        \`\`\`
 
         or
 
-        ~~~sh
+        \`\`\`sh
         pnpm build:watch
-        ~~~
+        \`\`\`
 
         ## Features & Tooling
 
