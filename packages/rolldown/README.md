@@ -18,6 +18,9 @@ Requires node 24+, and — since these packages ship TypeScript source — a
 modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
 `esnext`).
 
+`@babel/core` and `@babel/plugin-transform-typescript` are peer dependencies,
+either babel 7 or babel 8 — see [Which babel](#which-babel).
+
 ## Usage
 
 Import `defineConfig` from the bundler you're using — `tsdown` or `rolldown` —
@@ -278,6 +281,23 @@ my-addon/
 Set `configFile` explicitly to override that (`configFile: false` ignores config
 files entirely, which is what you want when your publish config would just
 restate the built-in defaults).
+
+### Which babel
+
+`ember()` runs _your_ babel: `@babel/core` and
+`@babel/plugin-transform-typescript` are peer dependencies accepting either
+`^7.28.10` or `^8.0.0`, and whichever your library resolves is the one that
+executes your config.
+
+That matters because babel majors don't mix. A v7 plugin loaded into v8's core
+throws `Requires Babel "^7.0.0-0", but was loaded with "8.x"` before it
+transforms anything, and the parsers disagree about the TypeScript AST besides
+— v8 moves enum members onto a `TSEnumBody` node that v7's transform never
+visits. So the core running your config has to be the same major as the plugins
+your config names.
+
+The two ranges are identical on purpose, so package managers resolve them as a
+matched pair. If you pin one, pin both.
 
 ## App re-exports
 

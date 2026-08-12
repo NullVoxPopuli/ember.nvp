@@ -18,8 +18,9 @@ const sharedDeps = {
 };
 
 const appDeps = {
-  // Apps strip types via their own babel.config.js; libraries have no babel
-  // config -- ember() handles type stripping.
+  // Apps strip types via their own babel.config.js, which only exists once
+  // this layer is applied. Libraries have no babel config -- ember() strips
+  // types for them, so their base carries the plugin either way.
   "@babel/plugin-transform-typescript": "^7.28.5",
   "@ember/app-tsconfig": "^2.0.0",
 };
