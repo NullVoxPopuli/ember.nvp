@@ -65,15 +65,33 @@ export async function prependPlugin(project, plugin, configPath = "babel.config.
     root
       .find(j.Property, {
         key: { name: "plugins" },
-        value: { type: "ArrayExpression" },
       })
       .forEach(
         /**
          * @param {any} path
          */
         (path) => {
-          path.node.value.elements.unshift(plugin);
+          let array = pluginsArrayOf(path.node.value);
+
+          array?.elements.unshift(plugin);
         },
       );
   });
+}
+
+/**
+ * The plugins value may be the array itself, or the array with
+ * methods chained off of it: `[ ... ].filter(Boolean)`
+ *
+ * @param {any} node
+ * @returns {any | undefined} the underlying ArrayExpression
+ */
+function pluginsArrayOf(node) {
+  if (node.type === "ArrayExpression") return node;
+
+  if (node.type === "CallExpression" && node.callee.type === "MemberExpression") {
+    return pluginsArrayOf(node.callee.object);
+  }
+
+  return undefined;
 }
