@@ -25,7 +25,6 @@
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@babel/core": "^7.28.10",
     "@embroider/core": "^4.4.2",
     "@embroider/macros": "^1.20.3",
     "@embroider/vite": "^1.5.0",
@@ -34,7 +33,11 @@
   "engines": {
     "node": ">= 24"
   },
+  "peerDependencies": {
+    "@babel/core": "^7.28.10 || ^8.0.0"
+  },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
     "rolldown": "^1.1.2",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"

@@ -1,8 +1,10 @@
-import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { rolldown } from "rolldown";
 import { afterEach, describe, expect, it } from "vitest";
+import { version as babelVersion } from "@babel/core";
 
 import { emberBabel, type BabelOptions } from "./babel.ts";
 import { emberTransform } from "./transform.ts";
@@ -136,5 +138,60 @@ describe("emberBabel", () => {
 
       expect(code).toContain(`"MARKER"`);
     });
+  });
+
+  /**
+   * Babel majors are not mix-and-match: a v7 plugin loaded into v8's core (or
+   * the reverse) throws `Requires Babel "^7.0.0-0", but was loaded with "8.x"`
+   * before it transforms anything, and the two parsers disagree about the TS
+   * AST besides -- v8 moves enum members onto a `TSEnumBody` node that v7's
+   * transform doesn't know to visit. So the whole default plugin set has to run
+   * on whichever major the consumer resolved.
+   */
+  describe(`default plugins under @babel/core ${babelVersion}`, () => {
+    it("compiles a .gts using the features the defaults exist for", async () => {
+      const code = await bundleWithBabel(
+        {
+          "index.gts": [
+            `enum Level { Low, High }`,
+            `class Counter { @tracked count = Level.Low; }`,
+            `export const marker: string = 'MARKER';`,
+            `export { Level, Counter };`,
+            `export default <template>hi</template>;`,
+          ].join("\n"),
+        },
+        { configFile: false },
+      );
+
+      // TypeScript is stripped (enums become real values, annotations go away)
+      expect(code).toContain("Level");
+      expect(code).not.toMatch(/\benum\b/);
+      expect(code).not.toContain("marker: string");
+      // decorator-transforms rewrote the decorated field against its runtime
+      expect(code).toContain("decorator-transforms/runtime-esm");
+      expect(code).not.toMatch(/@tracked/);
+      // the template became a precompileTemplate call, not wire format
+      expect(code).toContain("precompileTemplate");
+    });
+  });
+});
+
+describe("babel version ranges", () => {
+  /**
+   * `@babel/plugin-transform-typescript` is versioned in lockstep with
+   * `@babel/core` and asserts the major it was loaded into, so a consumer that
+   * can resolve one range but not the other gets a crash rather than a
+   * resolution error. Keeping the two declarations identical means package
+   * managers always pick a matched pair.
+   */
+  it("declares @babel/core and @babel/plugin-transform-typescript identically", async () => {
+    const packageDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+    const manifest = JSON.parse(await readFile(path.join(packageDir, "package.json"), "utf8"));
+
+    expect(manifest.peerDependencies["@babel/plugin-transform-typescript"]).toBe(
+      manifest.peerDependencies["@babel/core"],
+    );
+    expect(manifest.dependencies).not.toHaveProperty("@babel/core");
+    expect(manifest.dependencies).not.toHaveProperty("@babel/plugin-transform-typescript");
   });
 });

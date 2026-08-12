@@ -60,3 +60,19 @@ jobs:
           git config --global user.name "ci"
           git config --global user.email "non@none.none"
           pnpm test:node ${{ matrix.slice.args }}
+
+  babel_8:
+    name: "Meta-plugin Tests (babel 8)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # The meta-plugins take @babel/core as a peer so the consuming project
+    # picks the major; the default install pins babel 7, so nothing else here
+    # covers the other half of that range.
+    steps:
+      - uses: wyvox/action@v1
+      - name: Swap the meta-plugins onto babel 8
+        run: |
+          pnpm --filter '@nullvoxpopuli/ember-*' add -D '@babel/core@^8.0.0'
+          pnpm --filter '@nullvoxpopuli/ember-rolldown' add -D '@babel/plugin-transform-typescript@^8.0.0'
+      - run: pnpm test:node packages/

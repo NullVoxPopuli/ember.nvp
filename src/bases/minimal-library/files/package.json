@@ -26,13 +26,15 @@
     "start": "tsdown --watch"
   },
   "dependencies": {
-    "decorator-transforms": "^2.3.2"
+    "decorator-transforms": "^2.4.0"
   },
   "peerDependencies": {
     "@glimmer/component": "^2.0.0",
     "ember-source": ">= 6.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^7.29.7",
     "@ember/library-tsconfig": "^2.0.0",
     "@glimmer/component": "^2.1.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",

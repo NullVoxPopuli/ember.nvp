@@ -11,6 +11,12 @@ Requires node 24+, and — since this package ships TypeScript source — a
 modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
 `esnext`).
 
+`@babel/core` is a peer dependency (`^7.28.10 || ^8.0.0`) rather than a
+dependency: it's the core that ends up executing the consuming project's babel
+config, so it has to be the same major as the plugins that config names. Babel
+refuses to load a v7 plugin into a v8 core (and vice versa), so a copy pinned
+here would break every project on the other major.
+
 ## Exports
 
 ### `maybeBabel(options?)`
