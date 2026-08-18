@@ -36,7 +36,7 @@
     "@ember/library-tsconfig": "^2.0.0",
     "@glimmer/component": "^2.1.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",
-    "ember-source": "~7.0.0",
+    "ember-source": "~7.2.0",
     "tsdown": "^0.22.7",
     "typescript": "^6.0.3"
   },

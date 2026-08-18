@@ -52,7 +52,7 @@ describe("layer: inspector-support", () => {
        * - https://ember-primitives.pages.dev/6-utils/createService.md
        *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
        */
-      import Application from 'ember-strict-application-resolver';
+      import Application from '@ember/application';
       import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
       export default class App extends Application {
         modules = { ...import.meta.glob('./router.*', { eager: true }), ...import.meta.glob('./templates/**/*', { eager: true }), ...import.meta.glob('./services/**/*', { eager: true }) };

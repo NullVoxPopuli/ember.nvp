@@ -4,7 +4,7 @@ import * as QUnit from "qunit";
 import { setup } from "qunit-dom";
 import { setupEmberOnerrorValidation, start as qunitStart } from "ember-qunit";
 import { setTesting } from "@embroider/macros";
-import EmberApp from "ember-strict-application-resolver";
+import EmberApp from "@ember/application";
 
 class Router extends EmberRouter {
   location = "none";
