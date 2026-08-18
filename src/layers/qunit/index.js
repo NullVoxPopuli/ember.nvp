@@ -28,7 +28,6 @@ const libraryDeps = {
   "@embroider/macros": "^1.20.3",
   "@nullvoxpopuli/ember-vite": "workspace:*",
   "babel-plugin-ember-template-compilation": "^4.0.0",
-  "ember-strict-application-resolver": "^0.1.0",
   vite: "^8.0.14",
 };
 const libraryTsDeps = {
