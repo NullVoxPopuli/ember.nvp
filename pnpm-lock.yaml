@@ -307,8 +307,8 @@ importers:
         specifier: workspace:*
         version: link:../../../../packages/rolldown
       ember-source:
-        specifier: ~7.0.0
-        version: 7.0.0(@glimmer/component@2.1.1)
+        specifier: ~7.2.0
+        version: 7.2.0(@glimmer/component@2.1.1)
       tsdown:
         specifier: ^0.22.7
         version: 0.22.7(typescript@6.0.3)
