@@ -10,7 +10,7 @@ import { hasInspectorSupport, wireInspectorSupport } from "#utils/inspector-supp
 describe("wireInspectorSupport", () => {
   it("wires the generated shape (export default class extends Application)", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class App extends Application {`,
       `  modules = {`,
@@ -20,7 +20,7 @@ describe("wireInspectorSupport", () => {
     ].join("\n");
 
     expect(wireInspectorSupport(code, "app/app.ts")).toMatchInlineSnapshot(`
-      "import Application from "ember-strict-application-resolver";
+      "import Application from "@ember/application";
       import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
       export default class App extends Application {
         modules = { ...import.meta.glob("./router.*", { eager: true }) };
@@ -31,7 +31,7 @@ describe("wireInspectorSupport", () => {
 
   it("wires a named class exported in a separate statement", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `class App extends Application {`,
       `  modules = {};`,
@@ -41,7 +41,7 @@ describe("wireInspectorSupport", () => {
     ].join("\n");
 
     expect(wireInspectorSupport(code, "app/app.js")).toMatchInlineSnapshot(`
-      "import Application from "ember-strict-application-resolver";
+      "import Application from "@ember/application";
       import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
       class App extends Application {
         modules = {  };
@@ -53,13 +53,13 @@ describe("wireInspectorSupport", () => {
 
   it("wires an anonymous default-exported class", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class extends Application {}`,
     ].join("\n");
 
     expect(wireInspectorSupport(code, "app/app.js")).toMatchInlineSnapshot(`
-      "import Application from "ember-strict-application-resolver";
+      "import Application from "@ember/application";
       import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
       export default class extends Application {
         inspector = setupInspector(this);
@@ -69,7 +69,7 @@ describe("wireInspectorSupport", () => {
 
   it("wires a class expression assigned to a variable", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `const App = class extends Application {`,
       `  modules = {};`,
@@ -79,7 +79,7 @@ describe("wireInspectorSupport", () => {
     ].join("\n");
 
     expect(wireInspectorSupport(code, "app/app.js")).toMatchInlineSnapshot(`
-      "import Application from "ember-strict-application-resolver";
+      "import Application from "@ember/application";
       import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
       const App = class extends Application {
         modules = {  };
@@ -108,14 +108,14 @@ describe("wireInspectorSupport", () => {
   it("adds only the missing member when the import is already present", () => {
     const code = [
       `import wireUp from "@embroider/legacy-inspector-support/ember-source-4.12";`,
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class App extends Application {}`,
     ].join("\n");
 
     expect(wireInspectorSupport(code, "app/app.ts")).toMatchInlineSnapshot(`
       "import wireUp from "@embroider/legacy-inspector-support/ember-source-4.12";
-      import Application from "ember-strict-application-resolver";
+      import Application from "@ember/application";
       export default class App extends Application {
         inspector = wireUp(this);
       }"
@@ -124,7 +124,7 @@ describe("wireInspectorSupport", () => {
 
   it("is idempotent", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class App extends Application {`,
       `  modules = {};`,
@@ -157,7 +157,7 @@ describe("wireInspectorSupport", () => {
 describe("hasInspectorSupport", () => {
   it("is false before wiring and true after", () => {
     const code = [
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class App extends Application {}`,
     ].join("\n");
@@ -169,7 +169,7 @@ describe("hasInspectorSupport", () => {
   it("is false when only the import is present", () => {
     const code = [
       `import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";`,
-      `import Application from "ember-strict-application-resolver";`,
+      `import Application from "@ember/application";`,
       ``,
       `export default class App extends Application {}`,
     ].join("\n");

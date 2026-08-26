@@ -91,7 +91,7 @@ function appTests(ext: "ts" | "js") {
     [`tests/application/welcome-test.g${ext}`]: `import { describe, expect } from "vitest";
 import { applicationTest } from "ember-vitest";
 import { visit } from "@ember/test-helpers";
-import Application from "ember-strict-application-resolver";
+import Application from "@ember/application";
 
 import Router from "#app/router.${ext}";
 import ApplicationTemplate from "#app/templates/application.g${ext}";

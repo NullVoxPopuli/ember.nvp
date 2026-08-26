@@ -10,7 +10,7 @@
  * - https://ember-primitives.pages.dev/6-utils/createService.md
  *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
  */
-import Application from "ember-strict-application-resolver";
+import Application from "@ember/application";
 
 export default class App extends Application {
   modules = {

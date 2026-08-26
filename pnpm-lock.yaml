@@ -178,11 +178,8 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2(@babel/core@7.29.7)
       ember-source:
-        specifier: ~7.0.0
-        version: 7.0.0(@glimmer/component@2.1.1)
-      ember-strict-application-resolver:
-        specifier: ^0.1.0
-        version: 0.1.1(@babel/core@7.29.7)
+        specifier: ~7.2.0
+        version: 7.2.0(@glimmer/component@2.1.1)
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -204,19 +201,22 @@ importers:
         version: 4.4.2(@glint/template@1.7.7)
       '@glint/ember-tsc':
         specifier: ^1.7.5
-        version: 1.7.5(ember-source@7.0.0(@glimmer/component@2.1.1))(typescript@6.0.3)
+        version: 1.7.5(ember-source@7.2.0(@glimmer/component@2.1.1))(typescript@6.0.3)
       '@glint/template':
         specifier: ^1.7.7
         version: 1.7.7
       '@glint/tsserver-plugin':
         specifier: ^2.5.5
-        version: 2.5.5(ember-source@7.0.0(@glimmer/component@2.1.1))
+        version: 2.5.5(ember-source@7.2.0(@glimmer/component@2.1.1))
       '@nullvoxpopuli/ember-vite':
         specifier: workspace:*
         version: link:../../../../packages/vite
       '@rollup/plugin-babel':
         specifier: ^7.1.0
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.55.3)
+      babel-plugin-debug-macros:
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.7)
       babel-plugin-ember-template-compilation:
         specifier: ^4.0.0
         version: 4.0.0
@@ -242,11 +242,8 @@ importers:
         specifier: ^2.3.2
         version: 2.3.2(@babel/core@7.29.7)
       ember-source:
-        specifier: ~7.0.0
-        version: 7.0.0(@glimmer/component@2.1.1)
-      ember-strict-application-resolver:
-        specifier: ^0.1.0
-        version: 0.1.1(@babel/core@7.29.7)
+        specifier: ~7.2.0
+        version: 7.2.0(@glimmer/component@2.1.1)
     devDependencies:
       '@babel/core':
         specifier: ^7.29.7
@@ -268,19 +265,22 @@ importers:
         version: 4.4.2(@glint/template@1.7.7)
       '@glint/ember-tsc':
         specifier: ^1.7.5
-        version: 1.7.5(ember-source@7.0.0(@glimmer/component@2.1.1))(typescript@6.0.3)
+        version: 1.7.5(ember-source@7.2.0(@glimmer/component@2.1.1))(typescript@6.0.3)
       '@glint/template':
         specifier: ^1.7.7
         version: 1.7.7
       '@glint/tsserver-plugin':
         specifier: ^2.5.5
-        version: 2.5.5(ember-source@7.0.0(@glimmer/component@2.1.1))
+        version: 2.5.5(ember-source@7.2.0(@glimmer/component@2.1.1))
       '@nullvoxpopuli/ember-vite':
         specifier: workspace:*
         version: link:../../../../packages/vite
       '@rollup/plugin-babel':
         specifier: ^7.1.0
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.55.3)
+      babel-plugin-debug-macros:
+        specifier: ^2.0.0
+        version: 2.0.0(@babel/core@7.29.7)
       babel-plugin-ember-template-compilation:
         specifier: ^4.0.0
         version: 4.0.0
@@ -307,8 +307,8 @@ importers:
         specifier: workspace:*
         version: link:../../../../packages/rolldown
       ember-source:
-        specifier: ~7.0.0
-        version: 7.0.0(@glimmer/component@2.1.1)
+        specifier: ~7.2.0
+        version: 7.2.0(@glimmer/component@2.1.1)
       tsdown:
         specifier: ^0.22.7
         version: 0.22.7(typescript@6.0.3)
@@ -3403,6 +3403,10 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
+  babel-import-util@2.1.1:
+    resolution: {integrity: sha512-3qBQWRjzP9NreSH/YrOEU1Lj5F60+pWSLP0kIdCWxjFHH7pX2YPHIxQ67el4gnMNfYoDxSDGcT0zpVlZ+gVtQA==}
+    engines: {node: '>= 12.*'}
+
   babel-import-util@3.0.1:
     resolution: {integrity: sha512-2copPaWQFUrzooJVIVZA/Oppx/S/KOoZ4Uhr+XWEQDMZ8Rvq/0SNQpbdIyMBJ8IELWt10dewuJw+tX4XjOo7Rg==}
     engines: {node: '>= 12.*'}
@@ -3410,6 +3414,12 @@ packages:
   babel-plugin-debug-macros@0.3.4:
     resolution: {integrity: sha512-wfel/vb3pXfwIDZUrkoDrn5FHmlWI96PCJ3UCDv2a86poJ3EQrnArNW5KfHSVJ9IOgxHbo748cQt7sDU+0KCEw==}
     engines: {node: '>=6'}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+
+  babel-plugin-debug-macros@2.0.0:
+    resolution: {integrity: sha512-7ZaLtXIY01PAPhLyjV3OACePnl+X5iQO7F4O/sOJHTfMf/36zyu14uVUxNiZmOUntYBsyT/VVplf1LrH6NcwvQ==}
+    engines: {node: '>=16'}
     peerDependencies:
       '@babel/core': ^7.0.0
 
@@ -4475,8 +4485,11 @@ packages:
     peerDependencies:
       '@glimmer/component': '>= 1.1.2'
 
-  ember-strict-application-resolver@0.1.1:
-    resolution: {integrity: sha512-/49JZ2Yk2ggicAGIoFNWcz05llhe2i+/2dpH5Pv1KlwZOBKkqMMJpTKEB4IMg+FjKBiE0r2yxuZzo9Oly9vc1A==}
+  ember-source@7.2.0:
+    resolution: {integrity: sha512-pWjYFeM76vAgiFvqrBacAsQh94vTIy8SC1X2S3goULJHJ5/tVWAZ2NtaLFx9oZd3/Lk0gGRdsCMla9rQY58vyw==}
+    engines: {node: '>= 20.19'}
+    peerDependencies:
+      '@glimmer/component': '>= 1.1.2'
 
   ember-template-recast@6.1.5:
     resolution: {integrity: sha512-VnRN8FzEHQnw/5rCv6Wnq8MVYXbGQbFY+rEufvWV+FO/IsxMahGEud4MYWtTA2q8iG+qJFrDQefNvQ//7MI7Qw==}
@@ -10223,7 +10236,31 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@glint/ember-tsc@1.7.5(ember-source@7.0.0(@glimmer/component@2.1.1))(typescript@6.0.3)':
+  '@glint/ember-tsc@1.7.5(ember-source@7.2.0(@glimmer/component@2.1.1))(typescript@5.9.3)':
+    dependencies:
+      '@glimmer/syntax': 0.95.0
+      '@glint/template': 1.7.7
+      '@volar/kit': 2.4.28(typescript@5.9.3)
+      '@volar/language-core': 2.4.28
+      '@volar/language-server': 2.4.28
+      '@volar/language-service': 2.4.28
+      '@volar/source-map': 2.4.28
+      '@volar/test-utils': 2.4.28
+      '@volar/typescript': 2.4.28
+      content-tag: 4.2.0
+      silent-error: 1.1.1
+      typescript: 5.9.3
+      volar-service-html: 0.0.71(@volar/language-service@2.4.28)
+      volar-service-typescript: 0.0.71(@volar/language-service@2.4.28)
+      vscode-languageserver-protocol: 3.17.5
+      vscode-languageserver-textdocument: 1.0.12
+      vscode-uri: 3.1.0
+    optionalDependencies:
+      ember-source: 7.2.0(@glimmer/component@2.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@glint/ember-tsc@1.7.5(ember-source@7.2.0(@glimmer/component@2.1.1))(typescript@6.0.3)':
     dependencies:
       '@glimmer/syntax': 0.95.0
       '@glint/template': 1.7.7
@@ -10243,7 +10280,7 @@ snapshots:
       vscode-languageserver-textdocument: 1.0.12
       vscode-uri: 3.1.0
     optionalDependencies:
-      ember-source: 7.0.0(@glimmer/component@2.1.1)
+      ember-source: 7.2.0(@glimmer/component@2.1.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -10252,6 +10289,17 @@ snapshots:
   '@glint/tsserver-plugin@2.5.5(ember-source@7.0.0(@glimmer/component@2.1.1))':
     dependencies:
       '@glint/ember-tsc': 1.7.5(ember-source@7.0.0(@glimmer/component@2.1.1))(typescript@5.9.3)
+      '@volar/language-core': 2.4.28
+      '@volar/typescript': 2.4.28
+      jiti: 2.6.1
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - ember-source
+      - supports-color
+
+  '@glint/tsserver-plugin@2.5.5(ember-source@7.2.0(@glimmer/component@2.1.1))':
+    dependencies:
+      '@glint/ember-tsc': 1.7.5(ember-source@7.2.0(@glimmer/component@2.1.1))(typescript@5.9.3)
       '@volar/language-core': 2.4.28
       '@volar/typescript': 2.4.28
       jiti: 2.6.1
@@ -10497,11 +10545,11 @@ snapshots:
   '@npmcli/fs@1.1.1':
     dependencies:
       '@gar/promisify': 1.1.3
-      semver: 7.8.1
+      semver: 7.8.5
 
   '@npmcli/fs@3.1.1':
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.5
 
   '@npmcli/git@5.0.8':
     dependencies:
@@ -10548,7 +10596,7 @@ snapshots:
       json-parse-even-better-errors: 3.0.2
       normalize-package-data: 6.0.2
       proc-log: 4.2.0
-      semver: 7.8.1
+      semver: 7.8.5
     transitivePeerDependencies:
       - bluebird
 
@@ -11621,12 +11669,20 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7
 
+  babel-import-util@2.1.1: {}
+
   babel-import-util@3.0.1: {}
 
   babel-plugin-debug-macros@0.3.4(@babel/core@7.29.7):
     dependencies:
       '@babel/core': 7.29.7
       semver: 5.7.2
+
+  babel-plugin-debug-macros@2.0.0(@babel/core@7.29.7):
+    dependencies:
+      '@babel/core': 7.29.7
+      babel-import-util: 2.1.1
+      semver: 7.8.5
 
   babel-plugin-ember-data-packages-polyfill@0.1.2:
     dependencies:
@@ -13112,12 +13168,28 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ember-strict-application-resolver@0.1.1(@babel/core@7.29.7):
+  ember-source@7.2.0(@glimmer/component@2.1.1):
     dependencies:
+      '@babel/core': 7.29.7
       '@embroider/addon-shim': 1.10.2
-      decorator-transforms: 2.3.2(@babel/core@7.29.7)
+      '@glimmer/component': 2.1.1
+      '@simple-dom/interface': 1.4.0
+      backburner.js: 2.8.0
+      broccoli-file-creator: 2.1.1
+      chalk: 4.1.2
+      ember-cli-babel: 8.3.1(@babel/core@7.29.7)
+      ember-cli-get-component-path-option: 1.0.0
+      ember-cli-normalize-entity-name: 1.0.0
+      ember-cli-path-utils: 1.0.0
+      ember-cli-string-utils: 1.1.0
+      ember-cli-typescript-blueprint-polyfill: 0.1.0
+      ember-router-generator: 2.0.0
+      inflection: 2.0.1
+      route-recognizer: 0.3.4
+      semver: 7.8.5
+      silent-error: 1.1.1
+      simple-html-tokenizer: 0.5.11
     transitivePeerDependencies:
-      - '@babel/core'
       - supports-color
 
   ember-template-recast@6.1.5:
@@ -15166,7 +15238,7 @@ snapshots:
       make-fetch-happen: 13.0.1
       nopt: 7.2.1
       proc-log: 4.2.0
-      semver: 7.8.1
+      semver: 7.8.5
       tar: 6.2.1
       which: 4.0.0
     transitivePeerDependencies:
@@ -15178,7 +15250,7 @@ snapshots:
     dependencies:
       growly: 1.3.0
       is-wsl: 2.2.0
-      semver: 7.8.1
+      semver: 7.8.5
       shellwords: 0.1.1
       uuid: 8.3.2
       which: 2.0.2
@@ -15198,7 +15270,7 @@ snapshots:
   normalize-package-data@6.0.2:
     dependencies:
       hosted-git-info: 7.0.2
-      semver: 7.8.1
+      semver: 7.8.5
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -15211,11 +15283,11 @@ snapshots:
 
   npm-install-checks@6.3.0:
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.5
 
   npm-install-checks@7.1.2:
     dependencies:
-      semver: 7.8.1
+      semver: 7.8.5
 
   npm-normalize-package-bin@3.0.1: {}
 
@@ -15232,14 +15304,14 @@ snapshots:
     dependencies:
       hosted-git-info: 8.1.0
       proc-log: 5.0.0
-      semver: 7.8.1
+      semver: 7.8.5
       validate-npm-package-name: 6.0.2
 
   npm-package-arg@13.0.2:
     dependencies:
       hosted-git-info: 9.0.2
       proc-log: 6.1.0
-      semver: 7.8.1
+      semver: 7.8.5
       validate-npm-package-name: 7.0.2
 
   npm-packlist@8.0.2:
@@ -16489,7 +16561,7 @@ snapshots:
       get-stdin: 9.0.0
       git-hooks-list: 3.2.0
       is-plain-obj: 4.1.0
-      semver: 7.8.1
+      semver: 7.8.5
       sort-object-keys: 1.1.3
       tinyglobby: 0.2.17
 
@@ -16499,7 +16571,7 @@ snapshots:
       detect-newline: 4.0.1
       git-hooks-list: 4.2.1
       is-plain-obj: 4.1.0
-      semver: 7.8.1
+      semver: 7.8.5
       sort-object-keys: 2.1.0
       tinyglobby: 0.2.17
 

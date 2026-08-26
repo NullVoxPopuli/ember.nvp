@@ -1,5 +1,22 @@
 # Changelog
 
+## Release (2026-08-18)
+
+* ember.nvp 1.5.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#125](https://github.com/NullVoxPopuli/ember.nvp/pull/125) Update to 7.2, drop ember-strict-application-resolver polyfill ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#121](https://github.com/NullVoxPopuli/ember.nvp/pull/121) Fix initial README formatting ([@tcjr](https://github.com/tcjr))
+  * [#122](https://github.com/NullVoxPopuli/ember.nvp/pull/122) Strip debug code from production app builds ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 2
+- Tom Carter ([@tcjr](https://github.com/tcjr))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-08-07)
 
 * @nullvoxpopuli/ember-rolldown 2.7.0 (minor)

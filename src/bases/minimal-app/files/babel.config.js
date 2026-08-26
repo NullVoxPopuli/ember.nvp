@@ -1,5 +1,7 @@
 import { buildMacros } from "@embroider/macros/babel";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const macros = buildMacros({
   configure(config) {
     if (process.env.EMBER_ENV === "test") {
@@ -40,8 +42,22 @@ export default {
         regenerator: false,
       },
     ],
+    isProduction && [
+      "babel-plugin-debug-macros",
+      {
+        debugTools: {
+          isDebug: false,
+          source: "@ember/debug",
+          assertPredicateIndex: 1,
+        },
+        externalizeHelpers: {
+          module: "@ember/debug",
+        },
+      },
+      "@ember/debug stripping",
+    ],
     ...macros.babelMacros,
-  ],
+  ].filter(Boolean),
 
   generatorOpts: {
     compact: false,
