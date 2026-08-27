@@ -19,7 +19,7 @@ export default {
     await packageJson.addDevDependencies(
       await getLatest({
         "@nullvoxpopuli/eslint-configs": "^5.5.0",
-        eslint: "^9.39.2",
+        eslint: "^10.9.1",
       }),
       project.directory,
     );
