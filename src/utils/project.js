@@ -69,6 +69,29 @@ export class Project {
   }
 
   /**
+   * Get resolved options for a specific layer, merging defaults with user-supplied options.
+   *
+   * @param {string} layerName
+   * @returns {Record<string, any>}
+   */
+  getLayerOptions(layerName) {
+    let layer = this.desires.layers?.find((l) => l.name === layerName);
+    /** @type {Record<string, any>} */
+    let defaults = {};
+
+    if (layer?.options) {
+      for (const [key, schema] of Object.entries(layer.options)) {
+        if (schema.default !== undefined) {
+          defaults[key] = schema.default;
+        }
+      }
+    }
+
+    let userOptions = this.desires.options?.[layerName] ?? {};
+    return { ...defaults, ...userOptions };
+  }
+
+  /**
    * @param {string} name
    * @returns {Promise<boolean>}
    */

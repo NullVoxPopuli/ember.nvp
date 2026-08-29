@@ -183,20 +183,36 @@ To add a new layer, create a new directory in `src/layers/` with:
 1. **`index.js`** - Layer definition:
 
 ```js
+// src/layers/itemizer/index.js
 import { packageJson, files } from "ember-apply";
 import { join } from "node:path";
 
 export default {
   label: "My Feature",
-  description: "What this feature does",
+  hint: "What this feature does",
 
-  async run(project) {
+  // Optional: Define configurable layer options
+  options: {
+    maxItems: {
+      type: "number", // "text" | "number" | "select" | "confirm"
+      prompt: "Enter maximum item count:",
+      default: 10,
+      validate: (val) => val > 0 || "Must be greater than 0",
+    },
+  },
+
+  async run(project, options = {}) {
+    const maxItems = options.maxItems ?? 10;
+
     // Copy files from files/ directory
     await files.applyFolder(join(import.meta.dirname, "files"), project.directory);
 
     await packageJson.addDependencies({ "some-package": "^1.0.0" }, project.directory);
 
-    await packageJson.addScripts({ "my-script": 'echo "Hello"' }, project.directory);
+    await packageJson.addScripts(
+      { "my-script": `echo "Max items: ${maxItems}"` },
+      project.directory,
+    );
   },
 
   // Optionally add something to the README.md file
@@ -205,6 +221,8 @@ export default {
   },
 };
 ```
+
+Optionally, layer options can be set non-interactively via CLI flags using `--<layer>.<option>` (e.g., `--itemizer.maxItems 120`).
 
 2. **`files/`** directory - Template files to copy:
    - Files will be copied to the target directory maintaining structure
