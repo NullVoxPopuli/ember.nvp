@@ -7,14 +7,14 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const toInstall = {
-  "@babel/eslint-parser": "^7.28.6",
-  "@eslint/js": "^9.39.2",
+  "@babel/eslint-parser": "^8.0.1",
+  "@eslint/js": "^10.0.1",
   "eslint-config-prettier": "^10.1.8",
   "eslint-plugin-ember": "^12.7.5",
   "eslint-plugin-n": "^17.23.2",
   "eslint-plugin-qunit": "^8.2.5",
   "typescript-eslint": "^8.53.0",
-  eslint: "^9.39.2",
+  eslint: "^10.9.1",
 };
 
 /**

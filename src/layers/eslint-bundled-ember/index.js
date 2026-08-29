@@ -18,8 +18,8 @@ export default {
 
     await packageJson.addDevDependencies(
       await getLatest({
-        "ember-eslint": "^0.6.1",
-        eslint: "^9.39.2",
+        "ember-eslint": "^1.0.0",
+        eslint: "^10.9.1",
       }),
       project.directory,
     );
