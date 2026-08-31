@@ -28,8 +28,9 @@ const INITIAL_ONLY = new Set<string>([
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   // publish checks: apps aren't published
   app: new Set(["publint", "are-the-types-wrong"]),
-  // libraries have no Application to wire inspector support into
-  library: new Set(["inspector-support"]),
+  // libraries have no Application to wire inspector support into,
+  // and no vite build to plug tailwind into
+  library: new Set(["inspector-support", "tailwind4"]),
   // publish checks: extensions aren't published (to npm)
   extension: new Set(["publint", "are-the-types-wrong"]),
 };
