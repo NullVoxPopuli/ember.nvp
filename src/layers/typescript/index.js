@@ -87,6 +87,12 @@ export default {
       reasons.push("tsconfig.json is missing");
     }
 
+    if (project.type === "library" && !project.hasFile("tsconfig.build.json")) {
+      if (!explain) return false;
+
+      reasons.push("tsconfig.build.json is missing");
+    }
+
     // Only projects with their own babel config need the TS plugin in it;
     // without one (libraries), ember() strips types.
     if (project.hasFile("babel.config.js") && !(await hasConfiguredTSBabel(project))) {
@@ -168,6 +174,9 @@ async function addTSConfig(project) {
 
   if (project.type === "library") {
     await cp(join(libraryBase, "tsconfig.json"), project.path("tsconfig.json"));
+    // The root tsconfig type-checks src + tests; tsconfig.build.json is the
+    // publish config tsdown builds with (src only, isolated declarations).
+    await cp(join(libraryBase, "tsconfig.build.json"), project.path("tsconfig.build.json"));
   }
 }
 
