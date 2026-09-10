@@ -1,5 +1,18 @@
 # Changelog
 
+## Release (2026-09-10)
+
+* ember.nvp 1.6.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#129](https://github.com/NullVoxPopuli/ember.nvp/pull/129) Add routes import ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+  * [#127](https://github.com/NullVoxPopuli/ember.nvp/pull/127) Update eslint (+ deps) in layers ([@tcjr](https://github.com/tcjr))
+
+#### Committers: 2
+- Tom Carter ([@tcjr](https://github.com/tcjr))
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-08-18)
 
 * ember.nvp 1.5.0 (minor)
