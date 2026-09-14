@@ -25,6 +25,17 @@ import type { TsdownPlugin, UserConfig } from "tsdown";
  *
  * - `output.sourcemap` — on (output option).
  *
+ * One default applies through rolldown's `options` hook, so it holds under
+ * both tools:
+ *
+ * - `optimization.inlineConst` — off. Rolldown's default (`mode: "smart"`)
+ *   substitutes an imported constant's literal wherever that makes the code
+ *   shorter — including into `precompileTemplate` scope objects, turning
+ *   `scope: () => ({ EMPTY })` into `scope: () => ({ EMPTY: "—" })`. Scope
+ *   entries must be direct references to in-scope values, so the consuming
+ *   app's template compiler rejects the published module. Nothing before that
+ *   compile catches it: the library builds, type-checks, and lints clean.
+ *
  * Externals are handled by `emberExternals()` (a `resolveId` hook) in both cases.
  */
 export function emberConfig(): TsdownPlugin {
@@ -40,6 +51,12 @@ export function emberConfig(): TsdownPlugin {
 
       config.deps ??= {};
       config.deps.neverBundle ??= ["node:*", "@ember/*", "@glimmer/*"];
+    },
+
+    options(options) {
+      options.optimization ??= {};
+      options.optimization.inlineConst ??= false;
+      return options;
     },
 
     outputOptions(options) {
