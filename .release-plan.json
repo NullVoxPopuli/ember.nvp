@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.7.1",
-      "newVersion": "1.8.0",
+      "oldVersion": "1.8.0",
+      "newVersion": "1.9.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -14,52 +14,14 @@
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-build-tooling-utils": {
-      "impact": "minor",
-      "oldVersion": "1.1.1",
-      "newVersion": "1.2.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/build-tooling-utils/package.json"
+      "oldVersion": "1.2.0"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "impact": "minor",
-      "oldVersion": "2.8.1",
-      "newVersion": "2.9.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        },
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/rolldown/package.json"
+      "oldVersion": "2.9.0"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "minor",
-      "oldVersion": "1.1.1",
-      "newVersion": "1.2.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        },
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.2.0"
     }
   },
-  "description": "## Release (2026-09-21)\n\n* ember.nvp 1.8.0 (minor)\n* @nullvoxpopuli/ember-build-tooling-utils 1.2.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.9.0 (minor)\n* @nullvoxpopuli/ember-vite 1.2.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`, `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`\n  * [#135](https://github.com/NullVoxPopuli/ember.nvp/pull/135) Accept @babel/core 8 in the plugin packages ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
+  "description": "## Release (2026-09-24)\n\n* ember.nvp 1.9.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#137](https://github.com/NullVoxPopuli/ember.nvp/pull/137) Add an expect-type layer for type tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
