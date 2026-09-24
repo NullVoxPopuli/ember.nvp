@@ -172,6 +172,14 @@ Code formatting with:
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
 
+### expect-type (optional)
+
+Type tests for TypeScript libraries with [expect-type](https://github.com/mmkal/expect-type).
+
+- Tests live in `type-tests/`, with their own tsconfig.
+- `lint:type-tests` typechecks them, and `lint` runs it too.
+- JavaScript projects and apps get nothing.
+
 ## Architecture
 
 ### How Layers Work

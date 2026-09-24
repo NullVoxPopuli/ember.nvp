@@ -28,11 +28,11 @@ const INITIAL_ONLY = new Set<string>([
  */
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   // publish checks: apps aren't published
-  app: new Set(["publint", "are-the-types-wrong"]),
+  app: new Set(["publint", "are-the-types-wrong", "expect-type"]),
   // libraries have no Application to wire inspector support into
   library: new Set(["inspector-support"]),
   // publish checks: extensions aren't published (to npm)
-  extension: new Set(["publint", "are-the-types-wrong"]),
+  extension: new Set(["publint", "are-the-types-wrong", "expect-type"]),
   // same toolchain as libraries: no Application either
   "custom-element": new Set(["inspector-support"]),
 };
@@ -61,6 +61,7 @@ const CHECK_LAYERS = new Set<string>([
   "prettier",
   "publint",
   "are-the-types-wrong",
+  "expect-type",
 ]);
 
 type PermutationGroup = "main" | "checks";

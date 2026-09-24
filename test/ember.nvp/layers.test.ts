@@ -13,6 +13,7 @@ describe("discoverLayers", () => {
         "are-the-types-wrong",
         "eslint-bundled-ember",
         "eslint-bundled-nvp",
+        "expect-type",
         "git",
         "github-actions",
         "inspector-support",
