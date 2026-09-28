@@ -9,9 +9,12 @@ import type { Project } from "ember.nvp";
 
 /**
  * The vitest layer ships infrastructure only (config, deps, scripts).
- * These tests generate projects with the layer, emit specs that exercise
- * each project's real exports, and run the real `pnpm test` (vitest in
- * headless-browser mode), asserting the specs genuinely run and pass.
+ *
+ * These tests:
+ * - generate projects with the layer
+ * - emit specs that exercise each project's real exports
+ * - run the real `pnpm test` (vitest in headless-browser mode),
+ *   and assert the specs run and pass
  */
 
 async function emit(project: Project, files: Record<string, string>) {
@@ -32,9 +35,11 @@ async function installAndTest(project: Project) {
 }
 
 /**
- * Specs against the library base's real exports, in the flavor matching
- * the generated project (these files are emitted by this test, not
- * shipped by the layer, so no automatic conversion applies).
+ * Specs against the library base's real exports,
+ * in the flavor matching the generated project.
+ *
+ * These files are emitted by this test, not shipped by the layer,
+ * so no automatic conversion applies.
  */
 function libraryTests(ext: "ts" | "js") {
   return {
@@ -82,9 +87,11 @@ describe("add", () => {
 }
 
 /**
- * Specs against the app base's real modules: boots an app made from the
- * app's own router class (pointed at a test-friendly location) and
- * application template, and visits its application route.
+ * Specs against the app base's real modules.
+ *
+ * Boots an app made from the app's own router class
+ * (pointed at a test-friendly location) and application template,
+ * then visits its application route.
  */
 function appTests(ext: "ts" | "js") {
   return {

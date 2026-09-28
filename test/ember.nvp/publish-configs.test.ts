@@ -8,20 +8,26 @@ import { join } from "node:path";
 import type { Project } from "ember.nvp";
 
 /**
- * A library whose package also holds dev-only code (a demo app, in-package
- * tests) keeps two of each build config: a permissive `tsconfig.json` and
- * `babel.config.js` that editors and `tsc --noEmit` use over everything, and
- * publish-only counterparts covering just what gets published. Either publish
- * config can sit in the package root or in `config/`.
+ * A library whose package also holds dev-only code (a demo app, in-package tests)
+ * keeps two of each build config:
+ * - a permissive `tsconfig.json` and `babel.config.js`,
+ *   which editors and `tsc --noEmit` use over everything
+ * - publish-only counterparts, covering just what gets published
  *
- * These tests generate a real library, put the configs in each of those
- * places, and run the real `pnpm build`.
+ * Either publish config can sit in the package root or in `config/`.
+ *
+ * These tests generate a real library,
+ * put the configs in each of those places,
+ * and run the real `pnpm build`.
  */
 
 /**
- * A development babel config: strips TypeScript, but leaves `<template>` as the
- * `@ember/template-compiler` call content-tag produced. Publishing this output
- * would tie the artifact to one exact ember-source.
+ * A development babel config.
+ *
+ * Strips TypeScript, but leaves `<template>` as the
+ * `@ember/template-compiler` call content-tag produced.
+ *
+ * Publishing this output ties the artifact to one exact ember-source.
  */
 const devBabelConfig = `export default {
   plugins: [
@@ -31,8 +37,10 @@ const devBabelConfig = `export default {
 `;
 
 /**
- * A publish babel config: compiles templates to \`precompileTemplate\`, which is
- * what a published library ships (the consuming app does the final compile).
+ * A publish babel config.
+ *
+ * Compiles templates to `precompileTemplate`, which is what a published library ships.
+ * The consuming app does the final compile.
  */
 const publishBabelConfig = `export default {
   plugins: [
@@ -44,11 +52,14 @@ const publishBabelConfig = `export default {
 `;
 
 /**
- * The `tsconfig.json` such a library actually has: it covers the demo app as
- * well as `src`, and deliberately has no `isolatedDeclarations` -- dev-only
- * code shouldn't be held to a declaration-emit constraint. If the build reads
- * this file rather than the publish tsconfig, the guard fails it, which is what
- * makes every assertion below meaningful.
+ * The `tsconfig.json` such a library actually has.
+ *
+ * It covers the demo app as well as `src`,
+ * and deliberately has no `isolatedDeclarations`:
+ * dev-only code must not be held to a declaration-emit constraint.
+ *
+ * If the build reads this file rather than the publish tsconfig, the guard fails it.
+ * That is what makes every assertion below meaningful.
  */
 const devTsconfig = `{
   "extends": "@ember/library-tsconfig",
@@ -61,8 +72,8 @@ const devTsconfig = `{
 `;
 
 /**
- * Relative paths in a tsconfig resolve against the file itself, so the copy
- * kept in `config/` has to reach back out to `src`.
+ * Relative paths in a tsconfig resolve against the file itself,
+ * so the copy kept in `config/` has to reach back out to `src`.
  */
 function publishTsconfig(directory: "." | "config"): string {
   const src = directory === "config" ? "../src" : "./src";
@@ -211,9 +222,9 @@ describe("publish configs", () => {
         // ...and the dev config, which has no template compilation, did not.
         expect(output).not.toContain("@ember/template-compiler");
 
-        // Declarations emitted, so the guard read the publish tsconfig: the
-        // dev tsconfig.json covering demo-app/ has no isolatedDeclarations and
-        // would have failed the build.
+        // Declarations emitted, so the guard read the publish tsconfig.
+        // The dev tsconfig.json covering demo-app/ has no isolatedDeclarations,
+        // and would have failed the build.
         expect(await listFiles(join(project.directory, "dist"))).toContain("index.d.ts");
       });
     }
@@ -224,17 +235,18 @@ describe("publish configs", () => {
 
     expect(build.exitCode, build.all).toBe(0);
 
-    // Nothing compiled the template, so content-tag's output survives -- the
-    // artifact you don't want to publish, which is why the preference exists.
+    // Nothing compiled the template, so content-tag's output survives.
+    // That is the artifact you don't want to publish: the reason the preference exists.
     expect(output).toContain("@ember/template-compiler");
     expect(output).not.toContain("precompileTemplate");
   });
 
   /**
-   * Writes `files` into the project and builds with `tsconfigOption` as tsdown's
-   * `tsconfig`, for the cases about *which* tsconfig the guard ends up reading.
-   * The publish babel config is always present so these fail for tsconfig
-   * reasons only.
+   * Writes `files` into the project and builds with `tsconfigOption` as tsdown's `tsconfig`.
+   * For the cases about *which* tsconfig the guard ends up reading.
+   *
+   * The publish babel config is always present,
+   * so these fail for tsconfig reasons only.
    */
   async function buildWithTsconfigOption(
     tsconfigOption: string,
@@ -295,9 +307,10 @@ describe("publish configs", () => {
   });
 
   it("rejects tsconfig: false while declarations are on", async () => {
-    // No tsconfig means no isolatedDeclarations, so tsdown falls back to the
-    // tsc-based pipeline, which can't see compiled .gts and dies with
-    // "Source file not found". Fail with something actionable instead.
+    // No tsconfig means no isolatedDeclarations,
+    // so tsdown falls back to the tsc-based pipeline.
+    // That pipeline can't see compiled .gts and dies with "Source file not found".
+    // Fail with something actionable instead.
     const { build } = await buildWithTsconfigOption("false");
 
     expect(build.exitCode).not.toBe(0);

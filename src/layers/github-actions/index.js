@@ -55,8 +55,9 @@ export default {
 };
 
 /**
- * This is a very silly way to handle YAML, but 🤷
- * will update if this starts getting to be troublesome.
+ * String concatenation is a very silly way to handle YAML, but 🤷
+ *
+ * Will update if this starts getting to be troublesome.
  */
 const preamble = `name: CI
 
@@ -135,8 +136,10 @@ async function transform(project) {
   content = await addOrUpdateTests(project, content);
 
   /**
-   * If we've still added nothing, we can't actually add the preamble
-   * because there are no jobs to run (we need at least one job).
+   * A workflow needs at least one job.
+   *
+   * If nothing was added, there is no job to run,
+   * so the preamble is not added either.
    */
   if (content === "") {
     return { content, original, didChange: original !== content, outputPath };

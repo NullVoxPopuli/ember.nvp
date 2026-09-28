@@ -16,8 +16,8 @@ async function installAndTest(project: Project) {
 }
 
 /**
- * The layer ships testing infrastructure only; the tests exercising the
- * base's example exports are generated here, in both flavors.
+ * The layer ships testing infrastructure only.
+ * The tests exercising the base's example exports are generated here, in both flavors.
  */
 const exampleTests = {
   typescript: {

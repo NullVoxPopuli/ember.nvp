@@ -8,10 +8,15 @@ import { describe, expect, it } from "vitest";
 import { emberTransform } from "./transform.ts";
 
 /**
- * Drives the plugin through a real rolldown build. `files` is a map of
- * relative path -> source; the build entry is `index.ts`. Every bare (package)
- * specifier is marked external so the build only exercises the local
- * `.gts`/`.gjs`/`.ts` handling and doesn't need real dependencies installed.
+ * Drives the plugin through a real rolldown build.
+ *
+ * `files` is a map of relative path -> source.
+ * The build entry is `index.ts`.
+ *
+ * Every bare (package) specifier is marked external,
+ * so the build only exercises the local `.gts` / `.gjs` / `.ts` handling
+ * and doesn't need real dependencies installed.
+ *
  * Returns the concatenated code of every emitted chunk.
  */
 async function bundle(
@@ -45,8 +50,8 @@ async function bundle(
     .map((chunk) => chunk.code)
     .join("\n");
 
-  // rolldown's `//#region <path>` comments reference the random temp dir;
-  // collapse them to the bare filename so snapshots stay deterministic.
+  // rolldown's `//#region <path>` comments reference the random temp dir.
+  // Collapse them to the bare filename so snapshots stay deterministic.
   return code.replace(/(\/\/#region ).*\/([^/\n]+)$/gm, "$1$2");
 }
 
@@ -180,11 +185,13 @@ describe("emberTransform (full plugin via rolldown)", () => {
 
   it("resolves an absolute .gts specifier imported from a plugin's virtual module", async () => {
     /**
-     * The shape a code-generating plugin emits: a virtual module (id prefixed
-     * with `\0`, so it exists nowhere on disk) whose generated source imports
-     * real files by absolute path, because it has no directory to be relative
-     * to. `path.dirname` of such an id is `"\0."`, so the specifier must not be
-     * resolved against the importer's directory.
+     * The shape a code-generating plugin emits:
+     * a virtual module (id prefixed with `\0`, so it exists nowhere on disk)
+     * whose generated source imports real files by absolute path,
+     * because it has no directory to be relative to.
+     *
+     * `path.dirname` of such an id is `"\0."`,
+     * so the specifier must not be resolved against the importer's directory.
      */
     const registry = (dir: string): Plugin[] => {
       const source = "./registry?virtual=views";
@@ -225,10 +232,12 @@ describe("emberTransform (full plugin via rolldown)", () => {
   it("compiles a .gts module used directly as an entry (no importer)", async () => {
     const code = await bundle(
       {
-        // Both an entry .gts and a .ts entry importing it: the shared module
-        // must resolve to ONE id (the entry resolution realpaths, matching
-        // rolldown's own resolver) so it lands in the entry chunk and the
-        // index chunk imports it, rather than duplicating the code.
+        // Both an entry .gts and a .ts entry importing it.
+        //
+        // The shared module must resolve to ONE id
+        // (the entry resolution realpaths, matching rolldown's own resolver),
+        // so it lands in the entry chunk and the index chunk imports it,
+        // rather than duplicating the code.
         "index.ts": `export { default as Foo } from './foo.gts';`,
         "foo.gts": [
           `import Component from '@glimmer/component';`,
@@ -299,8 +308,8 @@ describe("emberTransform (full plugin via rolldown)", () => {
 
     const chunk = output.find((entry) => entry.type === "chunk" && "map" in entry);
     expect(chunk).toBeDefined();
-    // The composed map traces through the rewrite back to the original .gts
-    // source (content-tag's map survives the specifier-rewrite pass).
+    // The composed map traces through the rewrite back to the original .gts source.
+    // (content-tag's map survives the specifier-rewrite pass)
     const sources = (chunk as { map?: { sources: string[] } }).map?.sources ?? [];
     expect(sources.some((source) => source.endsWith("foo.gts"))).toBe(true);
   });

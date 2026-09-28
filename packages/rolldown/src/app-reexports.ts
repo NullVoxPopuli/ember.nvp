@@ -5,13 +5,14 @@ import type { RolldownPluginLike } from "./plugin-like.ts";
 
 export interface AppReexportsOptions {
   /**
-   * Globs, matched against each built filename (relative to the output
-   * directory), selecting which modules get an app re-export.
+   * Globs selecting which modules get an app re-export.
+   * Matched against each built filename, relative to the output directory.
    *
-   * Defaults to `["services/*"]` -- top-level services only. Under strict
-   * mode, components and helpers are imported, but services are still
-   * injected by name, so they are the one thing an app must always be able
-   * to resolve.
+   * Defaults to `["services/*"]`: top-level services only.
+   *
+   * Under strict mode, components and helpers are imported.
+   * Services are still injected by name,
+   * so they are the one thing an app must always be able to resolve.
    *
    * `.d.ts` files never match.
    */
@@ -23,33 +24,39 @@ export interface AppReexportsOptions {
   exclude?: string[];
 
   /**
-   * Rename a re-export: receives the built filename, returns the filename the
-   * app sees. Defaults to the built filename unchanged.
+   * Rename a re-export.
+   *
+   * Receives the built filename, returns the filename the app sees.
+   * Defaults to the built filename unchanged.
    */
   mapFilename?: (filename: string) => string;
 
   /**
-   * Which bindings a file's re-export module forwards: an array of names
-   * (default `["default"]`), or a raw export clause string such as `"*"`.
+   * Which bindings a file's re-export module forwards:
+   * - an array of names (default `["default"]`)
+   * - or a raw export clause string such as `"*"`
    */
   exports?: (filename: string) => string[] | string | undefined;
 }
 
 /**
- * Merges built modules into the consuming app's namespace, so classic
- * resolution (`{{a-component}}`, service/helper lookup by name) finds them --
- * the same job as `@embroider/addon-dev`'s `appReexports` rollup plugin.
+ * Merges built modules into the consuming app's namespace,
+ * so classic resolution finds them
+ * (`{{a-component}}`, service / helper lookup by name).
  *
- * For every built file matching `include` (minus `exclude` and `.d.ts`), it
- * writes a tiny module under `<outDir>/_app_/` re-exporting from the
- * library's own name, and records the full set in `package.json` under
- * `ember-addon.app-js`.
+ * The same job as `@embroider/addon-dev`'s `appReexports` rollup plugin.
  *
- * Unlike the embroider plugin, nothing is written unless its content actually
- * differs from what is on disk: the `_app_/` modules are compared
- * byte-for-byte, and `package.json` is only rewritten when the `app-js` map
- * itself changed (so an equivalent map in different formatting is left
- * alone). This keeps rebuilds from re-triggering file watchers.
+ * For every built file matching `include` (minus `exclude` and `.d.ts`):
+ * - writes a tiny module under `<outDir>/_app_/`,
+ *   re-exporting from the library's own name
+ * - records the full set in `package.json` under `ember-addon.app-js`
+ *
+ * Nothing is written unless its content differs from what is on disk:
+ * - the `_app_/` modules are compared byte-for-byte
+ * - `package.json` is only rewritten when the `app-js` map itself changed
+ *   (an equivalent map in different formatting is left alone)
+ *
+ * This keeps rebuilds from re-triggering file watchers.
  *
  * This is a separate import, because most libraries don't need it:
  *
@@ -64,9 +71,12 @@ export interface AppReexportsOptions {
  * });
  * ```
  *
- * With no arguments, top-level services (`services/*`) are re-exported. A
- * string or array of strings is the include glob(s), optionally followed by
- * the remaining options; an object gives full control:
+ * With no arguments, top-level services (`services/*`) are re-exported.
+ *
+ * The first argument can be:
+ * - a string or array of strings: the include glob(s),
+ *   optionally followed by the remaining options
+ * - an object: full control
  *
  * ```js
  * appReexports();                          // services/*
@@ -97,7 +107,7 @@ export function appReexports(
       const appJs: Record<string, string> = {};
 
       // Sorted so the app-js map (and therefore package.json) is stable
-      // across builds regardless of chunk emission order.
+      // across builds, regardless of chunk emission order.
       for (const builtFilename of Object.keys(bundle).sort()) {
         if (!isIncluded(builtFilename, include, resolved.exclude)) continue;
 
@@ -143,7 +153,7 @@ function writeFileIfChanged(path: string, content: string) {
   try {
     existing = readFileSync(path, { encoding: "utf8" });
   } catch {
-    // Doesn't exist yet (or isn't readable) -- write it.
+    // Doesn't exist yet (or isn't readable): write it.
   }
 
   if (existing === content) return;

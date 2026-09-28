@@ -6,9 +6,13 @@ import { styleText } from "node:util";
 import { structuredPatch } from "diff";
 
 /**
- * Directories that belong to the target project's environment rather than
- * its generated contents. They are never seeded into the stage, never
- * diffed, and never deleted on commit.
+ * Directories that belong to the target project's environment,
+ * not to its generated contents.
+ *
+ * They are:
+ * - never seeded into the stage
+ * - never diffed
+ * - never deleted on commit
  *
  * (`.git` has one exception: see {@link Stage#commit})
  */
@@ -20,30 +24,31 @@ const ENVIRONMENT_DIRECTORIES = new Set(["node_modules", ".git"]);
  */
 
 /**
- * A copy-on-write overlay for a project directory, in the spirit of
- * Docker's layered file systems:
+ * A copy-on-write overlay for a project directory,
+ * in the spirit of Docker's layered file systems:
  *
  * - the target directory is the read-only lower layer
  * - a real directory in the OS temp dir is the writable upper layer,
  *   seeded ("copied up") from the target
  *
- * All generation (bases, layers, consolidators) runs against the upper
- * layer via `stage.directory`. Because the upper layer is a real
- * directory, layers keep using `node:fs`, `ember-apply`, and even
- * subprocesses (`git`, package managers) exactly as they would against
- * the real project -- an in-process virtual fs can't offer that, since
- * child processes can't see it.
+ * All generation (bases, layers, consolidators) runs against the upper layer,
+ * via `stage.directory`.
  *
- * Nothing touches the target until {@link Stage#commit}; {@link Stage#discard}
- * throws the upper layer away.
+ * The upper layer is a real directory on purpose.
+ * Layers keep using `node:fs`, `ember-apply`, and subprocesses
+ * (`git`, package managers) exactly as they would against the real project.
+ * An in-process virtual fs can't offer that: child processes can't see it.
+ *
+ * Nothing touches the target until {@link Stage#commit}.
+ * {@link Stage#discard} throws the upper layer away.
  */
 export class Stage {
   /**
-   * @param {string} targetDirectory the directory the project should end up in
+   * @param {string} targetDirectory the directory the project must end up in
    * @param {{ seed?: boolean }} [options]
-   *   seed: copy the target's current contents into the stage first
-   *   (a "copy up"). Defaults to true. Pass false to stage a from-scratch
-   *   generation (e.g. the "replace" flow).
+   *   seed: copy the target's current contents into the stage first (a "copy up").
+   *   Defaults to true.
+   *   Pass false to stage a from-scratch generation (e.g. the "replace" flow).
    * @returns {Promise<Stage>}
    */
   static async create(targetDirectory, options = {}) {
@@ -80,8 +85,10 @@ export class Stage {
   }
 
   /**
-   * The writable upper layer. Generate in here,
-   * e.g. `new Project(stage.directory, desires)`.
+   * The writable upper layer.
+   *
+   * Generate in here:
+   *   `new Project(stage.directory, desires)`
    *
    * @type {string}
    */
@@ -169,19 +176,23 @@ export class Stage {
   }
 
   /**
-   * Applies the staged changes to the target directory, then removes the
-   * stage. Only paths reported by {@link Stage#changes} are touched --
-   * everything else in the target (untracked files, node_modules, .git)
-   * is left alone.
+   * Applies the staged changes to the target directory, then removes the stage.
    *
-   * One exception: when the stage has a `.git` directory and the target
-   * does not (the git layer ran `git init` inside the stage), the `.git`
-   * directory is carried over so a freshly generated project keeps its
-   * history.
+   * Only paths reported by {@link Stage#changes} are touched.
+   * Everything else in the target is left alone:
+   * - untracked files
+   * - node_modules
+   * - .git
    *
-   * @param {Change[]} [changes] the changes to apply -- pass a subset of
-   *   {@link Stage#changes} to apply only some of them (e.g. the ones a
-   *   user accepted during review). Defaults to all staged changes.
+   * One exception: when the stage has a `.git` directory and the target does not
+   * (the git layer ran `git init` inside the stage),
+   * the `.git` directory is carried over.
+   * A freshly generated project keeps its history that way.
+   *
+   * @param {Change[]} [changes] the changes to apply.
+   *   Pass a subset of {@link Stage#changes} to apply only some of them
+   *   (e.g. the ones a user accepted during review).
+   *   Defaults to all staged changes.
    * @returns {Promise<Change[]>} the changes that were written
    */
   async commit(changes) {
@@ -222,9 +233,9 @@ export class Stage {
 }
 
 /**
- * All files (as paths relative to `directory`), excluding environment
- * directories. Includes dotfiles (`.gitignore`, `.github/`, ...), which
- * `fs.glob` would skip.
+ * All files, as paths relative to `directory`, excluding environment directories.
+ *
+ * Includes dotfiles (`.gitignore`, `.github/`, ...), which `fs.glob` skips.
  *
  * @param {string} directory
  * @returns {Promise<Set<string>>}

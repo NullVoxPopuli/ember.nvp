@@ -5,12 +5,15 @@ import { join } from "node:path";
 import { hasGit } from "#utils/git.js";
 import { assert } from "node:console";
 import { layers, layerNames } from "#layers";
+import { isLibraryType } from "#utils/project-type.js";
+
+export { isLibraryType };
 
 /**
  * State container for the project.
  *
- * May eventually include information for discovering existing state
- * about a project.
+ * May eventually include information for discovering
+ * existing state about a project.
  */
 export class Project {
   #directory;
@@ -38,6 +41,15 @@ export class Project {
    */
   get type() {
     return this.desires.type;
+  }
+
+  /**
+   * See {@link isLibraryType}
+   *
+   * @type {boolean}
+   */
+  get isLibrary() {
+    return isLibraryType(this.type);
   }
 
   /**

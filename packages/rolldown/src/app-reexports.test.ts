@@ -8,9 +8,10 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { appReexports, type AppReexportsOptions } from "./app-reexports.ts";
 
 /**
- * The plugin reads and writes package.json relative to the current working
- * directory (matching the other plugins in this package), so each test runs
- * inside its own temp project.
+ * The plugin reads and writes package.json relative to the current working directory
+ * (matching the other plugins in this package).
+ *
+ * So each test runs inside its own temp project.
  */
 describe("appReexports", () => {
   let projectDir: string;

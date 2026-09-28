@@ -1,5 +1,8 @@
-Each of these base projects are _real_ projects that can be ran in these directories.
+Each base is a _real_ project.
+You can run it from its `files/` directory.
 
-For changing the name of a project, the code in the base layer's index.js should find all the places the name is used and swap it out (codemod style).
+A base never uses a template language such as ejs:
+that would make the base unrunnable.
 
-We don't want to use ejs, because it makes the base layers unrunnable.
+To change the project name, the base's `index.js` finds every place the name is used,
+and swaps it out (codemod style).

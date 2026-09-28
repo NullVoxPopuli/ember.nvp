@@ -14,8 +14,9 @@ afterEach(() => {
 });
 
 /**
- * An ember-source stub whose `ember-addon.renamed-modules` provides
- * `@glimmer/runtime` (file-path keys, like the real manifest).
+ * An ember-source stub whose `ember-addon.renamed-modules` provides `@glimmer/runtime`.
+ *
+ * File-path keys, like the real manifest.
  */
 const EMBER_SOURCE_STUB = {
   name: "ember-source",
@@ -29,9 +30,11 @@ const EMBER_SOURCE_STUB = {
 };
 
 /**
- * Writes a fixture package (manifest + optional stub ember-source in its
- * node_modules) and cds into it — the plugin reads both from the library's
- * own context, like the tsdown CLI.
+ * Writes a fixture package and cds into it:
+ * - a manifest
+ * - an optional stub ember-source in its node_modules
+ *
+ * The plugin reads both from the library's own context, like the tsdown CLI.
  */
 async function fixture(manifest: object, { emberSource = true } = {}): Promise<string> {
   const dir = await mkdtemp(path.join(tmpdir(), "ember-rolldown-externals-"));
@@ -50,7 +53,9 @@ async function fixture(manifest: object, { emberSource = true } = {}): Promise<s
   return dir;
 }
 
-/** Runs the plugin's own hooks directly against the current fixture. */
+/**
+ * Runs the plugin's own hooks directly against the current fixture.
+ */
 function resolveWith(source: string): unknown {
   const plugin = emberExternals();
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
@@ -68,17 +73,17 @@ describe("emberExternals", () => {
   });
 
   it("externalizes the modules ember-source provides via renamed-modules", async () => {
-    // Private API like @glimmer/runtime exists only inside the app's
-    // ember-source (its ember-addon.renamed-modules) — @embroider/core's
-    // emberVirtualPackages doesn't list it.
+    // Private API like @glimmer/runtime exists only inside the app's ember-source
+    // (its ember-addon.renamed-modules).
+    // @embroider/core's emberVirtualPackages doesn't list it.
     await fixture({});
     expect(resolveWith("@glimmer/runtime")).toBe(false);
     expect(resolveWith("@ember/-internals/glimmer")).toBe(false);
   });
 
   it("does not blanket-externalize @glimmer packages ember-source doesn't provide", async () => {
-    // e.g. @glimmer/component is a real package a library may want bundled;
-    // only declared deps / virtual packages / renamed-modules are external.
+    // e.g. @glimmer/component is a real package a library may want bundled.
+    // Only declared deps / virtual packages / renamed-modules are external.
     await fixture({});
     expect(resolveWith("@glimmer/not-provided")).toBeUndefined();
   });

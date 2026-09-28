@@ -8,30 +8,29 @@ A speed-optimized default meta-config for ember projects.
 npm add @nullvoxpopuli/ember-vite
 ```
 
-Requires node 24+, and — since these packages ship TypeScript source — a
-modern TypeScript when type-checking: 6+ with `lib` covering `es2025` (e.g.
-`esnext`).
+Requires node 24+. These packages ship TypeScript source, so type-checking
+needs TypeScript 6+ with `lib` covering `es2025` (for example `esnext`).
 
 ## Usage
 
-in your vite config
+In your vite config:
 
 ```js
 import { defineConfig } from "vite";
 import { ember } from "@nullvoxpopuli/ember-vite";
 
 export default defineConfig({
-  plugins: [
-    ember(),
-  ],
-}
+  plugins: [ember()],
+});
 ```
 
-And remove any plugins from embroider or babel.
-Then delete from your package.json: `@rollup/plugin-babel`, `@embroider/core`, `@embroider/vite`.
+Then:
+
+1. Remove any plugins from embroider or babel.
+2. Delete from your package.json: `@rollup/plugin-babel`, `@embroider/core`, `@embroider/vite`.
 
 > [!NOTE]
-> babel related deps are still needed for linting, so don't delete those
+> Linting still needs the babel related deps, so keep those.
 
 ## Requirements
 

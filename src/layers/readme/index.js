@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { formatLabel } from "#utils/cli.js";
+import { tagNameFor } from "#bases/minimal-custom-element";
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -73,13 +74,13 @@ ${project.runPrefix} start
 
 ### Building
 
-To build the library:
+To build the extension:
 
 \`\`\`sh
 ${project.runPrefix} build
 \`\`\`
 
-or
+or, to rebuild on change:
 
 \`\`\`sh
 ${project.runPrefix} build:watch
@@ -113,6 +114,55 @@ ${project.runPrefix} build
 ${layerDocsMarkdown}`;
 }
 
+/**
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} layerDocsMarkdown
+ */
+function customElementReadme(project, layerDocsMarkdown) {
+  let tagName = tagNameFor(project.name);
+
+  return `# ${project.name}
+
+An Ember component, packaged as a custom element, created with \`ember.nvp\`.
+The built package contains ember, so the page that uses the element needs nothing else.
+
+## Usage
+
+Import the \`register\` entry once. It defines the \`<${tagName}>\` tag.
+
+\`\`\`js
+import "${project.name}/register";
+\`\`\`
+
+\`\`\`html
+<${tagName} label="Clicks" step="2"></${tagName}>
+\`\`\`
+
+To choose your own tag name, import the class and define it yourself:
+
+\`\`\`js
+import { CounterElement } from "${project.name}";
+
+customElements.define("my-counter", CounterElement);
+\`\`\`
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 24
+- ${project.packageManager}
+
+### Development & Building
+
+To build the package:
+
+\`\`\`sh
+${project.runPrefix} build
+\`\`\`
+${layerDocsMarkdown}`;
+}
+
 export default {
   label: formatLabel("README.md", "generate project documentation"),
   hint: "project README",
@@ -125,7 +175,6 @@ export default {
    * @param {import('#utils/project.js').Project} project
    */
   async run(project) {
-    // Collect layer docs
     const layerDocs = [];
     for (const layer of project.desires.layers) {
       if (layer.name === "readme" || !layer.readme) {
@@ -149,7 +198,6 @@ export default {
       layerDocsMarkdown = `\n## Features & Tooling\n\n${layerDocs.join("\n\n")}\n`;
     }
 
-    // Merge the layers' snippets into the main readme template
     let content;
     switch (project.type) {
       case "extension":
@@ -157,6 +205,9 @@ export default {
         break;
       case "library":
         content = libraryReadme(project, layerDocsMarkdown);
+        break;
+      case "custom-element":
+        content = customElementReadme(project, layerDocsMarkdown);
         break;
       default:
         content = appReadme(project, layerDocsMarkdown);

@@ -8,10 +8,12 @@ import { join } from "node:path";
 import type { Project } from "ember.nvp";
 
 /**
- * The minimal-library base has to produce a *buildable* library: these tests
- * generate both flavors (JavaScript and TypeScript), snapshot the interesting
- * generated files, and run the real `pnpm build` (tsdown + rolldown) against
- * them.
+ * The minimal-library base has to produce a *buildable* library.
+ *
+ * These tests:
+ * - generate both flavors (JavaScript and TypeScript)
+ * - snapshot the interesting generated files
+ * - run the real `pnpm build` (tsdown + rolldown) against them
  */
 
 async function installAndBuild(project: Project) {

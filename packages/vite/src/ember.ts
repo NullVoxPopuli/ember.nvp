@@ -19,14 +19,16 @@ function absolutePath(relativePath: string) {
  * Everything a project without its own babel config needs:
  *
  * - TypeScript stripping
- * - template compilation (wire format: vite serves/bundles for the
- *   project's own ember-source, so the final compile happens here)
+ * - template compilation, to the wire format
+ *   (vite serves and bundles for the project's own ember-source,
+ *    so the final compile happens here)
  * - build macros, evaluated at build time
- * - decorator-transforms, with its runtime left as a bare specifier so it
- *   resolves from the project (which depends on `decorator-transforms`)
+ * - decorator-transforms, with its runtime left as a bare specifier
+ *   so it resolves from the project
+ *   (the project depends on `decorator-transforms`)
  *
- * The plugins are named, not imported: babel resolves them from the
- * project, which carries them as its own dependencies.
+ * The plugins are named, not imported.
+ * babel resolves them from the project, which carries them as its own dependencies.
  */
 function defaultBabelPlugins() {
   const macros = buildMacros();
@@ -56,12 +58,14 @@ type BabelOptions =
     };
 
 /**
- * The project's babel config wins when it exists -- `babel.configFile`
- * selects which one (e.g. a test-only `config/test/babel.config.js`).
- * Without one (libraries), `defaultBabelPlugins` covers TypeScript,
- * templates, macros, and decorators, so no config file is required --
- * helpers are inlined because projects without a babel config don't
- * carry `@babel/runtime`.
+ * The project's babel config wins when it exists.
+ * `babel.configFile` selects which one (e.g. a test-only `config/test/babel.config.js`).
+ *
+ * Without one (libraries), `defaultBabelPlugins` covers TypeScript, templates, macros, and decorators,
+ * so no config file is required.
+ *
+ * Helpers are inlined in that case:
+ * projects without a babel config don't carry `@babel/runtime`.
  */
 function babelOptions(nvpConfig: Config): BabelOptions {
   const configFile = resolve(
@@ -83,9 +87,12 @@ function babelOptions(nvpConfig: Config): BabelOptions {
 /**
  * Additional opt-ins beyond maybeBabel's built-in list.
  *
- * These libraries ship code that still needs babel (ember-concurrency's
- * decorators, ember-scoped-css transforms, ember-intl's formatMessage macro),
- * and the `initializeRuntimeMacrosConfig` runtime call must be compiled away.
+ * These libraries ship code that still needs babel:
+ * - ember-concurrency's decorators
+ * - ember-scoped-css transforms
+ * - ember-intl's formatMessage macro
+ *
+ * The `initializeRuntimeMacrosConfig` runtime call must also be compiled away.
  */
 function babelFilter(nvpConfig: Config) {
   return {
@@ -120,9 +127,10 @@ interface Config {
     configFile?: string;
 
     /**
-     * optional way to configure when babel is activateed.
-     * by default, all transforming is oxc, except when babel is needed
-     * (for things not currently implemented in oxc)
+     * optional way to configure when babel is activated.
+     *
+     * by default, all transforming is oxc,
+     * except when babel is needed (for things not currently implemented in oxc)
      */
     include?: {
       /**
@@ -154,10 +162,12 @@ export function ember(nvpConfig: Config = {}) {
   const filter = babelFilter(nvpConfig);
 
   /*
-   * Plugins must be returned as top-level array entries — NOT pushed into
-   * config.plugins inside a config() hook.  Vite 8 extracts user plugins
-   * *before* config hooks run, so anything added later is invisible to the
-   * plugin container (resolveId, load, etc. hooks never fire).
+   * Plugins must be returned as top-level array entries,
+   * NOT pushed into config.plugins inside a config() hook.
+   *
+   * Vite 8 extracts user plugins *before* config hooks run,
+   * so anything added later is invisible to the plugin container
+   * (resolveId, load, etc. hooks never fire).
    */
   return [
     {
@@ -194,9 +204,8 @@ export function ember(nvpConfig: Config = {}) {
           resolver({ rolldown: true }),
           templateTag(),
 
-          // Libraries will have precompileTemplate and macros, etc,
-          // and we need to compile that away using this app's
-          // template compiler
+          // Libraries ship precompileTemplate calls and macros.
+          // Both must compile away here, with this app's template compiler.
           maybeBabel({
             ...babel,
             parallel: nvpConfig.babel?.parallel,
@@ -231,14 +240,12 @@ function applyConfig(viteConfig: ResolvedConfig, env: ConfigEnv, nvpConfig: Conf
 }
 
 function dev(viteConfig: ResolvedConfig, nvpConfig: Config) {
-  /**************************************
-   *
+  /**
    * build config for tests
    *
-   * NOTE: we can't minify because some tests
-   *       are checking x.constructor.name, which changes when minified
-   *
-   *************************************/
+   * NOTE: we can't minify.
+   *       some tests check x.constructor.name, which changes when minified
+   */
   Object.assign(viteConfig.build, {
     sourcemap: true,
     cleanCssOptions: { sourceMap: true },
@@ -333,7 +340,8 @@ function prod(viteConfig: ResolvedConfig, nvpConfig: Config) {
     minify: true,
     cleanDir: true,
     /**
-     * This is needed due to how we manage module state.
+     * Needed due to how we manage module state.
+     *
      * This can create waterfalls when too much top-level await is used.
      */
     strictExecutionOrder: true,
@@ -342,10 +350,10 @@ function prod(viteConfig: ResolvedConfig, nvpConfig: Config) {
      */
     codeSplitting: {
       /**
-       * Kind of a shame this isn't automatic based on dynamic import usage
-       * in vite8.
-       * Kinda forces us to know every potential problem area of the app,
-       * rather than rely on automatic optimizations based on import/module usage
+       * Kind of a shame this isn't automatic based on dynamic import usage in vite8.
+       *
+       * This forces us to know every potential problem area of the app,
+       * rather than rely on automatic optimizations based on import/module usage.
        */
       groups: [...(nvpConfig?.production?.codeSplittingGroups ?? [])],
     },

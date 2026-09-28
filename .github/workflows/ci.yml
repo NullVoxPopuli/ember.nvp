@@ -28,6 +28,28 @@ jobs:
       - uses: wyvox/action@v1
       - run: pnpm lint
 
+  babel_8:
+    name: "Node Tests (@babel/core 8)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: wyvox/action@v1
+      # The plugin packages accept Babel 7 and 8, and the lockfile resolves 7.
+      # The blueprint fixtures still need 7 (ember-cli-babel, broccoli), so the
+      # bump is scoped to the three packages that declare the wider range.
+      - run: |
+          cat >> pnpm-workspace.yaml <<'EOF'
+
+          overrides:
+            "@nullvoxpopuli/ember-build-tooling-utils>@babel/core": "^8.0.0"
+            "@nullvoxpopuli/ember-rolldown>@babel/core": "^8.0.0"
+            "@nullvoxpopuli/ember-rolldown>@babel/plugin-transform-typescript": "^8.0.0"
+            "@nullvoxpopuli/ember-vite>@babel/core": "^8.0.0"
+          EOF
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm test:node packages/
+
   node_tests:
     name: "Node Tests (${{ matrix.slice.name }})"
     runs-on: ubuntu-latest
@@ -49,8 +71,12 @@ jobs:
             args: test/ember.nvp/permutations/extension-1.test.ts
           - name: extension permutations 2/2
             args: test/ember.nvp/permutations/extension-2.test.ts
+          - name: custom-element permutations 1/2
+            args: test/ember.nvp/permutations/custom-element-1.test.ts
+          - name: custom-element permutations 2/2
+            args: test/ember.nvp/permutations/custom-element-2.test.ts
           - name: check-layer permutations
-            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts
+            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts test/ember.nvp/permutations/custom-element-checks.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 

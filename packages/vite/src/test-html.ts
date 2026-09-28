@@ -3,10 +3,10 @@ import { join } from "node:path";
 import type { ViteDevServer } from "vite";
 
 /**
- * Everything a QUnit + testem run needs, with no project-specific
- * references: root-relative specifiers keep it independent of where the
- * project keeps its files, and the globs pick up tests/** as well as
- * co-located `*-test` modules under src/**.
+ * Everything a QUnit + testem run needs, with no project-specific references.
+ *
+ * - root-relative specifiers keep it independent of where the project keeps its files
+ * - the globs pick up tests/** as well as co-located `*-test` modules under src/**
  */
 const DEFAULT_TEST_HTML = `<!doctype html>
 <html>
@@ -39,14 +39,16 @@ const DEFAULT_TEST_HTML = `<!doctype html>
 `;
 
 /**
- * Lets a project run its tests without maintaining a tests/index.html:
- * whenever that file is absent, this plugin answers for it -- `load`
- * supplies the html to the build (so `tests/index.html` still lands in
- * dist for testem), and the dev-server middleware serves it (through
- * `transformIndexHtml`, so the html goes through the same pipeline as an
- * on-disk file).
+ * Lets a project run its tests without maintaining a tests/index.html.
  *
- * A tests/index.html on disk always wins; every hook here defers to it.
+ * Whenever that file is absent, this plugin answers for it:
+ * - `load` supplies the html to the build
+ *   (so `tests/index.html` still lands in dist for testem)
+ * - the dev-server middleware serves it, through `transformIndexHtml`,
+ *   so the html goes through the same pipeline as an on-disk file
+ *
+ * A tests/index.html on disk always wins.
+ * Every hook here defers to it.
  */
 export function testHtml() {
   const htmlPath = join(process.cwd(), "tests", "index.html");

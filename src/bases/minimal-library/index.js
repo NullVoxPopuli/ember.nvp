@@ -11,9 +11,9 @@ import { removeConfiguredPlugin } from "#utils/babel.js";
  * Provides the absolute bare minimum for an Ember v2 library (addon):
  * - type: "module" in package.json
  * - built with tsdown + @nullvoxpopuli/ember-rolldown
- * - a sample `<template>` component and a plain module
- * - No babel.config.js: ember() covers TS stripping, template compilation,
- *   and decorators
+ * - an empty src/ with an index entry
+ * - No babel.config.js
+ *   (ember() covers TS stripping, template compilation, and decorators)
  * - No testing framework
  * - No linting or formatting
  *
@@ -65,8 +65,10 @@ async function updateName(project) {
 }
 
 /**
- * The template's package.json is `private: true` so it can never be
- * published from this repo; the generated library exists to be published,
+ * The template's package.json is `private: true`,
+ * so it can never be published from this repo.
+ *
+ * The generated library exists to be published,
  * so the flag is removed entirely.
  *
  * @param {import('#utils/project.js').Project} project
@@ -78,9 +80,11 @@ async function makePublishable(project) {
 }
 
 /**
- * When the project is JavaScript (no typescript layer), remove the TS
- * toolchain, drop the tsconfig, and point the build at the emitted `.js`
- * entry (declarations can't be produced without types).
+ * When the project is JavaScript (no typescript layer):
+ * - remove the TS toolchain
+ * - drop the tsconfig
+ * - point the build at the emitted `.js` entry
+ *   (declarations can't be produced without types)
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -99,8 +103,8 @@ async function makeJavaScript(project) {
 }
 
 /**
- * No declarations are emitted for a JavaScript library, so the `types`
- * export conditions would point at files that never exist.
+ * No declarations are emitted for a JavaScript library,
+ * so the `types` export conditions would point at files that never exist.
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -115,8 +119,9 @@ async function removeTypesExports(project) {
 }
 
 /**
- * Rewrites the tsdown config so it builds the JavaScript entry and stops
- * emitting declarations (defineConfig defaults to `dts: true`).
+ * Rewrites the tsdown config so it:
+ * - builds the JavaScript entry
+ * - stops emitting declarations (defineConfig defaults to `dts: true`)
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -152,9 +157,10 @@ async function upgradeDependencies(project) {
 }
 
 /**
- * The base doesn't emit a babel.config.js, but this can run over an
- * existing project that has one -- and a JavaScript project's config
- * must not reference the TS plugin.
+ * The base doesn't emit a babel.config.js,
+ * but this can run over an existing project that has one.
+ *
+ * A JavaScript project's babel config must not reference the TS plugin.
  *
  * @param {import('#utils/project.js').Project} project
  */

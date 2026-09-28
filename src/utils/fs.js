@@ -7,17 +7,22 @@ import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
 /**
  * `**\/*` alone skips dotfiles, which bases legitimately provide
- * (`.gitignore`, `.env.development`, ...): the extra patterns match
- * dotfiles at any depth and files inside dot-directories (`.github/...`).
+ * (`.gitignore`, `.env.development`, ...).
+ *
+ * The extra patterns match:
+ * - dotfiles at any depth
+ * - files inside dot-directories (`.github/...`)
  */
 const EVERY_FILE = ["**/*", "**/.*", "**/.*/**/*"];
 
 /**
+ * Modified version of applyFolder from ember-apply.
  *
- * Modified version of applyFolder from ember-apply
- * where the caller gets to decide the final output filPath and contents - whereas the version from ember-apply only allows similar file paths in source and destination.
+ * Here, the caller decides the final output path and contents.
+ * The version from ember-apply only allows the same file paths
+ * in source and destination.
  *
- * We need customization because we will intake ts and output js
+ * We need that freedom because we intake ts and output js.
  *
  * @param {string} from
  * @param {{to: import('#utils/project.js').Project, process: (data: { entry: string, contents: string }) => string | Promise<void>}} options sub folder within the target project to copy the contents to
@@ -56,11 +61,12 @@ export async function applyFolderTo(from, project) {
   /**
    * Files we wrote, to be import-rewritten in a second pass.
    *
-   * Rewriting has to wait until every file is on disk: it checks which
-   * file a specifier actually resolves to, so rewriting while the folder
-   * is still half-applied depends on iteration order (e.g. `index.js`
-   * pointing at `./utils/math.ts` before `math.js` exists would be left
-   * alone, emitting a broken import).
+   * Rewriting has to wait until every file is on disk.
+   * It checks which file a specifier actually resolves to,
+   * so rewriting a half-applied folder depends on iteration order.
+   *
+   * For example: `index.js` pointing at `./utils/math.ts` before `math.js` exists
+   * would be left alone, emitting a broken import.
    *
    * @type {string[]}
    */
@@ -110,10 +116,13 @@ export async function applyFolderTo(from, project) {
   });
 
   /**
-   * Imports must always match the emitted files (and carry their
-   * extension). The util decides which files it applies to and is a
-   * no-op for everything else. Files that already existed are the
-   * user's; we leave them alone.
+   * Imports must always match the emitted files, and carry their extension.
+   *
+   * The util decides which files it applies to.
+   * It is a no-op for everything else.
+   *
+   * Files that already existed are the user's.
+   * We leave them alone.
    */
   for (let filePath of written) {
     let contents = await readFile(filePath, "utf-8");

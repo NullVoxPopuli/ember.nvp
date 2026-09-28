@@ -5,10 +5,13 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
 /**
- * This package's own published shape: consumers write their build config in
- * TypeScript, so `import { ember } from "@nullvoxpopuli/ember-rolldown"` has to
- * carry types. Without them it is an implicit `any` (TS7016), and a config file
- * silently stops being type-checked.
+ * This package's own published shape.
+ *
+ * Consumers write their build config in TypeScript,
+ * so `import { ember } from "@nullvoxpopuli/ember-rolldown"` has to carry types.
+ *
+ * Without them it is an implicit `any` (TS7016),
+ * and a config file silently stops being type-checked.
  */
 const packageDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -43,8 +46,8 @@ async function declarations() {
 
 describe("published types", () => {
   beforeAll(async () => {
-    // `clean` is on, but don't let these assertions depend on that: stale
-    // artifacts from an earlier build satisfy every one of them on their own
+    // `clean` is on, but don't let these assertions depend on that.
+    // Stale artifacts from an earlier build satisfy every one of them on their own.
     await rm(path.join(packageDir, "dist"), { recursive: true, force: true });
     await execa("pnpm", ["build"], { cwd: packageDir });
   }, 120_000);
@@ -66,14 +69,16 @@ describe("published types", () => {
 
   /**
    * A declaration may only reach for packages a consumer is guaranteed to have.
-   * Reference a devDependency and there are two ways to lose, both quiet:
-   * the specifier survives and consumers can't resolve it (`skipLibCheck` hides
-   * that, degrading the type to an error type), or the declaration bundler
-   * inlines the whole type surface — a ~200kB copy of rolldown's types, in the
-   * case that prompted this test, nominally distinct from the consumer's own.
    *
-   * `ember()` returns plugins, so `RolldownPluginLike` exists to keep rolldown
-   * on the devDependency side of that line.
+   * Reference a devDependency, and there are two ways to lose, both quiet:
+   * - the specifier survives and consumers can't resolve it
+   *   (`skipLibCheck` hides that, degrading the type to an error type)
+   * - the declaration bundler inlines the whole type surface
+   *   (a ~200kB copy of rolldown's types, in the case that prompted this test,
+   *    nominally distinct from the consumer's own)
+   *
+   * `ember()` returns plugins,
+   * so `RolldownPluginLike` exists to keep rolldown on the devDependency side of that line.
    */
   it("declarations only reference packages consumers have", async () => {
     const manifest = await readManifest();

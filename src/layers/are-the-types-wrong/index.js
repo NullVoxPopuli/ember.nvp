@@ -15,13 +15,13 @@ export default {
 
   async run(project) {
     // Publish checks: apps aren't published
-    if (project.type !== "library") return;
+    if (!project.isLibrary) return;
 
     // Declarations are the thing being checked
     if (!(await project.hasOrWantsLayer("typescript"))) return;
 
-    // ESM-only packages don't offer the CJS resolution modes the strict
-    // profile requires
+    // ESM-only packages don't offer the CJS resolution modes
+    // that the strict profile requires
     await addTsdownConfigProperty(project, "attw", `attw: { profile: "esm-only" }`);
     await packageJson.addDevDependencies(await getLatest(deps), project.directory);
   },
@@ -42,9 +42,9 @@ export default {
     /** @type {string[]} */
     const reasons = [];
 
-    // Nothing to set up outside TypeScript libraries, so nothing can be
-    // missing
-    if (project.type !== "library" || !(await project.hasOrWantsLayer("typescript"))) {
+    // Nothing to set up outside TypeScript libraries,
+    // so nothing can be missing
+    if (!project.isLibrary || !(await project.hasOrWantsLayer("typescript"))) {
       return explain ? { isSetup: true, reasons } : true;
     }
 

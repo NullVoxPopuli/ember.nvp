@@ -12,8 +12,8 @@ import { removeConfiguredPlugin } from "#utils/babel.js";
  * whose popup is an Ember app:
  * - type: "module" in package.json
  * - public/manifest.json copied verbatim into dist
- * - index.html popup booting from an external script (extension pages
- *   forbid inline scripts via CSP)
+ * - index.html popup booting from an external script
+ *   (extension pages forbid inline scripts via CSP)
  * - No testing framework
  * - No linting or formatting
  * - No ember-welcome-page
@@ -25,8 +25,8 @@ export default {
   /**
    * 1. Apply files
    *   a. Remove TS if needed
-   * 2. Remove TS deps/files if needed
-   * 3. Update name(s)
+   * 2. Update name(s)
+   * 3. Remove TS deps/files if needed
    * 4. Upgrade in-range dependencies
    * 5. Update an existing babel config, if any
    *
@@ -42,6 +42,8 @@ export default {
 };
 
 /**
+ * A JavaScript project's babel config must not reference the TS plugin.
+ *
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
@@ -60,7 +62,9 @@ async function applyFiles(project) {
 }
 
 /**
- * Operates on known files where the name matters
+ * Operates on known files where the name matters.
+ *
+ * The extension's display name lives in public/manifest.json.
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -86,10 +90,10 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   /**
-   * We don't actually remove anything, because we want intellisense for JS
+   * Intellisense for JS needs some of these,
+   * but minimal means minimal.
    *
-   * But perhaps for the sake of minimal, we do remoev it.
-   * And we add a layer later for JSDoc ased TS or something
+   * A later layer for JSDoc-based TS can add them back.
    */
   await packageJson.removeDevDependencies(
     [
@@ -110,9 +114,10 @@ async function makeJavaScript(project) {
   }, project.directory);
 
   /**
-   * The import-rewriting pass only handles module files; the popup's
-   * <script src> points at the boot module by path, so it has to follow
-   * the .ts -> .js rename by hand.
+   * The import-rewriting pass only handles module files.
+   *
+   * The popup's <script src> points at the boot module by path,
+   * so it has to follow the .ts -> .js rename by hand.
    */
   if (!project.hasFile("index.html")) return;
 

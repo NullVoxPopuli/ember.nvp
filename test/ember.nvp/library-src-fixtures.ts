@@ -4,9 +4,13 @@ import { dirname, join } from "node:path";
 import type { Project } from "ember.nvp";
 
 /**
- * The library base generates an empty `src/`; tests that build or test a
- * library write this example source (a class component, a template-only
- * component, and a plain module) into the generated project first.
+ * The library base generates an empty `src/`.
+ *
+ * Tests that build or test a library write this example source
+ * into the generated project first:
+ * - a class component
+ * - a template-only component
+ * - a plain module
  */
 export const librarySource = {
   typescript: {

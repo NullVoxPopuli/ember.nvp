@@ -22,30 +22,37 @@ const INITIAL_ONLY = new Set<string>([
 
 /**
  * Layers that don't yet generate a working setup for a project type.
- * Every layer is *supposed* to support every base eventually -- shrink
- * these as layers learn.
+ *
+ * Every layer is *supposed* to support every base eventually.
+ * Shrink these as layers learn.
  */
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   // publish checks: apps aren't published
-  app: new Set(["publint", "are-the-types-wrong"]),
+  app: new Set(["publint", "are-the-types-wrong", "expect-type"]),
   // libraries have no Application to wire inspector support into
   library: new Set(["inspector-support"]),
   // publish checks: extensions aren't published (to npm)
-  extension: new Set(["publint", "are-the-types-wrong"]),
+  extension: new Set(["publint", "are-the-types-wrong", "expect-type"]),
+  // same toolchain as libraries: no Application either
+  "custom-element": new Set(["inspector-support"]),
 };
 
 const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
   "minimal-app": "app",
   "minimal-library": "library",
   "minimal-extension": "extension",
+  "minimal-custom-element": "custom-element",
 };
 
 /**
- * Layers that only add lint / format / publish checks. They don't affect
- * the runtime shape of a project, so they permutate among themselves in a
- * small "checks" matrix instead of multiplying the main one. ("apply anew"
- * still applies each of them on top of every main permutation, so linear
- * cross-group coverage remains.)
+ * Layers that only add lint / format / publish checks.
+ *
+ * They don't affect the runtime shape of a project,
+ * so they permutate among themselves in a small "checks" matrix
+ * instead of multiplying the main one.
+ *
+ * "apply anew" still applies each of them on top of every main permutation,
+ * so linear cross-group coverage remains.
  */
 const CHECK_LAYERS = new Set<string>([
   "eslint-bundled-ember",
@@ -54,6 +61,7 @@ const CHECK_LAYERS = new Set<string>([
   "prettier",
   "publint",
   "are-the-types-wrong",
+  "expect-type",
 ]);
 
 type PermutationGroup = "main" | "checks";
@@ -102,11 +110,14 @@ const eachBase = bases.map((base) => {
 });
 
 /**
- * The permutation matrix grows exponentially with the layer count, so
- * each base runs from its own test file(s) -- CI runs them as separate,
- * parallel jobs. A base whose matrix outgrows one job's budget runs from
- * several files, each taking a deterministic 1-of-N slice. The "checks"
- * group (CHECK_LAYERS) runs from its own file(s) the same way.
+ * The permutation matrix grows exponentially with the layer count,
+ * so each base runs from its own test file(s).
+ * CI runs them as separate, parallel jobs.
+ *
+ * A base whose matrix outgrows one job's budget runs from several files,
+ * each taking a deterministic 1-of-N slice.
+ *
+ * The "checks" group (CHECK_LAYERS) runs from its own file(s) the same way.
  *
  * @param base which base's permutations this file runs
  * @param options.index / options.total which 1-of-N slice of the permutations this file runs

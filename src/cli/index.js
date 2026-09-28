@@ -21,7 +21,7 @@ import { askReplaceOrUpdate } from "./questions/replace-or-update.js";
  * This whole file's primary purpose is to be an interactive CLI
  * for `generateProject`.
  *
- * Other tools can call `generateProject` themselves if they wish
+ * Other tools can call `generateProject` themselves
  * if they want to provide different TUI/GUIs.
  */
 async function main() {
@@ -40,19 +40,19 @@ async function main() {
   await askIfOK();
 
   /**
-   * Everything is generated in a stage: a real directory (in the OS temp
-   * dir) acting as a writable overlay of the target directory.
+   * Everything is generated in a stage:
+   * a real directory (in the OS temp dir) acting as a writable overlay of the target directory.
    *
-   * When updating an existing project, the stage is seeded with a full
-   * copy of it (sans node_modules/.git), so the bases and layers run
-   * against the project's current state -- isSetup checks, package.json
-   * reads, file existence checks, etc. all see the existing files, and
-   * the codemods modify them in the stage exactly as if they were
-   * operating in place. "replace" starts from an empty stage instead.
+   * When updating an existing project, the stage is seeded with a full copy of it
+   * (sans node_modules/.git), so the bases and layers run against the project's current state:
+   * - isSetup checks, package.json reads, file existence checks, etc. all see the existing files
+   * - the codemods modify them in the stage exactly as if they were operating in place
    *
-   * The target itself is not touched until stage.commit() below, which
-   * applies the difference between the stage and the target (or the
-   * subset of it the user accepts during review).
+   * "replace" starts from an empty stage instead.
+   *
+   * The target itself is not touched until stage.commit() below.
+   * That applies the difference between the stage and the target
+   * (or the subset of it the user accepts during review).
    */
   const stage = await Stage.create(projectPath, { seed: replaceOrUpdate !== "replace" });
 
@@ -101,9 +101,12 @@ async function main() {
   }
 
   /**
-   * New projects (and "replace", which was already confirmed) are written
-   * without asking. Updates to an existing project must be confirmed:
-   * write all / review each change (accept/reject) / cancel.
+   * New projects (and "replace", which was already confirmed) are written without asking.
+   *
+   * Updates to an existing project must be confirmed:
+   * - write all
+   * - review each change (accept/reject)
+   * - cancel
    */
   const isUpdate = !stage.isNew && replaceOrUpdate !== "replace";
 
@@ -126,9 +129,11 @@ async function main() {
 
   /**
    * Converted / generated files are written expecting the project's own
-   * formatting and lint pass to run right away (e.g. blank lines between
-   * import groups are `eslint --fix`'s job) -- so when the project has a
-   * lint:fix script, surface it as the step right after install.
+   * formatting and lint pass to run right away.
+   * (e.g. blank lines between import groups are `eslint --fix`'s job)
+   *
+   * So when the project has a lint:fix script,
+   * surface it as the step right after install.
    */
   let lintFixStep = "";
   try {

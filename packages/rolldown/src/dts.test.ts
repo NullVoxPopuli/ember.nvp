@@ -7,9 +7,13 @@ import { afterEach, describe, expect, it } from "vitest";
 import { ember } from "../index.ts";
 
 interface Dist {
-  /** Sorted dist-relative paths of every emitted file. */
+  /**
+   * Sorted dist-relative paths of every emitted file.
+   */
   files: string[];
-  /** dist-relative path -> content, for every emitted .d.ts and .css file. */
+  /**
+   * dist-relative path -> content, for every emitted .d.ts and .css file.
+   */
   contents: Record<string, string>;
 }
 
@@ -22,12 +26,16 @@ afterEach(() => {
 
 /**
  * Drives `ember()` through a real tsdown build (the dts pipeline included).
- * `files` is a map of relative path -> source, written into a temp dir that
- * becomes the cwd for the build (the externals and isolated-declarations
- * plugins read package.json / tsconfig.json from cwd, like the tsdown CLI).
  *
- * Returns the emitted file list plus the full contents of every declaration
- * and css file (js output is covered by transform.test.ts).
+ * `files` is a map of relative path -> source.
+ * It is written into a temp dir that becomes the cwd for the build.
+ * (the externals and isolated-declarations plugins read package.json / tsconfig.json
+ *  from cwd, like the tsdown CLI)
+ *
+ * Returns:
+ * - the emitted file list
+ * - the full contents of every declaration and css file
+ *   (js output is covered by transform.test.ts)
  */
 async function buildFixture(files: Record<string, string>, entry: string[]): Promise<Dist> {
   const dir = await mkdtemp(path.join(tmpdir(), "ember-rolldown-dts-"));
@@ -81,7 +89,9 @@ async function buildFixture(files: Record<string, string>, entry: string[]): Pro
   return dist;
 }
 
-/** One printable document of every captured file, for a single snapshot. */
+/**
+ * One printable document of every captured file, for a single snapshot.
+ */
 function printed(dist: Dist): string {
   return Object.entries(dist.contents)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -91,10 +101,12 @@ function printed(dist: Dist): string {
 
 describe("declarations (full ember() via tsdown)", () => {
   it("emits .d.ts for an entry that type-imports from a non-entry .gts", async () => {
-    // Mirrors a design-system shape: the component is in the runtime graph via
-    // the index entry, while a second entry (a service) only *type*-imports
-    // from it. The service's declaration then references the component's
-    // (virtual) .d.ts, which only exists in the bundler's module graph.
+    // Mirrors a design-system shape:
+    // - the component is in the runtime graph via the index entry
+    // - a second entry (a service) only *type*-imports from it
+    //
+    // The service's declaration then references the component's (virtual) .d.ts,
+    // which only exists in the bundler's module graph.
     const dist = await buildFixture(
       {
         "src/index.ts": `export { default as Popup } from './popup.gts';`,
@@ -174,11 +186,12 @@ describe("declarations (full ember() via tsdown)", () => {
   });
 
   it("emits .d.ts when a .gts module is only ever type-imported", async () => {
-    // Nothing value-imports popup.gts, so its virtual module never enters the
-    // runtime graph: the only route to its declaration is the dts resolver
-    // loading it on demand. The declaration pipeline registers modules as
-    // their (virtual) source loads, so the import must resolve to the source
-    // id — a pre-rewritten `.d.ts` id skips that registration and dangles.
+    // Nothing value-imports popup.gts, so its virtual module never enters the runtime graph.
+    // The only route to its declaration is the dts resolver loading it on demand.
+    //
+    // The declaration pipeline registers modules as their (virtual) source loads,
+    // so the import must resolve to the source id.
+    // A pre-rewritten `.d.ts` id skips that registration and dangles.
     const dist = await buildFixture(
       {
         "src/service.ts": [
@@ -233,10 +246,10 @@ describe("declarations (full ember() via tsdown)", () => {
   });
 
   it("emits .d.ts for a .gts that type-imports another (otherwise unimported) .gts", async () => {
-    // A nested component type-imports a sibling from the parent directory;
-    // its declaration then carries a relative source specifier for a module
-    // that exists only in the bundler's graph (never on disk, never in the
-    // runtime graph).
+    // A nested component type-imports a sibling from the parent directory.
+    //
+    // Its declaration then carries a relative source specifier for a module
+    // that exists only in the bundler's graph (never on disk, never in the runtime graph).
     const dist = await buildFixture(
       {
         "src/index.ts": `export { default as OptionList } from './components/select/option-list.gts';`,
@@ -288,11 +301,14 @@ describe("declarations (full ember() via tsdown)", () => {
   });
 
   it("bundles co-located CSS (via @tsdown/css) without breaking declarations", async () => {
-    // Ember components routinely import a co-located .css file. Without CSS
-    // handling the build dies on tsdown's css-guard — and because the failing
-    // component module never loads, every declaration that references it
-    // dangles (surfacing as misleading UNLOADABLE_DEPENDENCY errors on
-    // <component>.d.ts). @tsdown/css makes both work.
+    // Ember components routinely import a co-located .css file.
+    //
+    // Without CSS handling, the build dies on tsdown's css-guard.
+    // And because the failing component module never loads,
+    // every declaration that references it dangles
+    // (surfacing as misleading UNLOADABLE_DEPENDENCY errors on <component>.d.ts).
+    //
+    // @tsdown/css makes both work.
     const dist = await buildFixture(
       {
         "src/index.ts": `export { default as Popup } from './popup.gts';`,

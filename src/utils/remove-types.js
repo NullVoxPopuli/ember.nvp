@@ -26,9 +26,7 @@ export async function removeTypes(extension, code) {
 }
 
 /**
- *
  * Support for removeTypes
- *
  */
 
 const preprocessor = new Preprocessor();
@@ -78,8 +76,8 @@ async function wrappedRemoveTypes(code = "", callback = babelRemoveTypes) {
         templateTag,
       );
     } else {
-      // babel-remove-types uses prettier under the hood, and adds trailing `;` where allowed,
-      // so we need to take that into account when restoring the template tags:
+      // babel-remove-types uses prettier under the hood, and adds trailing `;` where allowed.
+      // Restoring the template tags has to account for that:
       transformedWithTemplateTag = transformedWithTemplateTag.replace(
         `${replacementExpression(i)};`,
         templateTag,

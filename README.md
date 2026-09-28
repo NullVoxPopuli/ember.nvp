@@ -5,10 +5,14 @@ _ember project generator: a reenvisioning of blueprints -- hopefully one day to 
 > [!NOTE]
 > **Why isn't this work happening in the default blueprints?** for a long time now, I've felt the old blueprint system from the very early days of ember-cli has not allowed for expressive enough layering of what people actually want out of a project generator. That said, that means there are some compromises in the CLI/generator in this repo. Throughout all files generated, whenever there is a caveat, there will be a comment in the file with the caveat, explaining status, open issues, and how we can collectively move forward. It's possible that one day ember-cli adopts or is inspired by this project, but it's too early to tell at the moment.
 
-_I can't recommend using this tool unless your comfortable with the emitted caveats in the project_.
-(And being comfortable debugging build issues is recommended)
+_I can't recommend using this tool unless you're comfortable with the emitted caveats in the project_.
+(And with debugging build issues.)
 
-But I'm very excited about this tool, because it's everything I've ever wanted from a project generator. Each layer is idempotent, and knows about the other layers. So if, for example, you omit eslint when setting up your project, but do have github-actions, when you do add eslint, your github-actions will be updated as well. And this works in any order.
+But I'm very excited about this tool, because it's everything I've ever wanted from a project generator.
+Each layer is idempotent, and knows about the other layers.
+For example: set up a project with github-actions but without eslint.
+When you add eslint later, your github-actions are updated as well.
+This works in any order.
 
 ## Usage
 
@@ -32,21 +36,25 @@ npx NullVoxPopuli/ember.nvp
 
 ### Updating an existing project
 
-You can run `ember.nvp` on top of an existing project to add layers to it. Generation never writes directly to your project -- everything runs in a staging directory first, and before finishing you choose to:
+You can run `ember.nvp` on top of an existing project to add layers to it.
+Nothing is written to your project until you confirm. Before finishing, you choose to:
 
-- **write the files** -- apply all of the staged changes
-- **review the diff** -- step through each changed file's diff, accepting or rejecting it individually (or accept/reject everything remaining)
-- **cancel** -- discard everything; your project is untouched
+- **write the files**: apply all of the staged changes
+- **review the diff**: step through each changed file, and accept or reject it (or accept / reject everything remaining)
+- **cancel**: discard everything. Your project is untouched.
 
-Only files that actually changed are written. `node_modules`, `.git`, and everything else in your project are left alone, and the accepted changes land as uncommitted edits for you to review with your own git tooling.
+Only files that actually changed are written.
+`node_modules`, `.git`, and everything else in your project are left alone.
+The accepted changes land as uncommitted edits, for you to review with your own git tooling.
 
-New projects skip the confirmation and are written as soon as generation succeeds. For scripting, `--write yes` / `--write no` answers the confirmation up front.
+New projects skip the confirmation, and are written as soon as generation succeeds.
+For scripting, `--write yes` / `--write no` answers the confirmation up front.
 
 ### Wrapping
 
-The provided CLI is only a wrapper around our exported `generateProject` function.
+The provided CLI is only a wrapper around the exported `generateProject` function.
 
-Other tools can call `generateProject` themselves if they wish to provide a different terminal or graphical UI.
+Other tools can call `generateProject` themselves, to provide a different terminal or graphical UI.
 
 ```js
 import { generateProject, Project } from 'ember.nvp';
@@ -67,7 +75,9 @@ await generateProject(new Project(
 
 All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
 
-To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`. A stage is a real directory in the OS temp dir, seeded with a copy of the target directory's current contents (sans `node_modules`/`.git`) -- so layers run against the project's existing state with plain `node:fs`, `ember-apply`, and subprocesses, and authoring a layer is exactly the same with or without one.
+To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`.
+A stage is a scratch copy of the target directory (without `node_modules` and `.git`).
+Layers run against that copy, and the target directory is untouched until you commit.
 
 ```js
 import { generateProject, Project, Stage } from "ember.nvp";
@@ -94,8 +104,9 @@ await stage.commit(); // write the changes to the target directory
 - Modern, incremental
 - Interactive CLI
   - choose your features
-- The generators fro the different types of projects are never out of date from each other
-  - each feature/layer is a mini codemod that has to support working within all the other layers -- so eslint for example is always derived the same way -- no way for "app" and "library" configs to get out of sync
+- The generators for the different types of projects are never out of date from each other
+  - each feature/layer is a mini codemod that has to work within all the other layers.
+    eslint, for example, is always derived the same way: "app" and "library" configs can't get out of sync
 
 Good for:
 
@@ -106,8 +117,9 @@ Good for:
 
 ## Layers
 
-Each layer is a standalone module that can add features to your ember project,
-and every layer is aware of the other layers, so if, for example, you run github actions first, and then later decide to add linting, the github actions output will be updated.
+Each layer is a standalone module that adds a feature to your ember project.
+Every layer is aware of the other layers.
+For example: add github actions first, and linting later. The github actions output is updated.
 
 ### 🎯 Minimal (always included)
 
@@ -126,7 +138,8 @@ Perfect for demos, reproductions, and learning!
 
 Runs `git init` for you.
 
-By default this layer is enabled, _unless_ you are running the generator in a git repo already -- then you have to opt in to git.
+This layer is enabled by default, _unless_ you run the generator inside a git repo already.
+In that case, you have to opt in to git.
 
 ### GitHub Actions (optional)
 
@@ -159,21 +172,29 @@ Code formatting with:
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
 
+### expect-type (optional)
+
+Type tests for TypeScript libraries with [expect-type](https://github.com/mmkal/expect-type).
+
+- Tests live in `type-tests/`, with their own tsconfig.
+- `lint:type-tests` typechecks them, and `lint` runs it too.
+- JavaScript projects and apps get nothing.
+
 ## Architecture
 
 ### How Layers Work
 
-1. **Discovery**: CLI scans `src/layers/` and imports each `index.js`
-2. **Selection**: User selects which optional layers to include
-3. **Execution**: Each layer's `run()` function is called in sequence:
+1. **Discovery**: the CLI scans `src/layers/` and imports each `index.js`
+2. **Selection**: the user selects which optional layers to include
+3. **Execution**: each layer's `run()` function is called in sequence:
    ```js
    await layer.run(project);
    ```
-4. **Layer Functions**: Inside `run()`, layers use [`ember-apply`](https://ember-apply.pages.dev/) to apply codemods in order to:
-   - Copy files from `files/` directory
-   - Add dependencies/devDependencies to package.json
-   - Add npm scripts
-   - Modify package.json metadata
+4. **Layer Functions**: inside `run()`, layers use [`ember-apply`](https://ember-apply.pages.dev/) to apply codemods:
+   - copy files from the `files/` directory
+   - add dependencies / devDependencies to package.json
+   - add npm scripts
+   - modify package.json metadata
    - etc
 
 ### Adding New Layers
@@ -224,7 +245,7 @@ export default {
 
 Optionally, layer options can be set non-interactively via CLI flags using `--<layer>.<option>` (e.g., `--itemizer.maxItems 120`).
 
-2. **`files/`** directory - Template files to copy:
-   - Files will be copied to the target directory maintaining structure
+2. **`files/`** directory: template files to copy
+   - files are copied to the target directory, keeping their structure
 
-The CLI will automatically discover and offer it as an option!
+The CLI discovers the layer and offers it as an option.

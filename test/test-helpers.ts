@@ -12,15 +12,18 @@ import { expect } from "vitest";
 const minimalApp = "minimal-app";
 const minimalAddon = "minimal-library";
 const minimalExtension = "minimal-extension";
+const minimalCustomElement = "minimal-custom-element";
 
-export const bases = [minimalApp, minimalAddon, minimalExtension];
+export const bases = [minimalApp, minimalAddon, minimalExtension, minimalCustomElement];
 
 export const layers = await discoverLayers();
 
 /**
- * Layers in the same group are alternatives to each other (one eslint
- * config, one test framework): selecting two of them would produce a
- * broken project, so permutations never combine them.
+ * Layers in the same group are alternatives to each other
+ * (one eslint config, one test framework).
+ *
+ * Selecting two of them produces a broken project,
+ * so permutations never combine them.
  */
 function exclusivityGroup(name: string): string | undefined {
   if (name.startsWith("eslint-")) return "eslint";
@@ -189,9 +192,11 @@ export async function expectIsSetup(project: Project, layer: DiscoveredLayer) {
 }
 
 /**
- * List every file under `directory` (recursively) as sorted paths relative
- * to `directory`. `node_modules` is always excluded; pass
- * `{ includeDist: false }` to also exclude the `dist/` build output.
+ * List every file under `directory` (recursively),
+ * as sorted paths relative to `directory`.
+ *
+ * `node_modules` is always excluded.
+ * Pass `{ includeDist: false }` to also exclude the `dist/` build output.
  */
 export async function listFiles(
   directory: string,

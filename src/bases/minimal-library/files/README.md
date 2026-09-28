@@ -24,16 +24,17 @@ pnpm start
 
 ## Structure
 
-- `src/` — your library source. Author components in `.gts`/`.gjs`
-  (template-tag) and plain modules in `.ts`/`.js`.
-- `src/index.ts` — the public entry point. Everything a consumer can import
-  must be re-exported from here (or added as an entry in `tsdown.config.js`).
-- `dist/` — the built output that gets published (git-ignored).
+- `src/` is your library source.
+  Author components in `.gts`/`.gjs` (template-tag) and plain modules in `.ts`/`.js`.
+- `src/index.ts` is the public entry point.
+  Everything a consumer can import must be re-exported from here,
+  or added as an entry in `tsdown.config.js`.
+- `dist/` is the built output that gets published (git-ignored).
 
 Declarations are emitted with
 [isolated declarations](https://www.typescriptlang.org/tsconfig/#isolatedDeclarations),
-so every exported value needs an explicit type annotation — in particular,
-annotate exported template-only components with `TOC<...>`.
+so every exported value needs an explicit type annotation.
+In particular, annotate exported template-only components with `TOC<...>`.
 
 ## Publishing
 

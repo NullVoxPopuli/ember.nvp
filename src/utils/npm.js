@@ -8,9 +8,10 @@ import { join, resolve } from "node:path";
 const CACHE = {};
 
 /**
- * Local, not-yet-published workspace packages that must be `link:`ed rather
- * than resolved from the registry. Maps the published package name to its
- * folder under `packages/`.
+ * Local, not-yet-published workspace packages.
+ * These must be `link:`ed rather than resolved from the registry.
+ *
+ * Maps the published package name to its folder under `packages/`.
  *
  * @type {{ [name: string]: string }}
  */
@@ -37,16 +38,18 @@ export async function getLatest(deps) {
 
       /**
        * HACK FOR CI.
-       * In practice, these packages will be published separately, and those
-       * versions will be used. Only the local, not-yet-published
-       * @nullvoxpopuli/ember-* packages need the link; every other dependency
-       * must still resolve its real version.
        *
-       * We use `link:` (a symlink) rather than `file:` (a copy into the store)
-       * on purpose: the packages ship TypeScript source, and Node 24 refuses to
-       * strip types for files physically located under node_modules. A symlink
-       * makes Node resolve the realpath to packages/* (outside node_modules),
-       * so its `.ts` runs directly.
+       * In practice, these packages will be published separately,
+       * and those versions will be used.
+       *
+       * Only the local, not-yet-published @nullvoxpopuli/ember-* packages need the link.
+       * Every other dependency must still resolve its real version.
+       *
+       * We use `link:` (a symlink) rather than `file:` (a copy into the store) on purpose:
+       * - the packages ship TypeScript source
+       * - Node 24 refuses to strip types for files physically located under node_modules
+       * - a symlink makes Node resolve the realpath to packages/* (outside node_modules),
+       *   so its `.ts` runs directly
        */
       if (needsLocalLink && LOCAL_PACKAGES[dep]) {
         version =

@@ -1,6 +1,6 @@
 import { Project } from "./project.js";
 export type PackageManager = "pnpm" | "npm";
-export type ProjectType = "app" | "library" | "extension";
+export type ProjectType = "app" | "library" | "extension" | "custom-element";
 
 export type LayerOptionType = "text" | "number" | "select" | "confirm" | "multiselect";
 
@@ -33,13 +33,14 @@ export interface Layer {
    */
   options?: LayerOptionsSchema;
   /**
-   * Whether the layer is pre-selected in the CLI (the user can still
-   * deselect it).
+   * Whether the layer is pre-selected in the CLI.
+   * The user can still deselect it.
    */
   defaultValue?: (projectType: ProjectType) => unknown;
   /**
-   * Optional README documentation snippet or function. Whatever is returned
-   * will show up in the generated project's README file.
+   * Optional README documentation snippet or function.
+   *
+   * Whatever is returned shows up in the generated project's README file.
    */
   readme?: string | ((project: Project) => string | undefined | Promise<string | undefined>);
   /**
@@ -64,10 +65,10 @@ export interface Layer {
 
 export interface DiscoveredLayer extends Layer {
   /**
-   * The unique name of the layer
-   * (exact match of the folder name
-   *   not provided by the layer
-   * )
+   * The unique name of the layer.
+   *
+   * An exact match of the folder name.
+   * Not provided by the layer itself.
    */
   name: string;
 }

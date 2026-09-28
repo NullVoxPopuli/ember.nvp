@@ -15,8 +15,9 @@ afterEach(() => {
 });
 
 /**
- * A babel config whose only plugin rewrites the string `"MARKER"` to `name`, so
- * the emitted code says which config file babel actually loaded.
+ * A babel config whose only plugin rewrites the string `"MARKER"` to `name`.
+ *
+ * So the emitted code says which config file babel loaded.
  */
 function markerConfig(name: string): string {
   return [
@@ -37,9 +38,13 @@ function markerConfig(name: string): string {
 }
 
 /**
- * Builds a `.gts` entry (so babel actually runs -- `maybeBabel` skips files that
- * need no transform) in a temp dir that becomes the cwd, the way config
- * detection sees it under the tsdown CLI. Returns the emitted code.
+ * Builds a `.gts` entry in a temp dir that becomes the cwd,
+ * the way config detection sees it under the tsdown CLI.
+ *
+ * A `.gts` entry so babel runs at all:
+ * `maybeBabel` skips files that need no transform.
+ *
+ * Returns the emitted code.
  */
 async function bundleWithBabel(
   files: Record<string, string>,

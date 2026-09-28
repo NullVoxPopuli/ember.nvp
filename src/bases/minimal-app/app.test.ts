@@ -110,8 +110,9 @@ const DEBUG_MARKERS = {
 
 /**
  * Lives in app/services/ so that app.ts's eager
- * `import.meta.glob("./services/**\/*")` pulls it into the build
- * without needing to modify any generated files.
+ * `import.meta.glob("./services/**\/*")` pulls it into the build.
+ *
+ * No generated file needs to change.
  */
 const debugFixture = `
 import { assert, deprecate, warn } from "@ember/debug";
@@ -134,8 +135,10 @@ if (macroCondition(isDevelopingApp())) {
 `;
 
 /**
- * Only .js files -- the sourcemaps (.map) contain the original
- * source (with markers) even in production builds.
+ * Only .js files.
+ *
+ * The sourcemaps (.map) contain the original source (with markers),
+ * even in production builds.
  */
 async function builtJavaScript(project: Project): Promise<string> {
   let files = globSync("dist/**/*.js", { cwd: project.directory });

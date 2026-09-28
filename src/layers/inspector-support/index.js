@@ -42,8 +42,8 @@ export default {
       await writeFile(path, wired);
     }
 
-    // the dependency is only useful once the Application actually got
-    // wired (the codemod leaves unrecognized Application shapes alone)
+    // The codemod leaves unrecognized Application shapes alone.
+    // The dependency is only useful once the Application is wired.
     if (!hasInspectorSupport(wired, path)) return;
 
     await packageJson.addDevDependencies(await getLatest(deps), project.directory);

@@ -6,9 +6,10 @@ import { dirname, join } from "node:path";
 import { rewriteImportsToMatchFiles } from "#utils/rewrite-imports.js";
 
 /**
- * Generation renames files (e.g. type removal turns .ts into .js), so
- * import specifiers are checked against the emitted project tree:
- * whatever file actually exists on disk wins.
+ * Generation renames files (e.g. type removal turns .ts into .js),
+ * so import specifiers are checked against the emitted project tree.
+ *
+ * Whatever file actually exists on disk wins.
  */
 describe("rewriteImportsToMatchFiles", () => {
   const dirs: string[] = [];

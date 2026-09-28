@@ -3,9 +3,10 @@ import { describe, it, expect } from "vitest";
 import { hasInspectorSupport, wireInspectorSupport } from "#utils/inspector-support.js";
 
 /**
- * The Application definition is found structurally, so every shape an app
- * author may have refactored their app file into gets wired the same way
- * the freshly generated shape does.
+ * The Application definition is found structurally.
+ *
+ * So every shape an app author has refactored their app file into
+ * gets wired the same way the freshly generated shape does.
  */
 describe("wireInspectorSupport", () => {
   it("wires the generated shape (export default class extends Application)", () => {

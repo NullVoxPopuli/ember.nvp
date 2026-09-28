@@ -6,9 +6,8 @@ import { rm } from "node:fs/promises";
 import type { Project } from "ember.nvp";
 
 /**
- * publint and are-the-types-wrong run inside the library's own build
- * (tsdown), so the real assertion is their report lines in `pnpm build`
- * output.
+ * publint and are-the-types-wrong run inside the library's own build (tsdown),
+ * so the real assertion is their report lines in `pnpm build` output.
  */
 
 describe("layers: publint + are-the-types-wrong", () => {

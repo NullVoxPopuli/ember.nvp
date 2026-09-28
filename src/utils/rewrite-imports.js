@@ -6,10 +6,12 @@ import enhancedResolve from "enhanced-resolve";
 const { ResolverFactory, CachedInputFileSystem } = enhancedResolve;
 
 /**
- * The module files this util operates on. Doubles as the candidate
- * extensions the resolver may append when a request has none (or when we
- * retry a request without its original extension) -- the single source
- * of truth for both.
+ * The module files this util operates on.
+ *
+ * Doubles as the candidate extensions the resolver may append
+ * when a request has none, or when we retry a request without its original extension.
+ *
+ * The single source of truth for both.
  */
 const MODULE_EXTENSIONS = [".js", ".gjs", ".ts", ".gts"];
 
@@ -19,38 +21,48 @@ function createResolver() {
     fileSystem: new CachedInputFileSystem(fs, 100),
     useSyncFileSystemCalls: true,
     extensions: MODULE_EXTENSIONS,
-    // no conditionNames: we only resolve local paths and sub-path
-    // self-imports (whose targets in the emitted `imports` field are
-    // plain strings, which match regardless of conditions)
+    // no conditionNames: we only resolve local paths and sub-path self-imports.
+    // Their targets in the emitted `imports` field are plain strings,
+    // which match regardless of conditions.
   });
 }
 
 /**
- * Imports must match files. Generation renames files (e.g. type removal
- * turns .ts into .js), so for every local specifier (./, ../, and #
- * subpath-imports -- expanded against the project's package.json
- * `imports` field) we check what actually exists in the emitted project
- * tree:
+ * Imports must match files.
  *
- * - the specifier resolves to a file and carries an extension? leave it
- *   alone.
- * - it resolves but has no extension? append the resolved file's
- *   extension (fully-specified local imports resolve faster), unless the
- *   fully-specified form no longer maps to the same file (e.g. `#config`,
- *   whose `imports` target carries the extension itself).
- * - it doesn't resolve, but the same specifier with whatever extension
- *   IS on disk does? rewrite it to that.
- * - nothing matches? leave it alone -- we can't know better, and the
- *   project's own build will report it loudly.
+ * Generation renames files (e.g. type removal turns .ts into .js).
+ * So for every local specifier, we check what actually exists in the emitted project tree.
+ *
+ * Local specifiers are:
+ * - ./ and ../
+ * - # subpath-imports, expanded against the project's package.json `imports` field
+ *
+ * For each one:
+ * - it resolves to a file and carries an extension?
+ *   leave it alone.
+ * - it resolves but has no extension?
+ *   append the resolved file's extension (fully-specified local imports resolve faster).
+ *   Unless the fully-specified form no longer maps to the same file
+ *   (e.g. `#config`, whose `imports` target carries the extension itself).
+ * - it doesn't resolve, but the same specifier with whatever extension IS on disk does?
+ *   rewrite it to that.
+ * - nothing matches?
+ *   leave it alone. We can't know better, and the project's own build will report it.
  *
  * Non-module files are returned untouched.
  *
- * ember-estree parses gjs natively and its visitors fire on actual module
- * specifiers only (static imports, re-exports, and dynamic import()) --
- * matched specifiers are rewritten on the AST and the File is printed
- * back out (comments included). Formatting is the project's own concern:
- * new projects run their configured lint:fix / format right away (it's
- * in the CLI's "Next steps").
+ * ember-estree parses gjs natively.
+ * Its visitors fire on actual module specifiers only:
+ * - static imports
+ * - re-exports
+ * - dynamic import()
+ *
+ * Matched specifiers are rewritten on the AST,
+ * and the File is printed back out (comments included).
+ *
+ * Formatting is the project's own concern.
+ * New projects run their configured lint:fix / format right away
+ * (it's in the CLI's "Next steps").
  *
  * Files with no specifiers to rewrite are returned untouched.
  *
@@ -101,9 +113,9 @@ export function rewriteImportsToMatchFiles(code, emittedPath) {
       // fully specified and correct
       if (currentExtension) return;
 
-      // extensionless: append the resolved file's extension, as long as
-      // the fully-specified form still maps to the same file (`#config`
-      // maps with the extension in the target, so `#config.js` wouldn't)
+      // extensionless: append the resolved file's extension,
+      // as long as the fully-specified form still maps to the same file.
+      // (`#config` maps with the extension in the target, so `#config.js` wouldn't)
       let candidate = specifier + extname(resolved);
 
       if (resolveFrom(candidate) !== resolved) return;

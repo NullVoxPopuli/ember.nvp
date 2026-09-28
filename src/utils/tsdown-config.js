@@ -2,12 +2,13 @@ import { readFile, writeFile } from "node:fs/promises";
 import { toTree, print, statements } from "ember-estree";
 
 /**
- * Adds a property to the object passed to `defineConfig(...)` in the
- * project's tsdown.config.js.
+ * Adds a property to the object passed to `defineConfig(...)`
+ * in the project's tsdown.config.js.
  *
- * No-ops when the property is already present (layers re-run), and when
- * the config doesn't have the `defineConfig({ ... })` shape -- an existing
- * project's hand-rolled config is the user's to manage.
+ * No-ops when:
+ * - the property is already present (layers re-run)
+ * - the config doesn't have the `defineConfig({ ... })` shape
+ *   (an existing project's hand-rolled config is the user's to manage)
  *
  * @param {import('#utils/project.js').Project} project
  * @param {string} propertyName

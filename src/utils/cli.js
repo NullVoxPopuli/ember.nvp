@@ -7,12 +7,12 @@ export function isInteractive() {
 }
 
 /**
- * I would like to have selecs look more like a table,
+ * I would like to have selects look more like a table,
  * but @clack/prompts makes this a bit hard.
  *
- * I tried using padding, but then when it prints your selection,
- * I don't think there is a way to format just that, so
- * there are a bunch of goofy spacings in the labels.
+ * I tried using padding.
+ * But when it prints your selection, I don't think there is a way to format just that.
+ * So there are a bunch of goofy spacings in the labels.
  */
 const PADDING = 10;
 

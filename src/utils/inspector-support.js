@@ -9,9 +9,9 @@ export const INSPECTOR_PACKAGE = "@embroider/legacy-inspector-support";
 export const INSPECTOR_ENTRY = `${INSPECTOR_PACKAGE}/ember-source-4.12`;
 
 /**
- * Modules whose default export is the Application (sub)class an app
- * extends. The class extending one of these is where inspector support
- * gets attached.
+ * Modules whose default export is the Application (sub)class an app extends.
+ *
+ * The class extending one of these is where inspector support gets attached.
  */
 const APPLICATION_MODULES = new Set(["ember-strict-application-resolver", "@ember/application"]);
 
@@ -56,10 +56,11 @@ function classMembers(classNode) {
 }
 
 /**
- * Everything wiring and detection need to know about the module: its
- * import declarations, the import from {@link INSPECTOR_PACKAGE} (any
- * subpath), the class extending an Application import, and that class's
- * `inspector` member.
+ * Everything wiring and detection need to know about the module:
+ * - its import declarations
+ * - the import from {@link INSPECTOR_PACKAGE} (any subpath)
+ * - the class extending an Application import
+ * - that class's `inspector` member
  *
  * @param {string} code
  * @param {string} filePath
@@ -117,9 +118,9 @@ function analyze(code, filePath) {
 }
 
 /**
- * Whether the module already wires inspector support: it imports
- * {@link INSPECTOR_PACKAGE} and its Application class carries the
- * `inspector` member.
+ * Whether the module already wires inspector support:
+ * - it imports {@link INSPECTOR_PACKAGE}
+ * - its Application class carries the `inspector` member
  *
  * @param {string} code
  * @param {string} filePath
@@ -143,16 +144,18 @@ export function hasInspectorSupport(code, filePath) {
  * }
  * ```
  *
- * The Application definition is found structurally -- any class
- * (declaration or expression, named, anonymous, or assigned to a
- * variable) extending a binding imported from an Application-providing
- * module -- so user-restructured app files are wired the same as
- * freshly generated ones.
+ * The Application definition is found structurally:
+ * any class extending a binding imported from an Application-providing module.
+ * - declaration or expression
+ * - named, anonymous, or assigned to a variable
  *
- * Idempotent: already-wired (or partially wired) modules keep their
- * existing import name and member. Returns the code unchanged when
- * there is nothing to do -- including when no Application definition
- * can be found.
+ * So user-restructured app files are wired the same as freshly generated ones.
+ *
+ * Idempotent.
+ * Already-wired (or partially wired) modules keep their existing import name and member.
+ *
+ * Returns the code unchanged when there is nothing to do,
+ * including when no Application definition can be found.
  *
  * @param {string} code
  * @param {string} filePath

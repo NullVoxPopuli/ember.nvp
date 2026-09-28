@@ -10,9 +10,11 @@ const ENV: Config = {
   environment: import.meta.env.DEV ? "development" : "production",
   rootURL: "/",
   /**
-   * Extension pages live at chrome-extension://<id>/index.html (or
-   * moz-extension://), where history-based routing has nothing to bind
-   * to. "none" keeps routing fully programmatic.
+   * Extension pages live at chrome-extension://<id>/index.html
+   * (or moz-extension://).
+   *
+   * History-based routing has nothing to bind to there.
+   * "none" keeps routing fully programmatic.
    */
   locationType: "none",
   EmberENV: {},

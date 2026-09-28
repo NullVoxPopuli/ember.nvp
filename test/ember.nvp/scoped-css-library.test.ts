@@ -7,8 +7,8 @@ import { dirname, join } from "node:path";
 import type { Project } from "ember.nvp";
 
 /**
- * Integration test for building a library that uses ember-scoped-css through
- * `@nullvoxpopuli/ember-rolldown` (tsdown):
+ * Integration test for building a library that uses ember-scoped-css
+ * through `@nullvoxpopuli/ember-rolldown` (tsdown):
  *
  * - the `scopedCSS()` unplugin (ember-scoped-css/rollup) resolves and rewrites
  *   the `?scoped=` CSS requests the template transform injects
@@ -18,8 +18,10 @@ import type { Project } from "ember.nvp";
  *   `dist/style.css` and keeps the import in `dist/index.js`, so consuming
  *   apps load the styles through the module graph
  *
- * Covers all three authoring modes: co-located `.css`, inline
- * `<style scoped>`, and the `scopedClass` pseudo-helper in module code.
+ * Covers all three authoring modes:
+ * - co-located `.css`
+ * - inline `<style scoped>`
+ * - the `scopedClass` pseudo-helper in module code
  */
 
 const source = {

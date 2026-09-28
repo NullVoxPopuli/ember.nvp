@@ -5,14 +5,16 @@
  * - scoped-css
  * - template compilation optimization
  *
- * `maybeBabel` runs babel ONLY on the files that actually need it (template-tag
- * files, files importing template/macro modules, and local code using
- * decorators). Everything else skips babel so the bundler's native (oxc)
- * transform handles it -- the whole point being to keep the fast path fast and
- * not re-slow the build by sending every file through babel.
+ * `maybeBabel` runs babel ONLY on the files that actually need it:
+ * - template-tag files
+ * - files importing template/macro modules
+ * - local code using decorators
  *
- * This is shared between the vite (app) and rolldown/tsdown (library)
- * meta-plugins.
+ * Everything else skips babel, so the bundler's native (oxc) transform handles it.
+ * The whole point is to keep the fast path fast,
+ * and not re-slow the build by sending every file through babel.
+ *
+ * This is shared between the vite (app) and rolldown/tsdown (library) meta-plugins.
  */
 import { and, code, id, include, not, or } from "@rolldown/pluginutils";
 import { babel } from "@rollup/plugin-babel";
@@ -21,8 +23,10 @@ import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
 import { extensions } from "./extensions.ts";
 
 /**
- * If a file imports any of these, it needs babel (templates, macros, and a
- * couple of addons that ship decorator-adjacent runtime code).
+ * If a file imports any of these, it needs babel:
+ * - templates
+ * - macros
+ * - a couple of addons that ship decorator-adjacent runtime code
  */
 const babelRequiredImports = [
   // Templates
@@ -65,20 +69,20 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
   filter?: {
     include: {
       /**
-       * If any additional (custom) plugins are provided, a pattern
-       * should be provided that detects their usage
+       * If any additional (custom) plugins are provided,
+       * a pattern must be provided that detects their usage.
        *
        * for example, to also run babel on files that import from ember-concurrency
        * ```js
        * {
-       *   code: ['ember-concurrency'],
+       *   imports: ['ember-concurrency'],
        * }
        * ```
        */
       imports: string[];
       /**
-       * If any additional (custom) plugins are provided, a pattern
-       * should be provided that detects their usage
+       * If any additional (custom) plugins are provided,
+       * a pattern must be provided that detects their usage.
        *
        * for example, to also run babel on files that use polyfilled APIs,
        * or use the "formatMessage" technique for translations
@@ -121,7 +125,6 @@ export function maybeBabel(userOptions: Options = {}) {
           id(/\.gjs$/),
           // imports one of the modules above
           code(importsRegex),
-          // (a common way to do translations)
           // local app code using a decorator
           // NOTE: maybeBabel requires that all libraries compile away their decorators
           //

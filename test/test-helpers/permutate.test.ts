@@ -19,7 +19,7 @@ describe("permutate", () => {
   it("skips duplicate entries", () => {
     const result = permutate(["a", "b", "b"]);
 
-    // Should not include ["a", "b"] twice
+    // Must not include ["a", "b"] twice
     const count = result.filter((perm) => perm.join(",") === "a,b").length;
     expect(count).toBe(1);
   });
@@ -77,8 +77,8 @@ describe("permutate", () => {
       expect(eslintCount).toBeLessThanOrEqual(1);
     }
 
-    // Should have permutations like: ["a"], ["a", "eslint-foo"], ["a", "b"], etc.
-    // but NOT ["a", "eslint-foo", "eslint-bar"]
+    // Expected permutations: ["a"], ["a", "eslint-foo"], ["a", "b"], etc.
+    // Never ["a", "eslint-foo", "eslint-bar"]
     const hasMultipleEslint = result.some(
       (perm) => perm.filter((item) => item.startsWith("eslint-")).length > 1,
     );

@@ -5,7 +5,7 @@ import { applyFolderTo } from "#utils/fs.js";
 import { removeConfiguredPlugin } from "#utils/babel.js";
 
 /**
- * Minimal Layer
+ * Minimal App Base
  *
  * Provides the absolute bare minimum for an Ember app:
  * - type: "module" in package.json
@@ -22,8 +22,10 @@ export default {
   /**
    * 1. Apply files
    *   a. Remove TS if needed
-   * 2. Remove TS deps/files if needed
-   * 3. Update name(s)
+   * 2. Update name(s)
+   * 3. Remove TS deps/files if needed
+   * 4. Upgrade in-range dependencies
+   * 5. Update an existing babel config, if any
    *
    * @param {import('#utils/project.js').Project} project
    */
@@ -37,6 +39,8 @@ export default {
 };
 
 /**
+ * A JavaScript project's babel config must not reference the TS plugin.
+ *
  * @param {import('#utils/project.js').Project} project
  */
 async function updateBabelConfig(project) {
@@ -72,10 +76,10 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   /**
-   * We don't actually remove anything, because we want intellisense for JS
+   * Intellisense for JS needs some of these,
+   * but minimal means minimal.
    *
-   * But perhaps for the sake of minimal, we do remoev it.
-   * And we add a layer later for JSDoc ased TS or something
+   * A later layer for JSDoc-based TS can add them back.
    */
   await packageJson.removeDevDependencies(
     [

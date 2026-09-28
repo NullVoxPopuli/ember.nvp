@@ -4,12 +4,21 @@ import { answers, printArgInUse } from "#args";
 /**
  * addon is alias for library
  * web-extension is alias for extension
+ * web-component is alias for custom-element
  */
-const SUPPORTED = new Set(["app", "library", "addon", "extension", "web-extension"]);
+const SUPPORTED = new Set([
+  "app",
+  "library",
+  "addon",
+  "extension",
+  "web-extension",
+  "custom-element",
+  "web-component",
+]);
 
 /**
  * @param {string | undefined} selected
- * @returns {selected is "app" | "library" | "addon" | "extension" | "web-extension"}
+ * @returns {selected is "app" | "library" | "addon" | "extension" | "web-extension" | "custom-element" | "web-component"}
  */
 function isValid(selected) {
   if (!selected) return false;
@@ -27,6 +36,7 @@ export async function askProjectType() {
 
     if (answers.type === "addon") return "library";
     if (answers.type === "web-extension") return "extension";
+    if (answers.type === "web-component") return "custom-element";
 
     return answers.type;
   }
@@ -44,6 +54,11 @@ export async function askProjectType() {
         value: "extension",
         label: "browser extension",
         hint: "Manifest V3 extension whose popup is an Ember app",
+      },
+      {
+        value: "custom-element",
+        label: "custom element",
+        hint: "an Ember component packaged as a web component, usable from any page",
       },
     ],
   });

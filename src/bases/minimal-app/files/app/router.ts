@@ -10,10 +10,10 @@ export default class Router extends EmbroiderRouter {
 Router.map(function () {});
 
 /**
+ * Route bundles (lazy-loaded route groups) have no nice API yet.
+ *
  * Caveat:
  * - https://github.com/embroider-build/embroider/issues/2521
- *   We don't yet have a way to do this in a nice way
- *
  */
 // function bundle(name: string, loader: () => Promise<{ default: unknown }>[]) {
 //   return {
@@ -35,7 +35,7 @@ Router.map(function () {});
 // }
 
 /**
- * Examples from:
+ * Example usage, from:
  * - https://github.com/NullVoxPopuli/limber/blob/67e2f54bbe224052e38f9a9e566d704411e65e86/apps/repl/app/router.ts#L35
  */
 // (window as any)._embroiderRouteBundles_ = [

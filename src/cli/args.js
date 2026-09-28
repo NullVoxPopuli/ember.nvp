@@ -14,7 +14,7 @@ const coreOptions = /** @type {const} */ ({
 
   type: {
     type: "string",
-    choices: ["app", "addon", "library"],
+    choices: ["app", "addon", "library", "extension", "custom-element"],
   },
 
   confirm: {

@@ -7,9 +7,10 @@ import type { Plugin } from "rolldown";
 const processor = new Preprocessor();
 
 /**
- * `.d.ts` files emitted for `.gts` source reference the original `.gts`
- * specifiers. Consumers can't resolve those, so we rewrite them back to
- * extension-less specifiers.
+ * `.d.ts` files emitted for `.gts` source reference the original `.gts` specifiers.
+ *
+ * Consumers can't resolve those,
+ * so we rewrite them back to extension-less specifiers.
  */
 function fixDeclarationImports(content: string): string {
   return content
@@ -41,10 +42,12 @@ async function fixDtsExtensionsInDir(dir: string): Promise<void> {
 /**
  * A sourcemap mapping every generated line to the same line of the input.
  *
- * `AAAA` is the [0, 0, 0, 0] VLQ segment (first line maps to source 0, line 0,
- * column 0); `AACA` is [0, 0, +1, 0] (each following line advances the source
- * line by one). Exact at line granularity, which is all the specifier rewrite
- * can disturb.
+ * - `AAAA` is the [0, 0, 0, 0] VLQ segment
+ *   (first line maps to source 0, line 0, column 0)
+ * - `AACA` is [0, 0, +1, 0]
+ *   (each following line advances the source line by one)
+ *
+ * Exact at line granularity, which is all the specifier rewrite can disturb.
  */
 function lineIdentityMap(id: string, source: string) {
   return {
@@ -60,8 +63,10 @@ function lineIdentityMap(id: string, source: string) {
 }
 
 /**
- * Maps `.gts` -> `.ts` and `.gjs` -> `.js` (so rolldown can identify them as
- * ts/js) and preprocesses `<template>` via content-tag.
+ * Preprocesses `<template>` via content-tag, and maps
+ *   `.gts` → `.ts`
+ *   `.gjs` → `.js`
+ * so rolldown can identify them as ts / js.
  */
 export function emberTransform(): Plugin {
   return {
@@ -70,21 +75,26 @@ export function emberTransform(): Plugin {
     resolveId: {
       order: "pre",
       handler(id, importer) {
-        // Entries have no importer: their ids come straight from the build
-        // config (tsdown expands entry globs to on-disk paths). Resolve a
-        // `.gts`/`.gjs` entry to the same virtual `.ts`/`.js` id an imported
-        // module gets, so the load hook compiles it via content-tag instead
-        // of the raw `<template>` source hitting the parser. Entries may be
-        // any extension — the emitted `.js`/`.d.ts` paths mirror the entry
-        // paths either way (that's how tsdown's dts support works).
+        // Entries have no importer.
+        // Their ids come straight from the build config
+        // (tsdown expands entry globs to on-disk paths).
+        //
+        // Resolve a `.gts` / `.gjs` entry to the same virtual `.ts` / `.js` id
+        // an imported module gets, so the load hook compiles it via content-tag
+        // instead of the raw `<template>` source hitting the parser.
+        //
+        // Entries may be any extension.
+        // The emitted `.js` / `.d.ts` paths mirror the entry paths either way
+        // (that's how tsdown's dts support works).
         if (!importer) {
           if (!id.endsWith(".gts") && !id.endsWith(".gjs")) return null;
           if (!existsSync(id)) return null;
 
-          // rolldown's default resolver realpaths entry ids (e.g. macOS
-          // /var -> /private/var). Match it, or this same file imported from
-          // another entry resolves to a second module id and gets duplicated
-          // into both chunks.
+          // rolldown's default resolver realpaths entry ids
+          // (e.g. macOS /var -> /private/var).
+          //
+          // Match it, or this same file imported from another entry
+          // resolves to a second module id and gets duplicated into both chunks.
           const fileName = realpathSync(path.resolve(id));
 
           return {
@@ -93,13 +103,16 @@ export function emberTransform(): Plugin {
           };
         }
 
-        // An absolute specifier already names the file, so it needs no
-        // importer-relative resolution — and joining it onto the importer's
-        // directory would corrupt it. That is not hypothetical: a plugin's
-        // virtual module (id prefixed with `\0`) can generate imports of
-        // on-disk files by absolute path, and `path.dirname("\0./registry")`
-        // is `"\0."`, so joining yields `"\0./Users/.../thing.gts"` — a path
-        // no `existsSync`/`readFile` can accept (it has a null byte in it).
+        // An absolute specifier already names the file,
+        // so it needs no importer-relative resolution.
+        // Joining it onto the importer's directory would corrupt it.
+        //
+        // That is not hypothetical.
+        // A plugin's virtual module (id prefixed with `\0`)
+        // can generate imports of on-disk files by absolute path,
+        // and `path.dirname("\0./registry")` is `"\0."`.
+        // Joining then yields `"\0./Users/.../thing.gts"`:
+        // a path no `existsSync` / `readFile` can accept (it has a null byte in it).
         const fileName = path.isAbsolute(id) ? id : path.join(path.dirname(importer), id);
 
         if (id.endsWith(".gts")) {
@@ -116,15 +129,19 @@ export function emberTransform(): Plugin {
           };
         }
 
-        // A `.ts`/`.js` specifier whose only backing file is a `.gts`/`.gjs`
-        // resolves to the virtual module. This must also serve `.d.ts`
-        // importers: rolldown-plugin-dts resolves a declaration module's
-        // imports through the plugin pipeline (`this.resolve`), and — when the
-        // resolution is a source file — loads it (registering its declaration)
-        // before mapping the import to the declaration id. Virtual modules
-        // exist nowhere else, so if we don't answer here the import either
-        // fails to resolve (no file on disk) or, worse, resolves to a
-        // declaration id that was never registered.
+        // A `.ts` / `.js` specifier whose only backing file is a `.gts` / `.gjs`
+        // resolves to the virtual module.
+        //
+        // This must also serve `.d.ts` importers.
+        // rolldown-plugin-dts resolves a declaration module's imports
+        // through the plugin pipeline (`this.resolve`).
+        // When the resolution is a source file, it loads it (registering its declaration)
+        // before mapping the import to the declaration id.
+        //
+        // Virtual modules exist nowhere else.
+        // If we don't answer here, the import either:
+        // - fails to resolve (no file on disk)
+        // - or, worse, resolves to a declaration id that was never registered
         if (id.endsWith(".ts")) {
           const gtsFileName = fileName.replace(/\.ts$/, ".gts");
           if (existsSync(gtsFileName) && !existsSync(fileName)) {
@@ -152,9 +169,11 @@ export function emberTransform(): Plugin {
         const meta = this.getModuleInfo(id)?.meta ?? {};
         let fileName = meta?.fileName;
 
-        // A virtual id can be loaded without having passed through our
-        // resolveId (rolldown-plugin-dts calls `this.load({ id })` with just
-        // the id), so no meta is attached: recover the backing file from disk.
+        // A virtual id can be loaded without having passed through our resolveId
+        // (rolldown-plugin-dts calls `this.load({ id })` with just the id),
+        // so no meta is attached.
+        //
+        // Recover the backing file from disk.
         if (!fileName && !existsSync(id)) {
           if (id.endsWith(".ts") && existsSync(id.replace(/\.ts$/, ".gts"))) {
             fileName = id.replace(/\.ts$/, ".gts");
@@ -188,12 +207,13 @@ export function emberTransform(): Plugin {
         id: /\.(js|ts)$/,
       },
       handler(input, id) {
-        // Rewrite `.gts` specifiers to `.ts` — the (virtual) source id — in
-        // runtime modules AND declaration modules alike. Declaration modules
-        // must NOT be rewritten to `.d.ts`: rolldown-plugin-dts's resolver
-        // treats a source-file resolution as "load it (registering its
-        // declaration), then map to the declaration id", while a `.d.ts` id is
-        // returned as-is — unloadable when the module isn't registered yet
+        // Rewrite `.gts` specifiers to `.ts`, the (virtual) source id,
+        // in runtime modules AND declaration modules alike.
+        //
+        // Declaration modules must NOT be rewritten to `.d.ts`.
+        // rolldown-plugin-dts's resolver treats a source-file resolution as
+        // "load it (registering its declaration), then map to the declaration id".
+        // A `.d.ts` id is returned as-is: unloadable when the module isn't registered yet
         // (e.g. the `.gts` is only ever type-imported).
         const output = input.replace(
           /(['"`])((?:\.\.?\/|\/|@|[A-Za-z0-9_\-])[^'"]*?\.gts)\1/g,
@@ -204,9 +224,9 @@ export function emberTransform(): Plugin {
           return null;
         }
 
-        // The rewrite only shortens import specifiers in place, so a
-        // line-identity map is accurate to the line (and to the column for
-        // everything before the first rewritten specifier on a line).
+        // The rewrite only shortens import specifiers in place,
+        // so a line-identity map is accurate to the line
+        // (and to the column, for everything before the first rewritten specifier on a line).
         return { code: output, map: lineIdentityMap(id, input) };
       },
     },

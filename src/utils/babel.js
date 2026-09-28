@@ -80,8 +80,9 @@ export async function prependPlugin(project, plugin, configPath = "babel.config.
 }
 
 /**
- * The plugins value may be the array itself, or the array with
- * methods chained off of it: `[ ... ].filter(Boolean)`
+ * The plugins value may be:
+ * - the array itself
+ * - the array with methods chained off of it: `[ ... ].filter(Boolean)`
  *
  * @param {any} node
  * @returns {any | undefined} the underlying ArrayExpression

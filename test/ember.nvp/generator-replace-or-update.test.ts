@@ -7,10 +7,12 @@ import { join } from "node:path";
 
 /**
  * The replace-or-update question only matters when a project already exists
- * at the target path. These tests generate a project, assert the baseline
- * state, then regenerate over it the way the CLI does once the user has
- * answered the question, and assert the resulting project output is correct
- * for each answer.
+ * at the target path.
+ *
+ * These tests:
+ * - generate a project and assert the baseline state
+ * - regenerate over it, the way the CLI does once the user has answered
+ * - assert the resulting project is correct for each answer
  */
 describe("generating over an existing project", () => {
   const prettier = layers.find((layer) => layer.name === "prettier")!;

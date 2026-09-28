@@ -15,7 +15,7 @@ export default {
 
   async run(project) {
     // Publish checks: apps aren't published
-    if (project.type !== "library") return;
+    if (!project.isLibrary) return;
 
     await addTsdownConfigProperty(project, "publint", "publint: true");
     await packageJson.addDevDependencies(await getLatest(deps), project.directory);
@@ -38,7 +38,7 @@ export default {
     const reasons = [];
 
     // Nothing to set up outside libraries, so nothing can be missing
-    if (project.type !== "library") {
+    if (!project.isLibrary) {
       return explain ? { isSetup: true, reasons } : true;
     }
 

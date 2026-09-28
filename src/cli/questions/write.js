@@ -17,10 +17,11 @@ function isValid(selected) {
 }
 
 /**
- * Nothing has been written to the target directory yet -- everything so
- * far only exists in the stage. Ask whether to write the staged changes,
- * with the option to review the diff change-by-change, accepting or
- * rejecting each one.
+ * Nothing has been written to the target directory yet.
+ * Everything so far only exists in the stage.
+ *
+ * Ask whether to write the staged changes,
+ * with the option to review the diff change-by-change, accepting or rejecting each one.
  *
  * @param {import('#utils/stage.js').Stage} stage
  * @param {import('#utils/stage.js').Change[]} changes
@@ -61,10 +62,11 @@ export async function askToWrite(stage, changes) {
 }
 
 /**
- * Show each change's diff and ask what to do with it. "accept remaining"
- * and "reject remaining" finish the review early, so they require an
- * extra confirmation; declining the confirmation returns to the change
- * being reviewed.
+ * Show each change's diff and ask what to do with it.
+ *
+ * "accept remaining" and "reject remaining" finish the review early,
+ * so they require an extra confirmation.
+ * Declining the confirmation returns to the change being reviewed.
  *
  * @param {import('#utils/stage.js').Stage} stage
  * @param {import('#utils/stage.js').Change[]} changes
@@ -83,8 +85,8 @@ async function reviewEachChange(stage, changes) {
 
     const remaining = changes.length - index;
 
-    // Bypass clack for the diff itself: diffs are long, and clack's
-    // log decorations wrap every line.
+    // Bypass clack for the diff itself.
+    // Diffs are long, and clack's log decorations wrap every line.
     console.log("\n" + (await stage.diff([change])));
 
     const answer = await p.select({
