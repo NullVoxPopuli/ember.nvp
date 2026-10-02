@@ -17,6 +17,8 @@ import { cwd } from "#utils/cwd.js";
 import { Project } from "#utils/project.js";
 import { Stage } from "#utils/stage.js";
 import { askAboutProjectHere, askReplaceOrUpdate } from "./questions/replace-or-update.js";
+import { checkForMigration, showTodo } from "./questions/migration.js";
+import { MigrationError } from "#migration-from";
 
 /**
  * This whole file's primary purpose is to be an interactive CLI
@@ -35,7 +37,11 @@ async function main() {
   const projectPath = here ? cwd : await askPath(projectName);
   const replaceOrUpdate = here ?? (await askReplaceOrUpdate(projectPath));
   const projectType = await askProjectType(replaceOrUpdate === "update" ? projectPath : undefined);
-  const selectedLayers = await askLayers(projectType);
+  const migrationLayers =
+    replaceOrUpdate === "update"
+      ? await checkForMigration(projectPath, projectName, projectType)
+      : [];
+  const selectedLayers = await askLayers(projectType, migrationLayers);
   const packageManager = await askPackageManager();
 
   // Layer options start from what the project already uses
@@ -82,15 +88,24 @@ async function main() {
   const s = p.spinner();
   s.start("Creating your Ember app...");
 
+  /** @type {import('#types').Finding[]} */
+  let todo = [];
+
   try {
     // Generate the project (into the stage)
-    await generateProject(project);
+    ({ todo } = await generateProject(project));
 
     s.stop("Project generated");
   } catch (err) {
     s.stop("Failed to create project");
 
     await stage.discard();
+
+    // the message is the list for the user, and a stack trace adds nothing to it
+    if (err instanceof MigrationError) {
+      p.cancel(err.message);
+      process.exit(1);
+    }
 
     if (err instanceof Error) {
       p.cancel(`Error: ${err.message}`);
@@ -140,6 +155,8 @@ async function main() {
   await stage.commit(toApply);
 
   p.log.success(`Applied ${toApply.length} change${toApply.length === 1 ? "" : "s"}`);
+
+  showTodo(todo);
 
   /**
    * Converted / generated files are written expecting the project's own

@@ -13,6 +13,7 @@
     "#bases/*": "./src/bases/*/index.js",
     "#consolidators/*": "./src/consolidators/*",
     "#layers": "./src/layers/index.js",
+    "#migration-from": "./src/migration-from/index.js",
     "#types": "./src/utils/types.ts",
     "#utils/*": "./src/utils/*",
     "#test-helpers": "./test/test-helpers.ts"

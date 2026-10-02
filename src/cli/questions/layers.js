@@ -5,8 +5,9 @@ import * as p from "@clack/prompts";
 
 /**
  * @param {import('#types').ProjectType} projectType
+ * @param {string[]} [suggested] layers to select by default, beyond each layer's own default
  */
-export async function askLayers(projectType) {
+export async function askLayers(projectType, suggested = []) {
   const optionalLayers = (await discoverLayers()).filter(
     (layer) => typeof layer.run === "function",
   );
@@ -37,7 +38,7 @@ export async function askLayers(projectType) {
   const defaultValues = (
     await Promise.all(
       optionalLayers.map(async (layer) => {
-        let result = await layer.defaultValue?.(projectType);
+        let result = suggested.includes(layer.name) || (await layer.defaultValue?.(projectType));
 
         return result && layer.name;
       }),

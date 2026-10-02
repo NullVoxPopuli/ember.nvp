@@ -101,6 +101,75 @@ export interface Base {
   run: (project: Project) => Promise<void>;
 }
 
+/**
+ * Something a migration found, for the user to act on.
+ */
+export interface Finding {
+  /**
+   * What was found, as a short noun phrase
+   */
+  title: string;
+  /**
+   * The files, packages, or options where it was found
+   */
+  where?: string[];
+  /**
+   * What to do about it
+   */
+  action: string;
+}
+
+export interface MigrationReport {
+  /**
+   * Features that ember.nvp does not support.
+   * Any of these stops the migration, before anything is written.
+   */
+  unsupported: Finding[];
+  /**
+   * Work for the user after the migration
+   */
+  todo: Finding[];
+  /**
+   * Layers that replace tooling from the old blueprint.
+   * The CLI selects them by default.
+   */
+  layers: string[];
+}
+
+/**
+ * Moves a project from an older blueprint to an ember.nvp base.
+ */
+export interface Migration {
+  /**
+   * The blueprint's package name
+   */
+  label: string;
+  /**
+   * The project type after the migration
+   */
+  type: ProjectType;
+  /**
+   * Whether the directory holds a project from this blueprint
+   */
+  detect: (directory: string) => boolean;
+  /**
+   * Reads the project and changes nothing.
+   *
+   * Files are read from `project.directory`.
+   * Installed dependencies are read from `project.desires.path`,
+   * because a stage has no node_modules.
+   */
+  check: (project: Project) => Promise<MigrationReport>;
+  /**
+   * Removes or rewrites the old blueprint's files,
+   * so that the base and the layers can apply their own.
+   *
+   * Runs before the base, and only when `check` found nothing unsupported.
+   * Adds to `report.todo` what depends on the selected layers.
+   */
+  run: (project: Project, report: MigrationReport) => Promise<void>;
+}
+
 export interface DiscoveredLayer extends Layer {
   /**
    * The unique name of the layer.

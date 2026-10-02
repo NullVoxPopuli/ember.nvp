@@ -59,6 +59,29 @@ The accepted changes land as uncommitted edits, for you to review with your own 
 New projects skip the confirmation, and are written as soon as generation succeeds.
 For scripting, `--write yes` / `--write no` answers the confirmation up front.
 
+### Migrating from an older blueprint
+
+Run ember.nvp in a project from one of these blueprints, and choose update:
+
+| Blueprint                                                                       | Becomes   |
+| ------------------------------------------------------------------------------- | --------- |
+| `@ember/addon-blueprint`, and the addon package of `@embroider/addon-blueprint` | a library |
+| `@ember-tooling/classic-build-addon-blueprint` (classic addons)                 | a library |
+| `@ember/app-blueprint` (Vite with `@embroider/compat`)                          | an app    |
+| `@ember-tooling/classic-build-app-blueprint` (classic apps)                     | an app    |
+
+ember.nvp checks the project before it asks about layers.
+When the project uses something that ember.nvp does not support, such as v1 addons or `.hbs` templates, ember.nvp lists each item with what to do, and writes nothing.
+Most of these items also work in the old setup, so you can fix them there first.
+
+Otherwise, the migration keeps your code, and replaces the old build:
+
+- libraries build with tsdown, and keep `addon-main.cjs`, so that apps with ember-cli can still use them
+- apps build with Vite, without `@embroider/compat`
+
+The layers that replace the old tooling, such as qunit for the tests, start selected.
+After writing, ember.nvp lists what is left for you, such as settings to copy by hand.
+
 ### Wrapping
 
 The provided CLI is only a wrapper around the exported `generateProject` function.
@@ -83,6 +106,11 @@ await generateProject(new Project(
 ```
 
 All parts of the generator are idempotent, so running generators on existing projects _can_ no-op.
+
+A project from an older blueprint is migrated first.
+`generateProject` returns `{ todo }`, the list of what is left for the user.
+When the project needs changes before it can migrate, `generateProject` throws a `MigrationError` with a `findings` list, and changes nothing.
+`checkMigration(project)` gives the same lists without changing anything, and `formatFindings(findings)` prints them the way the CLI does.
 
 To get the same don't-write-until-confirmed behavior as the CLI, wrap generation in a `Stage`.
 A stage is a scratch copy of the target directory (without `node_modules` and `.git`).
