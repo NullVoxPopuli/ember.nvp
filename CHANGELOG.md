@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-10-02)
+
+* ember.nvp 1.15.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#158](https://github.com/NullVoxPopuli/ember.nvp/pull/158) Migrate projects from the older blueprints ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-09-30)
 
 * ember.nvp 1.14.0 (minor)

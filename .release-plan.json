@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.13.0",
-      "newVersion": "1.14.0",
+      "oldVersion": "1.14.0",
+      "newVersion": "1.15.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.2.0"
     }
   },
-  "description": "## Release (2026-09-30)\n\n* ember.nvp 1.14.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#156](https://github.com/NullVoxPopuli/ember.nvp/pull/156) Give TypeScript libraries with tests a publish tsconfig ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-10-02)\n\n* ember.nvp 1.15.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#158](https://github.com/NullVoxPopuli/ember.nvp/pull/158) Migrate projects from the older blueprints ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
