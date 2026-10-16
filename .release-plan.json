@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.15.0",
-      "newVersion": "1.16.0",
+      "oldVersion": "1.16.0",
+      "newVersion": "1.17.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -22,38 +22,20 @@
     },
     "@nullvoxpopuli/ember-rolldown": {
       "impact": "minor",
-      "oldVersion": "2.10.0",
-      "newVersion": "2.11.0",
+      "oldVersion": "2.11.0",
+      "newVersion": "2.12.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./packages/rolldown/package.json"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "minor",
-      "oldVersion": "1.2.0",
-      "newVersion": "1.3.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.3.0"
     }
   },
-  "description": "## Release (2026-10-12)\n\n* ember.nvp 1.16.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.11.0 (minor)\n* @nullvoxpopuli/ember-vite 1.3.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#163](https://github.com/NullVoxPopuli/ember.nvp/pull/163) Update the embroider dependencies, give the config hook its plugin context ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#162](https://github.com/NullVoxPopuli/ember.nvp/pull/162) Find the embroider config plugin by name ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n* `@nullvoxpopuli/ember-rolldown`\n  * [#160](https://github.com/NullVoxPopuli/ember.nvp/pull/160) Fix macOS tests ([@tcjr](https://github.com/tcjr))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Tom Carter ([@tcjr](https://github.com/tcjr))\n"
+  "description": "## Release (2026-10-16)\n\n* ember.nvp 1.17.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.12.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`\n  * [#166](https://github.com/NullVoxPopuli/ember.nvp/pull/166) Require babel-plugin-ember-template-compilation 4.0.1 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#164](https://github.com/NullVoxPopuli/ember.nvp/pull/164) Add vite/client types to the dev tsconfig of libraries with tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

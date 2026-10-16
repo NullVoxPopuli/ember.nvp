@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-10-16)
+
+* ember.nvp 1.17.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.12.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#166](https://github.com/NullVoxPopuli/ember.nvp/pull/166) Require babel-plugin-ember-template-compilation 4.0.1 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#164](https://github.com/NullVoxPopuli/ember.nvp/pull/164) Add vite/client types to the dev tsconfig of libraries with tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-10-12)
 
 * ember.nvp 1.16.0 (minor)
