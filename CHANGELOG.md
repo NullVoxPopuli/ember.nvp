@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-10-25)
+
+* ember.nvp 1.17.1 (patch)
+* @nullvoxpopuli/ember-vite 1.3.1 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`, `@nullvoxpopuli/ember-vite`
+  * [#169](https://github.com/NullVoxPopuli/ember.nvp/pull/169) Take the macros development mode from the vite mode ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#167](https://github.com/NullVoxPopuli/ember.nvp/pull/167) Expect rolldown 1.2.15 module comments in generated output ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-10-16)
 
 * ember.nvp 1.17.0 (minor)
