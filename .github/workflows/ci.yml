@@ -46,6 +46,7 @@ jobs:
             "@nullvoxpopuli/ember-rolldown>@babel/core": "^8.0.0"
             "@nullvoxpopuli/ember-rolldown>@babel/plugin-transform-typescript": "^8.0.0"
             "@nullvoxpopuli/ember-vite>@babel/core": "^8.0.0"
+            "@nullvoxpopuli/ember-vite>@babel/plugin-transform-typescript": "^8.0.0"
           EOF
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm test:node packages/

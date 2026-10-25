@@ -59,9 +59,20 @@ function absolutePath(relativePath: string) {
  *
  * The plugins are named, not imported.
  * babel resolves them from the project, which carries them as its own dependencies.
+ *
+ * The macros take development mode from the vite mode.
+ * `buildMacros` reads NODE_ENV, but vite sets NODE_ENV
+ * only after the config hooks run.
  */
-function defaultBabelPlugins() {
-  const macros = buildMacros();
+function defaultBabelPlugins(mode: string) {
+  const macros = buildMacros({
+    configure(config) {
+      if (isDev(mode)) {
+        config.enablePackageDevelopment(process.cwd());
+        config.enableRuntimeMode();
+      }
+    },
+  });
 
   return [
     [
@@ -106,11 +117,15 @@ function babelOptions(nvpConfig: Config): BabelOptions {
     return { configFile };
   }
 
+  /**
+   * The config hook fills this list, once it knows the vite mode.
+   * The babel plugins keep a reference to it, so they see the filled list.
+   */
   return {
     configFile: false,
     babelrc: false,
     babelHelpers: "inline",
-    plugins: defaultBabelPlugins(),
+    plugins: [],
   };
 }
 
@@ -209,6 +224,14 @@ export function ember(nvpConfig: Config = {}) {
          * and takes its esbuild path without it.
          */
         await emberConfig.call(this, viteConfig, env);
+
+        if ("plugins" in babel) {
+          babel.plugins.length = 0;
+
+          for (const plugin of defaultBabelPlugins(env.mode)) {
+            babel.plugins.push(plugin);
+          }
+        }
 
         viteConfig.experimental ||= {};
         viteConfig.build ||= {};
