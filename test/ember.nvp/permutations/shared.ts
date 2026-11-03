@@ -29,12 +29,13 @@ const INITIAL_ONLY = new Set<string>([
 const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   // publish checks: apps aren't published
   app: new Set(["publint", "are-the-types-wrong", "expect-type"]),
-  // libraries have no Application to wire inspector support into
-  library: new Set(["inspector-support"]),
+  // libraries have no Application to wire inspector support into, or to render on a server
+  library: new Set(["inspector-support", "ssr"]),
   // publish checks: extensions aren't published (to npm)
-  extension: new Set(["publint", "are-the-types-wrong", "expect-type"]),
+  // ssr: an extension's pages are files in the browser, with no server
+  extension: new Set(["publint", "are-the-types-wrong", "expect-type", "ssr"]),
   // same toolchain as libraries: no Application either
-  "custom-element": new Set(["inspector-support"]),
+  "custom-element": new Set(["inspector-support", "ssr"]),
 };
 
 const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {

@@ -21,6 +21,7 @@ describe("discoverLayers", () => {
         "qunit",
         "readme",
         "renovate",
+        "ssr",
         "typescript",
         "vitest",
       ]

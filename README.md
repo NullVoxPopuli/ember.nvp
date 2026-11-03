@@ -210,6 +210,15 @@ Code formatting with:
 - New Theme: [qunit-theme-ember](https://github.com/IgnaceMaes/qunit-theme-ember)
 - Default utilities to help you find why tests are stuck
 
+### 🖥️ SSR (optional, apps only)
+
+Pages render on the server with [vite-ember-ssr](https://github.com/evoactivity/vite-ember-ssr), and the browser rehydrates them.
+
+- `dev` renders through Vite, with HMR.
+- `build` builds the client and the server bundle.
+- `serve` serves the build, on `$PORT` (default 4200).
+- `fetch()` responses from the server render are in the page, so the browser does not request them again.
+
 ### ⚡ Vitest (optional)
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
