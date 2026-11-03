@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.17.1",
-      "newVersion": "1.18.0",
+      "oldVersion": "1.18.0",
+      "newVersion": "1.19.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.3.1"
     }
   },
-  "description": "## Release (2026-11-03)\n\n* ember.nvp 1.18.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#172](https://github.com/NullVoxPopuli/ember.nvp/pull/172) Add an ssr layer: SSR and SSG with vite-ember-ssr ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#170](https://github.com/NullVoxPopuli/ember.nvp/pull/170) Start new projects on ember-source 7.4 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-03)\n\n* ember.nvp 1.19.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#173](https://github.com/NullVoxPopuli/ember.nvp/pull/173) ssr layer: start serves the build ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

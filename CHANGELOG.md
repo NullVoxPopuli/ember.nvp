@@ -2,6 +2,17 @@
 
 ## Release (2026-11-03)
 
+* ember.nvp 1.19.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#173](https://github.com/NullVoxPopuli/ember.nvp/pull/173) ssr layer: start serves the build ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-03)
+
 * ember.nvp 1.18.0 (minor)
 
 #### :rocket: Enhancement
