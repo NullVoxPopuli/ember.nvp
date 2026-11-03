@@ -38,7 +38,7 @@ const BASIC_HELP_OUTPUT = `
           Bypass target confirmation step [choices: "yes", "no"]
 
           --layers <string> [--layers <string> ...]
-          Layers to apply to the project [choices: "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "typescript", "vitest"]
+          Layers to apply to the project [choices: "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
 
           --packageManager <string>
           Package manager to configure for the project [choices: "npm", "pnpm"]
@@ -53,6 +53,10 @@ const BASIC_HELP_OUTPUT = `
       Layer: eslint-bundled
           --eslint-bundled.preset <string>
           Which ESLint config? [choices: "ember", "nvp"] [default: "ember"]
+
+      Layer: ssr
+          --ssr.mode <string>
+          When do pages render? [choices: "server", "static"] [default: "server"]
 
       Layer: typescript
           --typescript.version <string>

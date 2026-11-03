@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate } from "#test-helpers";
+import { generate, reapply } from "#test-helpers";
 import { layers } from "#layers";
 import { execa, type ResultPromise } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -80,6 +80,21 @@ async function addItemRoute(project: Project, ext: "ts" | "js", apiPort: number)
   );
 }
 
+/**
+ * A JSON API for the item route.
+ */
+async function startApi() {
+  let api = createServer((_request, response) => {
+    response.writeHead(200, {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*",
+    });
+    response.end(JSON.stringify({ name: "Pikachu" }));
+  });
+
+  return { api, apiPort: await listen(api) };
+}
+
 async function waitForServer(url: string, serve: ResultPromise) {
   let exited = false;
 
@@ -103,23 +118,17 @@ async function waitForServer(url: string, serve: ResultPromise) {
 describe.each([
   { flavor: "javascript", ext: "js", layerNames: ["ssr", "qunit"] },
   { flavor: "typescript", ext: "ts", layerNames: ["ssr", "qunit", "typescript"] },
-] as const)("ssr layer ($flavor)", ({ ext, layerNames }) => {
+] as const)("ssr layer, server mode ($flavor)", ({ ext, layerNames }) => {
   let project: Project;
   let api: Server;
   let serve: ResultPromise;
   let origin: string;
 
   beforeAll(async () => {
-    api = createServer((_request, response) => {
-      response.writeHead(200, {
-        "content-type": "application/json",
-        "access-control-allow-origin": "*",
-      });
-      response.end(JSON.stringify({ name: "Pikachu" }));
-    });
+    let started = await startApi();
+    let apiPort = started.apiPort;
 
-    let apiPort = await listen(api);
-
+    api = started.api;
     project = await generate({
       layers: [...layerNames],
       options: { typescript: { version: "7" } },
@@ -193,5 +202,118 @@ describe.each([
     let test = await execa("pnpm test", { cwd: project.directory, shell: true });
 
     expect(test.exitCode).toBe(0);
+  });
+});
+
+describe.each([
+  { flavor: "javascript", ext: "js", layerNames: ["ssr", "qunit"] },
+  { flavor: "typescript", ext: "ts", layerNames: ["ssr", "qunit", "typescript"] },
+] as const)("ssr layer, static mode ($flavor)", ({ ext, layerNames }) => {
+  let project: Project;
+  let api: Server;
+
+  beforeAll(async () => {
+    let started = await startApi();
+
+    api = started.api;
+    project = await generate({
+      layers: [...layerNames],
+      options: { typescript: { version: "7" }, ssr: { mode: "static" } },
+    });
+
+    await addItemRoute(project, ext, started.apiPort);
+
+    /**
+     * What a user does to prerender a route of their own.
+     */
+    let config = (await project.read("vite.config.mjs"))!;
+
+    await writeFile(
+      join(project.directory, "vite.config.mjs"),
+      config.replace('routes: ["index"]', 'routes: ["index", "item"]'),
+    );
+
+    await execa("pnpm install", { cwd: project.directory, shell: true });
+    await execa("pnpm build", { cwd: project.directory, shell: true });
+  });
+
+  afterAll(async () => {
+    api?.close();
+
+    if (process.env.CI) return;
+
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("is setup", async () => {
+    expect(await ssr.isSetup(project, true)).toEqual({ isSetup: true, reasons: [] });
+  });
+
+  it("has no server", () => {
+    expect(project.hasFile("server.js")).toBe(false);
+  });
+
+  it("renders the application template to dist/index.html", async () => {
+    let html = (await project.read("dist/index.html"))!;
+
+    expect(html).toContain("Welcome to Ember</h1>");
+    expect(html).toContain("window.__vite_ember_ssr_rehydrate__=true");
+  });
+
+  it("renders route data at build time", async () => {
+    let html = (await project.read("dist/item/index.html"))!;
+
+    expect(html).toMatch(/<p id="item">(<!--[^>]*-->)?Pikachu/);
+  });
+
+  it("keeps the user's routes when it runs again", async () => {
+    await reapply(project, [...layerNames]);
+
+    expect(await project.read("vite.config.mjs")).toContain('routes: ["index", "item"]');
+  });
+
+  it("runs the tests from the build", async () => {
+    let test = await execa("pnpm test", { cwd: project.directory, shell: true });
+
+    expect(test.exitCode).toBe(0);
+  });
+});
+
+describe("ssr layer, from server mode to static mode", () => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({ layers: ["ssr", "qunit"] });
+    project = await generate({
+      directory: project.directory,
+      layers: ["ssr", "qunit"],
+      options: { ssr: { mode: "static" } },
+    });
+  });
+
+  afterAll(async () => {
+    if (process.env.CI) return;
+
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("is setup for static mode", async () => {
+    expect(await ssr.isSetup(project, true)).toEqual({ isSetup: true, reasons: [] });
+  });
+
+  it("removes what only the server needs", async () => {
+    let manifest = JSON.parse((await project.read("package.json"))!);
+    let config = (await project.read("vite.config.mjs"))!;
+
+    expect(project.hasFile("server.js")).toBe(false);
+    expect(manifest.dependencies.sirv).toBeUndefined();
+    expect(manifest.dependencies["vite-ember-ssr"]).toBeUndefined();
+    expect(manifest.devDependencies["vite-ember-ssr"]).toBeTruthy();
+    expect(config).not.toContain("emberSsr");
+    expect(await project.read("testem.cjs")).toContain('cwd: "dist"');
   });
 });
