@@ -1,5 +1,17 @@
 # Changelog
 
+## Release (2026-11-03)
+
+* ember.nvp 1.18.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#172](https://github.com/NullVoxPopuli/ember.nvp/pull/172) Add an ssr layer: SSR and SSG with vite-ember-ssr ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#170](https://github.com/NullVoxPopuli/ember.nvp/pull/170) Start new projects on ember-source 7.4 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-10-25)
 
 * ember.nvp 1.17.1 (patch)
