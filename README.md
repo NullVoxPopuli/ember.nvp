@@ -220,9 +220,10 @@ Choose when pages render:
 - `server` (default): on every request, from a Node server, with fresh data.
   `dev` renders through Vite, with HMR.
   `build` builds the client and the server bundle.
-  `serve` serves the build, on `$PORT` (default 4200).
+  `start` serves the build, on `$PORT` (default 4200).
 - `static`: at build time, to one HTML file per route, for any static host.
   The routes to render are in `vite.config.mjs`.
+  `start` serves `dist` with `vite preview`.
 
 ### ⚡ Vitest (optional)
 

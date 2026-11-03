@@ -10,7 +10,7 @@ import type { Project } from "ember.nvp";
 
 /**
  * Generates apps with the ssr layer, builds them,
- * and requests pages from the real `serve` script.
+ * and requests pages from the real `start` script.
  *
  * Each app gets a route whose model comes from a JSON API that this test starts,
  * so the page only has the data when the server rendered it.
@@ -143,7 +143,7 @@ describe.each([
 
     origin = `http://127.0.0.1:${port}`;
     /**
-     * The "serve" script, without pnpm in between,
+     * The "start" script, without pnpm in between,
      * so that kill() stops the server itself.
      */
     serve = execa("node", ["server.js"], {

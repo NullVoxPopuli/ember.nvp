@@ -45,8 +45,7 @@ const SERVER = {
   scripts: {
     build: "vite build && vite build --ssr app/app-ssr",
     dev: "node server.js --dev",
-    start: "node server.js --dev",
-    serve: "node server.js",
+    start: "node server.js",
   },
   /**
    * emberSsr() puts the client build in dist/client.
@@ -58,7 +57,7 @@ const SERVER = {
 
 - \`${run} dev\` - Start the development server, with SSR and HMR
 - \`${run} build\` - Build the client (\`dist/client\`) and the server bundle (\`dist/server\`)
-- \`${run} serve\` - Serve the build, on \`$PORT\` (default 4200)`,
+- \`${run} start\` - Serve the build, on \`$PORT\` (default 4200)`,
 };
 
 /**
@@ -76,8 +75,7 @@ const STATIC = {
   scripts: {
     build: "vite build",
     dev: "vite",
-    start: "vite",
-    serve: "vite preview",
+    start: "vite preview",
   },
   testemCwd: "dist",
   readme: (
@@ -86,7 +84,7 @@ const STATIC = {
 The routes to render are in \`vite.config.mjs\`.
 
 - \`${run} build\` - Build the app, and render the routes to \`dist\`
-- \`${run} serve\` - Serve \`dist\``,
+- \`${run} start\` - Serve \`dist\``,
 };
 
 /**
