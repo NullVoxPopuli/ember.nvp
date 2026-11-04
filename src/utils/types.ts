@@ -68,6 +68,12 @@ export interface Layer {
    */
   readme?: string | ((project: Project) => string | undefined | Promise<string | undefined>);
   /**
+   * Optional notes for coding agents, in the same shape as `readme`.
+   *
+   * The agents-md layer puts them in the generated project's AGENTS.md.
+   */
+  agents?: string | ((project: Project) => string | undefined | Promise<string | undefined>);
+  /**
    * The function that applies the codemod
    *
    * run _may_ be invoked multiple times,

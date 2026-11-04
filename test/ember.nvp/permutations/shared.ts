@@ -46,7 +46,7 @@ const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
 };
 
 /**
- * Layers that only add lint / format / type / publish checks.
+ * Layers that only add lint / format / type / publish checks, or notes for agents.
  *
  * They don't affect the runtime shape of a project,
  * so they permutate among themselves in a small "checks" matrix
@@ -56,6 +56,7 @@ const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
  * so linear cross-group coverage remains.
  */
 const CHECK_LAYERS = new Set<string>([
+  "agents-md",
   "eslint-bundled",
   "eslint-ejected",
   "prettier",

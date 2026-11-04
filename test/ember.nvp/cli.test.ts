@@ -38,7 +38,7 @@ const BASIC_HELP_OUTPUT = `
           Bypass target confirmation step [choices: "yes", "no"]
 
           --layers <string> [--layers <string> ...]
-          Layers to apply to the project [choices: "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
+          Layers to apply to the project [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
 
           --packageManager <string>
           Package manager to configure for the project [choices: "npm", "pnpm"]

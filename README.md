@@ -190,6 +190,15 @@ Runs `git init` for you.
 This layer is enabled by default, _unless_ you run the generator inside a git repo already.
 In that case, you have to opt in to git.
 
+### AGENTS.md (on by default)
+
+Writes `AGENTS.md`, the notes that coding agents read before they work on the project.
+It lists the scripts, the import aliases, the common imports, and the project layout.
+Other layers add their own notes, for example the ssr layer's page title and 404 recipes.
+
+ember.nvp owns the text between `<!-- ember.nvp:start -->` and `<!-- ember.nvp:end -->`, and writes it again on each run.
+Text outside the markers is yours.
+
 ### GitHub Actions (optional)
 
 Adds simple GitHub Actions workflow to your project
@@ -318,6 +327,11 @@ export default {
   // Optionally add something to the README.md file
   readme() {
     return "### My Feature\n\nHere's what my feature brings to the table.";
+  },
+
+  // Optionally add notes for coding agents to AGENTS.md
+  agents() {
+    return "## My Feature\n\nRun `my-script` after you change the config.";
   },
 };
 ```
