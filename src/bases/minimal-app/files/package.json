@@ -25,28 +25,28 @@
     "start": "vite"
   },
   "dependencies": {
-    "@embroider/macros": "^1.21.3",
+    "@embroider/macros": "^1.21.4",
     "@embroider/router": "^3.0.6",
-    "@glimmer/component": "^2.1.1",
-    "decorator-transforms": "^2.3.2",
+    "@glimmer/component": "^2.2.1",
+    "decorator-transforms": "^2.4.0",
     "ember-source": "~7.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/plugin-transform-runtime": "^7.29.7",
-    "@babel/plugin-transform-typescript": "^7.29.7",
-    "@babel/runtime": "^7.29.7",
-    "@ember/app-tsconfig": "^2.0.0",
-    "@embroider/core": "^4.6.9",
-    "@glint/ember-tsc": "^1.7.5",
-    "@glint/template": "^1.7.7",
-    "@glint/tsserver-plugin": "^2.5.5",
+    "@babel/plugin-transform-typescript": "^7.29.9",
+    "@babel/runtime": "^7.29.10",
+    "@ember/app-tsconfig": "^2.1.0",
+    "@embroider/core": "^4.6.10",
+    "@glint/ember-tsc": "^1.14.3",
+    "@glint/template": "^1.11.1",
+    "@glint/tsserver-plugin": "^2.7.16",
     "@nullvoxpopuli/ember-vite": "workspace:*",
     "@rollup/plugin-babel": "^7.1.0",
     "babel-plugin-debug-macros": "^2.0.0",
     "babel-plugin-ember-template-compilation": "^4.0.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.14"
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": ">= 24"

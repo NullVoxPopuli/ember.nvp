@@ -30,12 +30,12 @@
     "start": "tsdown --watch"
   },
   "devDependencies": {
-    "@ember/library-tsconfig": "^2.0.0",
-    "@glimmer/component": "^2.1.1",
+    "@ember/library-tsconfig": "^3.0.0",
+    "@glimmer/component": "^2.2.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",
-    "decorator-transforms": "^2.3.2",
+    "decorator-transforms": "^2.4.0",
     "ember-source": "~7.4.0",
-    "tsdown": "^0.22.7",
+    "tsdown": "^0.23.5",
     "typescript": "^6.0.3"
   },
   "engines": {
