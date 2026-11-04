@@ -12,21 +12,27 @@ const START = "<!-- ember.nvp:start -->";
 const END = "<!-- ember.nvp:end -->";
 
 /**
- * Imports that apps and libraries use most.
- * The layer test builds an app that imports each of them,
- * so a path that stops existing fails the test.
+ * Pages of the Ember guides, as raw markdown on these guides-source PR branches:
+ * - templates: https://github.com/ember-learn/guides-source/pull/2248
+ * - application state: https://github.com/ember-learn/guides-source/pull/2237
+ * - reactivity: https://github.com/ember-learn/guides-source/pull/2219
+ *
+ * Agents read raw markdown more cheaply than a rendered page.
  */
-export const IMPORTS = `import Component from "@glimmer/component";
-import { tracked } from "@glimmer/tracking";
-import { trackedArray, trackedMap, trackedObject } from "@ember/reactive/collections";
-import { on } from "@ember/modifier";
-import { array, concat, fn, get, hash } from "@ember/helper";
-import { LinkTo } from "@ember/routing";
-import Route from "@ember/routing/route";
-import Controller from "@ember/controller";
-import Service, { service } from "@ember/service";
-import { registerDestructor } from "@ember/destroyable";
-import { htmlSafe } from "@ember/template";`;
+const GUIDES = {
+  templates:
+    "https://raw.githubusercontent.com/ember-learn/guides-source/t3/port-glimmer-cheatsheet-reference/guides/release/reference/templates.md",
+  state:
+    "https://raw.githubusercontent.com/ember-learn/guides-source/nvp/lifetimes-of-state/guides/release/application-state/index.md",
+  reactivity:
+    "https://raw.githubusercontent.com/NullVoxPopuli/guides-source/nvp/reactivity/guides/release/in-depth-topics/reactivity/index.md",
+};
+
+/**
+ * Template keywords that need no import.
+ * The layer test renders a template that uses each one without an import.
+ */
+export const KEYWORDS = ["on", "fn", "eq", "not", "and", "or"];
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -61,12 +67,7 @@ ${entries.map(([alias, target]) => `- \`${alias}\` → \`${typeof target === "st
 const APP_LAYOUT = `## Project layout
 
 - \`app/app\` registers the modules in \`app/router\`, \`app/routes/\`, \`app/templates/\`, and \`app/services/\`.
-  Ember looks those up by name.
-- Everything else (components, helpers, modifiers, utils) is imported where it is used.
-- Templates are \`.gjs\` or \`.gts\` files with a \`<template>\` tag.
-  A route's template is \`app/templates/<route>\`, and it gets \`@model\`.
-- Routes go in \`Router.map\` in \`app/router\`. A route's \`model()\` loads its data, and can be \`async\`.
-- A plain function works as a helper in a template.
+  Everything else (components, helpers, modifiers, utils) is imported where it is used.
 - Services from libraries are not registered automatically.
   Re-export each one in \`app/services/\`, for example \`app/services/page-title.js\`:
 
@@ -74,11 +75,12 @@ const APP_LAYOUT = `## Project layout
   export { default } from "ember-page-title/services/page-title";
   \`\`\``;
 
-const COMMON_IMPORTS = `## Common imports
+const GUIDES_SECTION = `## Guides
 
-\`\`\`js
-${IMPORTS}
-\`\`\``;
+- [Templates](${GUIDES.templates}): syntax, keywords, and helpers.
+  In \`<template>\`, these are keywords and need no import: ${KEYWORDS.map((word) => `\`${word}\``).join(", ")}, and the other comparison helpers in the reference.
+- [Application state](${GUIDES.state}): where each piece of state lives.
+- [Reactivity](${GUIDES.reactivity}): tracked state and derived state.`;
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -108,7 +110,7 @@ An Ember ${project.type}, generated with [ember.nvp](https://github.com/NullVoxP
     await scripts(project),
     project.type === "app" ? APP_LAYOUT : "",
     await aliases(project),
-    COMMON_IMPORTS,
+    GUIDES_SECTION,
   ];
 
   for (let section of await layerSections(project)) sections.push(section);

@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { generate, reapply } from "#test-helpers";
 import { layers } from "#layers";
-import { IMPORTS } from "../../src/layers/agents-md/index.js";
+import { KEYWORDS } from "../../src/layers/agents-md/index.js";
 import { execa } from "execa";
 import { rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -9,23 +9,6 @@ import { join } from "node:path";
 import type { Project } from "ember.nvp";
 
 const agentsMd = layers.find((layer) => layer.name === "agents-md")!;
-
-/**
- * Every name that IMPORTS brings in, so that a module can use them all.
- */
-function importedNames() {
-  let names: string[] = [];
-
-  for (let match of IMPORTS.matchAll(/^import (\w+)?,? ?(?:\{([^}]*)\})? from/gm)) {
-    if (match[1]) names.push(match[1]);
-
-    for (let name of (match[2] ?? "").split(",")) {
-      if (name.trim()) names.push(name.trim());
-    }
-  }
-
-  return names;
-}
 
 describe("agents-md layer, app with ssr", () => {
   let project: Project;
@@ -79,26 +62,59 @@ describe("agents-md layer, app with ssr", () => {
     expect(again.trimEnd().endsWith("After.")).toBe(true);
     expect(again.match(/ember\.nvp:start/g)).toHaveLength(1);
   });
+});
 
-  it("lists imports that exist", async () => {
-    let names = importedNames();
+/**
+ * A template that uses each keyword from AGENTS.md without an import.
+ * Static mode renders it to dist/index.html at build time.
+ */
+const KEYWORDS_TEMPLATE = `const greet = (name) => \`Hi \${name}\`;
 
-    expect(names).toContain("LinkTo");
+<template>
+  <p id="eq">{{if (eq 1 1) "eq works"}}</p>
+  <p id="logic">{{if (and true (not false) (or false true)) "logic works"}}</p>
+  {{#let (fn greet "Ember") as |greetEmber|}}
+    <p id="fn">{{(greetEmber)}}</p>
+  {{/let}}
+  <button type="button" {{on "click" greet}}>on works</button>
+</template>
+`;
 
-    await writeFile(
-      join(project.directory, "app/agents-imports.js"),
-      `${IMPORTS}\n\nconsole.log(${names.join(", ")});\n`,
-    );
+describe("agents-md layer, template keywords", () => {
+  let project: Project;
 
-    let app = (await project.read("app/app.js"))!;
+  beforeAll(async () => {
+    project = await generate({
+      layers: ["agents-md", "ssr"],
+      options: { ssr: { mode: "static" } },
+    });
 
-    await writeFile(join(project.directory, "app/app.js"), `import "./agents-imports.js";\n${app}`);
-
+    await writeFile(join(project.directory, "app/templates/index.gjs"), KEYWORDS_TEMPLATE);
     await execa("pnpm install", { cwd: project.directory, shell: true });
+    await execa("pnpm build", { cwd: project.directory, shell: true });
+  });
 
-    let build = await execa("pnpm vite build", { cwd: project.directory, shell: true, all: true });
+  afterAll(async () => {
+    if (process.env.CI) return;
 
-    expect(build.exitCode, build.all).toBe(0);
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("uses every keyword that AGENTS.md lists", () => {
+    for (let keyword of KEYWORDS) {
+      expect(KEYWORDS_TEMPLATE, keyword).toMatch(new RegExp(`[({]${keyword} `));
+    }
+  });
+
+  it("renders each keyword without an import", async () => {
+    let html = (await project.read("dist/index.html"))!;
+
+    expect(html).toContain("eq works");
+    expect(html).toContain("logic works");
+    expect(html).toContain("Hi Ember");
+    expect(html).toContain("on works");
   });
 });
 
