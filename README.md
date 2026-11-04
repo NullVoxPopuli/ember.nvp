@@ -49,6 +49,7 @@ npx ember.nvp --name my-app --path ./my-app --type app --layers typescript
 ### Default layers
 
 Some layers are on by default, for example `agents-md` and `readme`.
+`npx ember.nvp --help` lists them.
 For a new project, `--layers` adds to these defaults.
 To leave a default out, use `--skip-layers`:
 
@@ -384,4 +385,7 @@ npx ember.nvp --layers eslint-bundled --eslint-bundled.preset nvp
 
 - `confirm` options are on with `--<layer>.<option>`, and off with `--no-<layer>.<option>`.
 - `multiselect` options take the flag more than once, or a comma-separated list.
+- Without a TTY, an option without a flag gets its default.
+  A `text` or `number` option without a `default` has no answer, so it needs its flag.
+  `--help` marks these options with `[required without a TTY]`.
 - `npx ember.nvp --help` lists every option.

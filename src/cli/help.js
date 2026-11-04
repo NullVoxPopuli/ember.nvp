@@ -36,11 +36,27 @@ export function printHelp(coreOptions, layers = []) {
     });
   }
 
+  const defaults = layers.filter((layer) => layer.defaultValue);
+
+  if (defaults.length > 0) {
+    console.log(styleText("bold", "Default Layers:"));
+    for (const layer of defaults) {
+      const when = layer.defaultWhen ? styleText("dim", ` (${layer.defaultWhen})`) : "";
+
+      console.log(`  ${styleText("cyan", layer.name)}${when}`);
+    }
+    console.log(
+      `\n  For a new project, ${styleText("cyan", "--layers")} adds to these.` +
+        ` ${styleText("cyan", "--skip-layers")} leaves one out.\n`,
+    );
+  }
+
   const withOptions = layers.filter((layer) => layer.options);
 
   if (withOptions.length === 0) return;
 
   console.log(styleText("bold", "Layer Options:"));
+  console.log("  Without a TTY, an option without a flag gets its default.\n");
   for (const layer of withOptions) {
     console.log(`  Layer: ${styleText(["cyan", "bold"], layer.name)}`);
     for (const [key, schema] of Object.entries(layer.options ?? {})) {
@@ -54,6 +70,8 @@ export function printHelp(coreOptions, layers = []) {
         description: schema.prompt,
         choices: schema.options?.map((choice) => choice.value),
         fallback: schema.default,
+        required:
+          schema.default === undefined && (schema.type === "text" || schema.type === "number"),
       });
     }
   }
@@ -68,9 +86,19 @@ export function printHelp(coreOptions, layers = []) {
  *   description?: string,
  *   choices?: string[],
  *   fallback?: unknown,
+ *   required?: boolean,
  * }} option
  */
-function printOption({ flag, alias, type, multiple, description = "", choices, fallback }) {
+function printOption({
+  flag,
+  alias,
+  type,
+  multiple,
+  description = "",
+  choices,
+  fallback,
+  required,
+}) {
   const typeStr = type ? styleText("dim", `<${type}>`) : "";
   const repeatStr = multiple
     ? type
@@ -84,9 +112,15 @@ function printOption({ flag, alias, type, multiple, description = "", choices, f
   const fallbackStr =
     fallback === undefined ? "" : styleText("dim", ` [default: ${JSON.stringify(fallback)}]`);
 
+  /**
+   * Without a TTY, a select, confirm, or multiselect option falls back to its first choice,
+   * true, or none. A text or number option without a default has no answer.
+   */
+  const requiredStr = required ? styleText("red", " [required without a TTY]") : "";
+
   console.log(`  ${styleText("cyan", alias)}${flagAndType}${repeatStr}`);
-  if (description || choicesStr || fallbackStr) {
-    console.log(`      ${description}${choicesStr}${fallbackStr}`);
+  if (description || choicesStr || fallbackStr || requiredStr) {
+    console.log(`      ${description}${choicesStr}${fallbackStr}${requiredStr}`);
   }
   console.log("");
 }

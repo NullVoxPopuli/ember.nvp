@@ -62,6 +62,11 @@ export interface Layer {
    */
   defaultValue?: (projectType: ProjectType) => unknown;
   /**
+   * When `defaultValue` is true, if not always.
+   * `--help` shows it beside the layer's name.
+   */
+  defaultWhen?: string;
+  /**
    * Optional README documentation snippet or function.
    *
    * Whatever is returned shows up in the generated project's README file.
