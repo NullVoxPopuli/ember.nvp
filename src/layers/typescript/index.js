@@ -33,6 +33,8 @@ export default {
     return isLibraryType(projectType);
   },
 
+  defaultWhen: "for libraries and custom elements",
+
   options: {
     version: {
       type: "select",

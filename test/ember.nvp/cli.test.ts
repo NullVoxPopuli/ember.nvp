@@ -52,7 +52,17 @@ const BASIC_HELP_OUTPUT = `
           --write <string>
           Confirm writing changes to disk [choices: "yes", "no"]
 
+    Default Layers:
+      agents-md
+      git (outside a git repo)
+      readme
+      typescript (for libraries and custom elements)
+
+      For a new project, --layers adds to these. --skip-layers leaves one out.
+
     Layer Options:
+      Without a TTY, an option without a flag gets its default.
+
       Layer: eslint-bundled
           --eslint-bundled.preset <string>
           Which ESLint config? [choices: "ember", "nvp"] [default: "ember"]

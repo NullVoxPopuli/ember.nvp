@@ -228,6 +228,8 @@ describe("Layer Options Feature", () => {
 
     expect(output.slice(output.indexOf("Layer Options:"))).toMatchInlineSnapshot(`
       "Layer Options:
+        Without a TTY, an option without a flag gets its default.
+
         Layer: fake-kitchen-sink
             --fake-kitchen-sink.unitCount <number>
             How many units do you want? [default: 7]
@@ -245,5 +247,40 @@ describe("Layer Options Feature", () => {
             Select optional kitchen sink extras [choices: "soap-dispenser", "garbage-disposal"] [default: ["soap-dispenser"]]
       "
     `);
+  });
+
+  it("marks a text option without a default as required without a TTY", () => {
+    const fakeRequiredLayer: DiscoveredLayer = {
+      name: "fake-required",
+      label: "Fake Required Layer",
+      options: {
+        title: { type: "text", prompt: "Which title?" },
+        flavor: {
+          type: "select",
+          prompt: "Which flavor?",
+          options: [{ label: "Plain", value: "plain" }],
+        },
+      },
+      async run() {},
+      async isSetup(_project?: Project, explain?: boolean): Promise<any> {
+        return explain ? { isSetup: true, reasons: [] } : true;
+      },
+    };
+
+    const lines: string[] = [];
+    const logSpy = vi.spyOn(console, "log").mockImplementation((line: string) => {
+      lines.push(stripVTControlCharacters(line));
+    });
+
+    try {
+      printHelp(coreOptions, [fakeRequiredLayer]);
+    } finally {
+      logSpy.mockRestore();
+    }
+
+    const output = lines.join("\n");
+
+    expect(output).toContain("Which title? [required without a TTY]");
+    expect(output).toContain('Which flavor? [choices: "plain"]\n');
   });
 });

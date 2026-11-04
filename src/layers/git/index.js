@@ -12,6 +12,8 @@ export default {
     return !isInGit();
   },
 
+  defaultWhen: "outside a git repo",
+
   /**
    * @param {import('#utils/project.js').Project} project
    */
