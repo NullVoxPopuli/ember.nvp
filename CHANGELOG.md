@@ -2,6 +2,20 @@
 
 ## Release (2026-11-04)
 
+* ember.nvp 1.21.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.13.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#182](https://github.com/NullVoxPopuli/ember.nvp/pull/182) agents-md: check order, modern Ember rules, per-base and per-layer notes ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+* `@nullvoxpopuli/ember-rolldown`, `ember.nvp`
+  * [#180](https://github.com/NullVoxPopuli/ember.nvp/pull/180) Update the dependencies of the bases ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-04)
+
 * ember.nvp 1.20.0 (minor)
 
 #### :rocket: Enhancement
