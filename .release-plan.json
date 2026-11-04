@@ -2,13 +2,17 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "1.18.0",
-      "newVersion": "1.19.0",
+      "oldVersion": "1.19.0",
+      "newVersion": "1.20.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -23,5 +27,5 @@
       "oldVersion": "1.3.1"
     }
   },
-  "description": "## Release (2026-11-03)\n\n* ember.nvp 1.19.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#173](https://github.com/NullVoxPopuli/ember.nvp/pull/173) ssr layer: start serves the build ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-04)\n\n* ember.nvp 1.20.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#178](https://github.com/NullVoxPopuli/ember.nvp/pull/178) Add an agents-md layer: AGENTS.md for coding agents ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#179](https://github.com/NullVoxPopuli/ember.nvp/pull/179) npm projects: no pnpm in the generated scripts ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#176](https://github.com/NullVoxPopuli/ember.nvp/pull/176) cli: when stdin is not a TTY, answer each question with its default ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
