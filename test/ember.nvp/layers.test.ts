@@ -10,6 +10,7 @@ describe("discoverLayers", () => {
 
     expect(layerNames).toMatchInlineSnapshot(`
       [
+        "agents-md",
         "are-the-types-wrong",
         "eslint-bundled",
         "expect-type",

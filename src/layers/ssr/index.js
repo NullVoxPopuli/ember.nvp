@@ -395,4 +395,53 @@ export default {
 
 ${modeFor(project).readme(project.runPrefix)}`;
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  agents(project) {
+    if (project.type !== "app") return;
+
+    let mode = modeFor(project);
+    let where =
+      mode === SERVER
+        ? "`server.js` renders each request with `app/app-ssr`, and serves the build."
+        : "`vite build` renders each route in `routes` of `emberSsg()` in `vite.config.mjs` to an HTML file. Add a route there to render it.";
+
+    let notFound =
+      mode === SERVER
+        ? `
+### 404 pages
+
+The render answers \`200\`, or \`500\` if it fails. To answer \`404\` for a URL with no page:
+
+1. Add \`this.route("not-found", { path: "/*path" });\` last in \`Router.map\`.
+2. Mark that page's template: \`<main data-not-found>\`.
+3. In \`render()\` in \`server.js\`:
+
+   \`\`\`js
+   let status = rendered.body.includes("data-not-found") ? 404 : rendered.statusCode;
+   \`\`\`
+`
+        : "";
+
+    return `## Server-side rendering (vite-ember-ssr)
+
+Pages render to HTML, and the browser rehydrates them. ${where}
+
+- Write normal browser code. The render has \`window\` and \`document\`.
+- \`fetch()\` responses from the render go into the page, so the browser does not request them again on the first load.
+- In \`index.html\`, the rendered head replaces \`<!-- VITE_EMBER_SSR_HEAD -->\`, and the rendered body replaces \`<!-- VITE_EMBER_SSR_BODY -->\`. Keep both markers.
+
+### Page titles
+
+Use [ember-page-title](https://github.com/ember-cli/ember-page-title):
+
+1. Add \`ember-page-title\` to the dependencies.
+2. Re-export its service in \`app/services/page-title.js\`:
+   \`export { default } from "ember-page-title/services/page-title";\`
+3. Delete the \`<title>\` line from \`index.html\`, so that the page has one title.
+4. \`import { pageTitle } from "ember-page-title";\`, then \`{{pageTitle "About"}}\` in a template. Titles add up: \`About | My App\`.
+${notFound}`;
+  },
 };
