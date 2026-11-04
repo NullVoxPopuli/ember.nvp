@@ -2,6 +2,21 @@
 
 ## Release (2026-11-04)
 
+* ember.nvp 2.0.0 (major)
+
+#### :boom: Breaking Change
+* `ember.nvp`
+  * [#183](https://github.com/NullVoxPopuli/ember.nvp/pull/183) --layers adds to the default layers, --skip-layers leaves one out ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#185](https://github.com/NullVoxPopuli/ember.nvp/pull/185) --help lists the default layers and the options that need a flag ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-04)
+
 * ember.nvp 1.21.0 (minor)
 * @nullvoxpopuli/ember-rolldown 2.13.0 (minor)
 
