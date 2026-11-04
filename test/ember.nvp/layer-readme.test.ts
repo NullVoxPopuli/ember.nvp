@@ -54,9 +54,12 @@ describe("layer: readme", () => {
         pnpm dev
         \`\`\`
 
-        or
+        ### Production build
+
+        To build the app, then serve the build on \`$PORT\` (default 4200):
 
         \`\`\`sh
+        pnpm build
         pnpm start
         \`\`\`
 

@@ -197,6 +197,9 @@ The base layer, matching the `--minimal` flag from [ember-cli/ember-app-blueprin
 - ✅ No ember-welcome-page
 - ✅ Vite-based with modern Ember
 
+In apps, `dev` starts the Vite dev server.
+`start` serves the build in `dist` with `vite preview`, on `$PORT` (default 4200), so run `build` first.
+
 Perfect for demos, reproductions, and learning!
 
 ### Git
@@ -260,7 +263,7 @@ Choose when pages render:
   `start` serves the build, on `$PORT` (default 4200).
 - `static`: at build time, to one HTML file per route, for any static host.
   The routes to render are in `vite.config.mjs`.
-  `start` serves `dist` with `vite preview`.
+  `start` serves `dist` with `vite preview`, on `$PORT` (default 4200).
 
 ### ⚡ Vitest (optional)
 

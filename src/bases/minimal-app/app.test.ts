@@ -1,5 +1,6 @@
 import { beforeAll, describe, it, expect as hardExpect, afterAll } from "vitest";
-import { generate, build, reapply } from "#test-helpers";
+import { generate, build, reapply, freePort, waitForServer } from "#test-helpers";
+import { execa } from "execa";
 import { packageJson } from "ember-apply";
 
 import type { Project } from "ember.nvp";
@@ -258,6 +259,44 @@ describe("javascript", () => {
     let { exitCode } = await build(project, "production");
 
     expect(exitCode).toBe(0);
+  });
+
+  it("start serves the production build on $PORT", async () => {
+    let { exitCode } = await build(project, "production");
+
+    hardExpect(exitCode).toBe(0);
+
+    let port = await freePort();
+    let origin = `http://127.0.0.1:${port}`;
+    let manifest = await packageJson.read(project.directory);
+
+    expect(manifest.scripts?.start).toBe("vite preview");
+
+    /**
+     * The "start" script, without pnpm in between,
+     * so that kill() stops the server itself.
+     * --host picks IPv4, because "localhost" can resolve to ::1.
+     */
+    let serve = execa("node_modules/.bin/vite", ["preview", "--host", "127.0.0.1"], {
+      cwd: project.directory,
+      env: { PORT: String(port) },
+      all: true,
+    });
+
+    try {
+      await waitForServer(origin, serve);
+
+      let home = await fetch(origin);
+      let html = await home.text();
+      let script = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1];
+
+      expect(home.status).toBe(200);
+      expect(script, "the page loads the built JS, not the dev server's").toBeTruthy();
+      expect((await fetch(`${origin}${script}`)).status).toBe(200);
+      expect((await fetch(`${origin}/a/deep/url`)).status, "the app routes deep URLs").toBe(200);
+    } finally {
+      serve.kill();
+    }
   });
 
   it("has no TS files", async () => {
