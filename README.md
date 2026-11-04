@@ -227,29 +227,39 @@ Choose when pages render:
 
 #### Page titles
 
-Set `document.title`.
-The render has a `document`, and the rendered `<head>` goes into the page.
+Use [ember-page-title](https://github.com/ember-cli/ember-page-title).
+The rendered `<head>` goes into the page, with the title.
 
-1. Delete the `<title>` line from `index.html`. If you keep it, the page has two titles, and the browser shows the first.
-2. Set a default title in `app/templates/application`, and a title in each page that needs one.
-   A page renders after the application template, so the title of the page wins.
+1. Add `ember-page-title` to the dependencies.
+2. Register its service. The app does not merge services from libraries, so re-export it:
 
-```js
-// app/utils/page-title.js
-export function pageTitle(title) {
-  document.title = title;
-}
-```
+   ```js
+   // app/services/page-title.js
+   export { default } from "ember-page-title/services/page-title";
+   ```
 
-```gjs
-// app/templates/about.gjs
-import { pageTitle } from "#utils/page-title.js";
+3. Delete the `<title>` line from `index.html`. If you keep it, the HTML from the server has two titles, and the first one is the static title.
+4. Set titles in the templates. The titles add up: `/about` gets `About | My App`.
 
-<template>
-  {{pageTitle "About"}}
-  <h1>About</h1>
-</template>
-```
+   ```gjs
+   // app/templates/application.gjs
+   import { pageTitle } from "ember-page-title";
+
+   <template>
+     {{pageTitle "My App"}}
+     {{outlet}}
+   </template>
+   ```
+
+   ```gjs
+   // app/templates/about.gjs
+   import { pageTitle } from "ember-page-title";
+
+   <template>
+     {{pageTitle "About"}}
+     <h1>About</h1>
+   </template>
+   ```
 
 #### Not-found pages (404)
 
