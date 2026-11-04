@@ -1,5 +1,21 @@
 # Changelog
 
+## Release (2026-11-04)
+
+* ember.nvp 1.20.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#178](https://github.com/NullVoxPopuli/ember.nvp/pull/178) Add an agents-md layer: AGENTS.md for coding agents ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#179](https://github.com/NullVoxPopuli/ember.nvp/pull/179) npm projects: no pnpm in the generated scripts ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#176](https://github.com/NullVoxPopuli/ember.nvp/pull/176) cli: when stdin is not a TTY, answer each question with its default ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-03)
 
 * ember.nvp 1.19.0 (minor)
