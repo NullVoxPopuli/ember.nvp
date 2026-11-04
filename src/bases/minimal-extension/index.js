@@ -25,6 +25,23 @@ export default {
   description: "Bare minimum browser extension structure with an Ember popup",
 
   /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  agents(project) {
+    return `## Project layout
+
+- \`public/manifest.json\` is the extension manifest. The build copies it into \`dist/\` as it is.
+  Add permissions, background scripts, and content scripts there.
+- \`index.html\` is the popup page.
+  Extension pages do not allow inline scripts, so the app boots from \`app/boot\`.
+- \`app/app\` registers the modules in \`app/router\`, \`app/templates/\`, and \`app/services/\`.
+  Everything else (components, helpers, modifiers, utils) is imported where it is used.
+- The popup has no URL bar, so routing uses \`locationType: "none"\`.
+- To try the popup in a browser tab, run \`${project.runPrefix} start\`.
+  To try it as an extension, run \`${project.runPrefix} build\`, then load \`dist/\` as an unpacked extension.`;
+  },
+
+  /**
    * A web app can have a manifest.json too (for a PWA),
    * but only a browser extension's manifest has `manifest_version`.
    *

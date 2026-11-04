@@ -109,6 +109,19 @@ export default {
   /**
    * @param {import('#utils/project.js').Project} project
    */
+  agents(project) {
+    let pass = project.packageManager === "npm" ? "-- " : "";
+
+    return `## Tests (Vitest)
+
+- Test files match \`tests/**/*-test.{js,ts,gjs,gts}\`. They run in headless Chrome.
+- To run one file: \`${project.runPrefix} test ${pass}tests/unit/example-test.ts\`.
+- To run only the tests whose names contain some text: \`${project.runPrefix} test ${pass}-t "<text>"\`.`;
+  },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
   readme(project) {
     return `### Testing (Vitest)
 

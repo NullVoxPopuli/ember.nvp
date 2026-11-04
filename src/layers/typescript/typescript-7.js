@@ -131,6 +131,17 @@ This project uses TypeScript 7 and [ember-content-mapper](https://github.com/Nul
 /**
  * @param {import('#utils/project.js').Project} project
  */
+export function agents(project) {
+  return `## Types
+
+- \`${project.runPrefix} lint:types\` checks the types, templates included.
+  Use it, not plain \`tsc\`: without \`--runExternalCode\`, \`tsc\` cannot read \`.gts\` and \`.gjs\` files.
+- Imports of \`.gts\` and \`.gjs\` modules must include the extension.`;
+}
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
 async function updateTSConfig(project) {
   let config = await tsconfig.read(project.directory);
 

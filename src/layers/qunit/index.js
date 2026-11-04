@@ -62,6 +62,30 @@ function tsDepsFor(project) {
 export default {
   label: "QUnit",
 
+  /**
+   * QUnit reads `filter` from the URL of the test page.
+   *
+   * @param {import('#utils/project.js').Project} project
+   */
+  agents(project) {
+    let pass = project.packageManager === "npm" ? "-- " : "";
+    let colocated = project.isLibrary
+      ? ""
+      : " A file in \`app/\` whose name ends in \`-test\` runs too.";
+
+    return `## Tests (QUnit)
+
+- Test files live in \`tests/\`.${colocated}
+- \`${project.runPrefix} test\` builds the tests, then runs them in headless Chrome.
+- To run only the tests whose names contain some text, build once, then filter:
+
+  \`\`\`sh
+  ${project.runPrefix} build:test
+  ${project.runPrefix} test:ci ${pass}--test_page "tests/index.html?hidepassed&filter=<text>"
+  \`\`\`
+- Read state from the DOM with \`assert.dom()\` from qunit-dom.`;
+  },
+
   async run(project) {
     let isLibrary = project.isLibrary;
     let ts = await project.hasOrWantsLayer("typescript");

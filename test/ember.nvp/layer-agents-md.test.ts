@@ -42,6 +42,26 @@ describe("agents-md layer, app with ssr", () => {
     }
   });
 
+  it("lists the checks in order", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain(`## Check your work
+
+After a change, run these scripts in this order:
+
+1. \`pnpm test\`
+2. \`pnpm build\``);
+  });
+
+  it("has the sections of the app base and the qunit layer", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain("## Modern Ember");
+    expect(agents).toContain("## Project layout");
+    expect(agents).toContain("- `app/app` registers the modules");
+    expect(agents).toContain("## Tests (QUnit)");
+  });
+
   it("has the section of the ssr layer", async () => {
     let agents = (await project.read("AGENTS.md"))!;
 
@@ -133,11 +153,126 @@ describe("agents-md layer, library", () => {
     }
   });
 
-  it("is setup, without the app layout", async () => {
+  it("is setup, with the library layout", async () => {
     let agents = (await project.read("AGENTS.md"))!;
 
     expect(await agentsMd.isSetup(project, true)).toEqual({ isSetup: true, reasons: [] });
     expect(agents).toContain("An Ember library");
-    expect(agents).not.toContain("## Project layout");
+    expect(agents).toContain("- `src/` holds the source.");
+    expect(agents).not.toContain("`app/app`");
+  });
+});
+
+describe.each([
+  { type: "extension" as const, line: "- `public/manifest.json` is the extension manifest." },
+  { type: "custom-element" as const, line: "- `src/element` is the custom element." },
+])("agents-md layer, $type", ({ type, line }) => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({ type, layers: ["agents-md"] });
+  });
+
+  afterAll(async () => {
+    if (process.env.CI) return;
+
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("has the layout of its base", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain("## Project layout");
+    expect(agents).toContain(line);
+  });
+});
+
+describe("agents-md layer, app with vitest and typescript", () => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({
+      layers: ["agents-md", "vitest", "typescript", "prettier"],
+      options: { typescript: { version: "7" } },
+    });
+  });
+
+  afterAll(async () => {
+    if (process.env.CI) return;
+
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("checks lint, types, and tests, in order", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain(`1. \`pnpm lint\`
+2. \`pnpm test\`
+3. \`pnpm build\``);
+  });
+
+  it("has the sections of the vitest and typescript layers", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain("## Tests (Vitest)");
+    expect(agents).toContain("## Types");
+    expect(agents).toContain("Imports of `.gts` and `.gjs` modules must include the extension.");
+  });
+});
+
+const FILTER_TESTS = `import { module, test } from "qunit";
+
+module("Unit | alpha", function () {
+  test("alpha one", function (assert) {
+    assert.ok(true);
+  });
+});
+
+module("Unit | beta", function () {
+  test("beta one", function (assert) {
+    assert.ok(true);
+  });
+});
+`;
+
+describe("agents-md layer, QUnit filter", () => {
+  let project: Project;
+
+  beforeAll(async () => {
+    project = await generate({ layers: ["agents-md", "qunit"] });
+
+    await writeFile(join(project.directory, "tests/unit/filter-test.js"), FILTER_TESTS);
+    await execa("pnpm install", { cwd: project.directory, shell: true });
+  });
+
+  afterAll(async () => {
+    if (process.env.CI) return;
+
+    if (project?.directory) {
+      await rm(project.directory, { recursive: true, force: true });
+    }
+  });
+
+  it("runs only the matching tests with the commands from AGENTS.md", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+    let commands = agents
+      .match(/```sh\n([\s\S]*?)```/)![1]!
+      .trim()
+      .split("\n")
+      .map((line) => line.trim().replace("<text>", "beta"));
+
+    let output = "";
+
+    for (let command of commands) {
+      output = (await execa(command, { cwd: project.directory, shell: true })).stdout;
+    }
+
+    expect(output).toContain("beta one");
+    expect(output).not.toContain("alpha one");
+    expect(output).toContain("# pass  1");
   });
 });

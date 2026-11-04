@@ -2,6 +2,7 @@ import { packageJson } from "ember-apply";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { bases } from "#bases";
 import { formatLabel } from "#utils/cli.js";
 
 /**
@@ -35,18 +36,58 @@ const GUIDES = {
 export const KEYWORDS = ["on", "fn", "eq", "not", "and", "or"];
 
 /**
+ * The scripts to run after a change, in order.
+ *
+ * With more than one linter, `lint` runs every `lint:*` script.
+ * With one linter, there is no `lint`, only that linter's `lint:*` script.
+ *
+ * @param {Record<string, string>} scripts
+ */
+function checkNames(scripts) {
+  let checks = scripts.lint
+    ? ["lint"]
+    : Object.keys(scripts).filter((name) => name.startsWith("lint:") && !name.endsWith(":fix"));
+
+  for (let name of ["test", "build"]) {
+    if (scripts[name]) checks.push(name);
+  }
+
+  return checks;
+}
+
+/**
  * @param {import('#utils/project.js').Project} project
  */
 async function scripts(project) {
   let manifest = await packageJson.read(project.directory);
-  let names = Object.keys(manifest.scripts ?? {});
+  let all = manifest.scripts ?? {};
+  let names = Object.keys(all);
 
   if (names.length === 0) return "";
 
-  return `## Scripts
+  let checks = checkNames(all);
 
-${names.map((name) => `- \`${project.runPrefix} ${name}\`: \`${manifest.scripts[name]}\``).join("\n")}`;
+  return `## Check your work
+
+After a change, run these scripts in this order:
+
+${checks.map((name, i) => `${i + 1}. \`${project.runPrefix} ${name}\``).join("\n")}
+
+## Scripts
+
+${names.map((name) => `- \`${project.runPrefix} ${name}\`: \`${all[name]}\``).join("\n")}`;
 }
+
+const MODERN_EMBER = `## Modern Ember
+
+This project uses Vite and template-tag components.
+Code from older Ember versions does not work here.
+
+- The \`ember\` CLI is not installed, so \`ember generate\` and \`ember serve\` fail. Use the scripts above.
+- Write components in \`.gjs\` or \`.gts\` files, with \`<template>\`. Do not add \`.hbs\` files.
+- Import \`Component\` from \`@glimmer/component\`, not from \`@ember/component\`.
+- Use native classes, \`@tracked\`, and getters. Do not use \`EmberObject\`, \`computed\`, \`get\`, or \`set\`.
+- Use \`{{on}}\` and \`{{fn}}\` in templates, not \`{{action}}\`.`;
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -64,17 +105,6 @@ From \`imports\` in \`package.json\`:
 ${entries.map(([alias, target]) => `- \`${alias}\` → \`${typeof target === "string" ? target : JSON.stringify(target)}\``).join("\n")}`;
 }
 
-const APP_LAYOUT = `## Project layout
-
-- \`app/app\` registers the modules in \`app/router\`, \`app/routes/\`, \`app/templates/\`, and \`app/services/\`.
-  Everything else (components, helpers, modifiers, utils) is imported where it is used.
-- Services from libraries are not registered automatically.
-  Re-export each one in \`app/services/\`, for example \`app/services/page-title.js\`:
-
-  \`\`\`js
-  export { default } from "ember-page-title/services/page-title";
-  \`\`\``;
-
 const GUIDES_SECTION = `## Guides
 
 - [Templates](${GUIDES.templates}): syntax, keywords, and helpers.
@@ -83,20 +113,13 @@ const GUIDES_SECTION = `## Guides
 - [Reactivity](${GUIDES.reactivity}): tracked state and derived state.`;
 
 /**
+ * @param {Pick<import('#types').Layer, "agents">} owner a base or a layer
  * @param {import('#utils/project.js').Project} project
  */
-async function layerSections(project) {
-  let sections = [];
+async function notesFrom(owner, project) {
+  let text = typeof owner.agents === "function" ? await owner.agents(project) : owner.agents;
 
-  for (let layer of project.desires.layers) {
-    if (!layer.agents) continue;
-
-    let text = typeof layer.agents === "function" ? await layer.agents(project) : layer.agents;
-
-    if (text && text.trim().length > 0) sections.push(text.trim());
-  }
-
-  return sections;
+  return text?.trim() ?? "";
 }
 
 /**
@@ -108,12 +131,15 @@ async function block(project) {
 
 An Ember ${project.type}, generated with [ember.nvp](https://github.com/NullVoxPopuli/ember.nvp).`,
     await scripts(project),
-    project.type === "app" ? APP_LAYOUT : "",
+    MODERN_EMBER,
+    await notesFrom(bases[project.type], project),
     await aliases(project),
     GUIDES_SECTION,
   ];
 
-  for (let section of await layerSections(project)) sections.push(section);
+  for (let layer of project.desires.layers) {
+    sections.push(await notesFrom(layer, project));
+  }
 
   return `${START}\n${sections.filter(Boolean).join("\n\n")}\n${END}`;
 }
