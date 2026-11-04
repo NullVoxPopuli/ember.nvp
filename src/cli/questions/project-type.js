@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, isTTY } from "./terminal.js";
+import { answer, isTTY } from "./terminal.js";
 import { detectProjectType } from "#bases";
 
 /**
@@ -46,10 +46,10 @@ export async function askProjectType(existingProject) {
   const initialValue = existingProject ? detectProjectType(existingProject) : undefined;
 
   if (!isTTY()) {
-    return answerWithoutTerminal("type", initialValue ?? "app", { given: answers.type });
+    return answer("type", initialValue ?? "app", { given: answers.type });
   }
 
-  const answer = await p.select({
+  const choice = await p.select({
     message: "Which type of project?",
     initialValue,
     options: [
@@ -72,10 +72,10 @@ export async function askProjectType(existingProject) {
     ],
   });
 
-  if (p.isCancel(answer)) {
+  if (p.isCancel(choice)) {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  return answer;
+  return choice;
 }

@@ -11,7 +11,7 @@ export function isTTY() {
 }
 
 /**
- * Answers a question when there is no terminal to ask it in:
+ * Answers a question without asking it:
  * with the question's default, or by exiting with the flag to pass.
  *
  * @template T
@@ -20,7 +20,7 @@ export function isTTY() {
  * @param {{ given?: unknown, reason?: string }} [invalid] a flag value that was passed, but is not valid
  * @returns {T}
  */
-export function answerWithoutTerminal(flag, fallback, invalid = {}) {
+export function answer(flag, fallback, invalid = {}) {
   if (invalid.given !== undefined) {
     return exit(
       `Invalid value '${String(invalid.given)}' for --${flag}.${invalid.reason ? ` ${invalid.reason}` : ""}`,
@@ -28,7 +28,7 @@ export function answerWithoutTerminal(flag, fallback, invalid = {}) {
   }
 
   if (fallback === undefined) {
-    return exit(`--${flag} is required when there is no terminal to ask in.`);
+    return exit(`--${flag} is required.`);
   }
 
   printArgInUse(flag, `${show(fallback)} (default)`);

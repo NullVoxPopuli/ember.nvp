@@ -1,7 +1,7 @@
 import { cancel, isCancel, text } from "@clack/prompts";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, isTTY } from "./terminal.js";
+import { answer, isTTY } from "./terminal.js";
 import { cwd } from "#utils/cwd.js";
 
 /**
@@ -30,13 +30,13 @@ export async function askPath(name) {
   const defaultValue = join(cwd, name);
 
   if (!isTTY()) {
-    return answerWithoutTerminal("path", defaultValue, {
+    return answer("path", defaultValue, {
       given: answers.path,
       reason: "It must start with '.' or '/'.",
     });
   }
 
-  const answer = await text({
+  const choice = await text({
     message: "Where would you like to place your project?",
     placeholder: defaultValue.replace(cwd, "."),
     defaultValue: defaultValue,
@@ -49,17 +49,17 @@ export async function askPath(name) {
     },
   });
 
-  if (isCancel(answer)) {
+  if (isCancel(choice)) {
     cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  if (answer) {
-    if (answer.startsWith(".")) {
-      return join(cwd, answer);
+  if (choice) {
+    if (choice.startsWith(".")) {
+      return join(cwd, choice);
     }
 
-    return answer;
+    return choice;
   }
 
   return defaultValue;

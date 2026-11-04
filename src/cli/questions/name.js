@@ -3,7 +3,7 @@ import packageNameRegex from "package-name-regex";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, isTTY } from "./terminal.js";
+import { answer, isTTY } from "./terminal.js";
 
 const DEFAULT = "my-app";
 
@@ -24,7 +24,7 @@ export async function askName(existingProject) {
   let fallback = existingName ?? DEFAULT;
 
   if (!isTTY()) {
-    return answerWithoutTerminal("name", fallback, {
+    return answer("name", fallback, {
       given: answers.name,
       reason: "It must be a valid npm package name.",
     });
