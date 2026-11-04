@@ -38,7 +38,10 @@ const BASIC_HELP_OUTPUT = `
           Bypass target confirmation step [choices: "yes", "no"]
 
           --layers <string> [--layers <string> ...]
-          Layers to apply to the project [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
+          Layers to apply to the project, in addition to the default layers [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
+
+          --skip-layers <string> [--skip-layers <string> ...]
+          Default layers to leave out [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
 
           --packageManager <string>
           Package manager to configure for the project [choices: "npm", "pnpm"]
@@ -182,6 +185,136 @@ test("without a TTY, a question without a flag gets its default", async () => {
     expect(res.exitCode).toBe(0);
     expect(stripVTControlCharacters(res.stdout)).toMatch(/using layers: .+ \(default\)/);
     expect(existsSync(join(path, "package.json"))).toBe(true);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+/**
+ * A new app in a temp dir: no replace-or-update question, and no prompt without a TTY.
+ */
+async function newAppArgs(label: string, ...extra: string[]) {
+  let parent = await mktemp(label);
+  let path = join(parent, "my-app");
+
+  return {
+    parent,
+    path,
+    args: [
+      "--name",
+      "my-app",
+      "--path",
+      path,
+      "--type",
+      "app",
+      "--packageManager",
+      "pnpm",
+      "--write",
+      "yes",
+      ...extra,
+    ],
+  };
+}
+
+test("--layers adds to the default layers", async () => {
+  let { parent, path, args } = await newAppArgs(
+    "cli-layers-add",
+    "--layers",
+    "prettier",
+    "--confirm",
+    "yes",
+  );
+
+  try {
+    let res = await cli(args).execaPromise;
+
+    expect(res.exitCode).toBe(0);
+    expect(stripVTControlCharacters(res.stdout)).toMatch(
+      /using layers: prettier \+ defaults: agents-md, .*readme/,
+    );
+    expect(existsSync(join(path, "AGENTS.md"))).toBe(true);
+    expect((await packageJson.read(path)).devDependencies).toHaveProperty("prettier");
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test("--skip-layers leaves a default layer out", async () => {
+  let { parent, path, args } = await newAppArgs(
+    "cli-skip-layers",
+    "--layers",
+    "prettier",
+    "--skip-layers",
+    "agents-md",
+    "--confirm",
+    "yes",
+  );
+
+  try {
+    let res = await cli(args).execaPromise;
+    let stdout = stripVTControlCharacters(res.stdout);
+
+    expect(res.exitCode).toBe(0);
+    expect(stdout).toMatch(/using layers: prettier \+ defaults: .*readme/);
+    expect(stdout).not.toMatch(/using layers: .*agents-md/);
+    expect(existsSync(join(path, "AGENTS.md"))).toBe(false);
+    expect(existsSync(join(path, "README.md"))).toBe(true);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test("a layer in both --layers and --skip-layers exits before writing anything", async () => {
+  let { parent, path, args } = await newAppArgs(
+    "cli-skip-layers-conflict",
+    "--layers",
+    "readme",
+    "--skip-layers",
+    "readme",
+    "--confirm",
+    "yes",
+  );
+
+  try {
+    let res = await cli(args).execaPromise.catch((error) => error);
+
+    expect(res.exitCode).toBe(1);
+    expect(stripVTControlCharacters(res.stdout)).toContain(
+      "Invalid value 'readme' for --skip-layers. It is also in --layers.",
+    );
+    expect(existsSync(path)).toBe(false);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test("with a TTY, --layers and the defaults are shown before the confirmation", async () => {
+  let { parent, path, args } = await newAppArgs("cli-layers-confirm", "--layers", "prettier");
+  let confirmation = "Do all the selections above look ok?";
+
+  try {
+    let { execaPromise } = cli(args, { tty: true });
+    let output = "";
+    let answered = false;
+
+    execaPromise.stdout?.on("data", (chunk) => {
+      output += chunk;
+
+      // Enter chooses "yes, generate the project"
+      if (!answered && stripVTControlCharacters(output).includes(confirmation)) {
+        answered = true;
+        execaPromise.stdin?.write("\r");
+      }
+    });
+
+    let res = await execaPromise;
+    let text = stripVTControlCharacters(output);
+
+    expect(res.exitCode).toBe(0);
+    expect(text).not.toContain("Select additional features:");
+    expect(text.indexOf("prettier + defaults: agents-md")).toBeGreaterThan(-1);
+    expect(text.indexOf("prettier + defaults: agents-md")).toBeLessThan(text.indexOf(confirmation));
+    expect(existsSync(join(path, "AGENTS.md"))).toBe(true);
   } finally {
     await rm(parent, { recursive: true, force: true });
   }

@@ -37,7 +37,14 @@ export const coreOptions = /** @type {const} */ ({
     type: "string",
     multiple: true,
     choices: layerNames,
-    description: "Layers to apply to the project",
+    description: "Layers to apply to the project, in addition to the default layers",
+  },
+
+  "skip-layers": {
+    type: "string",
+    multiple: true,
+    choices: layerNames,
+    description: "Default layers to leave out",
   },
 
   packageManager: {
@@ -117,6 +124,7 @@ const typedValues =
 export const answers = {
   ...typedValues,
   layers: typedValues.layers ?? [],
+  "skip-layers": typedValues["skip-layers"] ?? [],
 };
 
 /**
