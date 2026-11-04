@@ -20,7 +20,7 @@ export function isTTY() {
  * @param {{ given?: unknown, reason?: string }} [invalid] a flag value that was passed, but is not valid
  * @returns {T}
  */
-export function answer(flag, fallback, invalid = {}) {
+export function provideAnswer(flag, fallback, invalid = {}) {
   if (invalid.given !== undefined) {
     return exit(
       `Invalid value '${String(invalid.given)}' for --${flag}.${invalid.reason ? ` ${invalid.reason}` : ""}`,

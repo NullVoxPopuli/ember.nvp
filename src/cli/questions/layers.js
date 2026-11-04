@@ -1,5 +1,5 @@
 import { answers, printArgInUse } from "#args";
-import { answer, isTTY } from "./terminal.js";
+import { isTTY, provideAnswer } from "./terminal.js";
 import { discoverLayers } from "#layers";
 
 import * as p from "@clack/prompts";
@@ -52,7 +52,7 @@ export async function askLayers(projectType, suggested = []) {
   ).filter(Boolean);
 
   if (!isTTY()) {
-    let names = answer("layers", defaultValues, {
+    let names = provideAnswer("layers", defaultValues, {
       given: given?.length ? given.join(",") : undefined,
       reason: `Choose from: ${optionalLayers.map((layer) => layer.name).join(", ")}.`,
     });

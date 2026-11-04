@@ -2,7 +2,7 @@ import * as p from "@clack/prompts";
 import { styleText } from "node:util";
 
 import { answers, printArgInUse } from "#args";
-import { answer, isTTY } from "./terminal.js";
+import { isTTY, provideAnswer } from "./terminal.js";
 
 const SUPPORTED = new Set(["yes", "no"]);
 
@@ -39,10 +39,10 @@ export async function askToWrite(stage, changes) {
   p.note(summarize(changes), `${changes.length} staged change${changes.length === 1 ? "" : "s"}`);
 
   if (!isTTY()) {
-    return answer("write", "yes", { given: answers.write }) === "yes" ? changes : null;
+    return provideAnswer("write", "yes", { given: answers.write }) === "yes" ? changes : null;
   }
 
-  const choice = await p.select({
+  const answer = await p.select({
     message: `Write these changes to ${stage.targetDirectory}?`,
     options: [
       { value: "yes", label: "write the files", hint: "apply all staged changes" },
@@ -55,11 +55,11 @@ export async function askToWrite(stage, changes) {
     ],
   });
 
-  if (p.isCancel(choice) || choice === "no") {
+  if (p.isCancel(answer) || answer === "no") {
     return null;
   }
 
-  if (choice === "yes") {
+  if (answer === "yes") {
     return changes;
   }
 

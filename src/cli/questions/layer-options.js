@@ -2,7 +2,7 @@ import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
 import { validateOption } from "./validate-option.js";
-import { answer, isTTY } from "./terminal.js";
+import { isTTY, provideAnswer } from "./terminal.js";
 
 /**
  * Prompt the user for options defined on the selected layers.
@@ -35,7 +35,7 @@ export async function askLayerOptions(selectedLayers, existing) {
       const detected = existing && schema.detect ? await schema.detect(existing) : undefined;
 
       if (!isTTY()) {
-        layerResult[key] = answer(
+        layerResult[key] = provideAnswer(
           `${layer.name}.${key}`,
           defaultAnswer(schema, detected ?? schema.default),
         );

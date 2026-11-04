@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
-import { answer, isTTY } from "./terminal.js";
+import { isTTY, provideAnswer } from "./terminal.js";
 
 const SUPPORTED = new Set(["yes", "no"]);
 
@@ -23,10 +23,10 @@ export async function askIfOK() {
   }
 
   if (!isTTY()) {
-    return answer("confirm", "yes", { given: answers.confirm });
+    return provideAnswer("confirm", "yes", { given: answers.confirm });
   }
 
-  const choice = await p.select({
+  const answer = await p.select({
     message: "Do all the selections above look ok?",
     options: [
       { value: "yes", label: "yes, generate the project" },
@@ -34,10 +34,10 @@ export async function askIfOK() {
     ],
   });
 
-  if (p.isCancel(choice) || choice === "no") {
+  if (p.isCancel(answer) || answer === "no") {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  return choice;
+  return answer;
 }

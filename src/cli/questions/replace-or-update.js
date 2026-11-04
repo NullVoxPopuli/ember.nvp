@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 
 import { answers, printArgInUse } from "#args";
-import { answer, isTTY } from "./terminal.js";
+import { isTTY, provideAnswer } from "./terminal.js";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";
@@ -34,10 +34,10 @@ export async function askReplaceOrUpdate(projectPath) {
   }
 
   if (!isTTY()) {
-    return answer("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
+    return provideAnswer("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 
-  const choice = await p.select({
+  const answer = await p.select({
     message: "Replace or update at the selected path",
     initialValue: "update",
     options: [
@@ -54,12 +54,12 @@ export async function askReplaceOrUpdate(projectPath) {
     ],
   });
 
-  if (p.isCancel(choice)) {
+  if (p.isCancel(answer)) {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  return choice;
+  return answer;
 }
 
 /**
@@ -81,10 +81,10 @@ export async function askAboutProjectHere() {
   }
 
   if (!isTTY()) {
-    return answer("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
+    return provideAnswer("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 
-  const choice = await p.select({
+  const answer = await p.select({
     message: "This directory has a package.json. What would you like to do?",
     initialValue: "update",
     options: [
@@ -106,10 +106,10 @@ export async function askAboutProjectHere() {
     ],
   });
 
-  if (p.isCancel(choice)) {
+  if (p.isCancel(answer)) {
     p.cancel("Operation cancelled");
     return process.exit(0);
   }
 
-  return isValid(choice) ? choice : undefined;
+  return isValid(answer) ? answer : undefined;
 }
