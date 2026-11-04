@@ -7,8 +7,9 @@ import * as p from "@clack/prompts";
 /**
  * @param {import('#types').ProjectType} projectType
  * @param {string[]} [suggested] layers to select by default, beyond each layer's own default
+ * @param {boolean} [isUpdate] the project exists already
  */
-export async function askLayers(projectType, suggested = []) {
+export async function askLayers(projectType, suggested = [], isUpdate = false) {
   const optionalLayers = (await discoverLayers()).filter(
     (layer) => typeof layer.run === "function",
   );
@@ -31,25 +32,59 @@ export async function askLayers(projectType, suggested = []) {
    * Read before the check, which narrows `answers.layers` to undefined after it.
    */
   const given = answers.layers;
+  const skipped = answers["skip-layers"];
 
-  if (isValid(answers.layers)) {
-    let result = optionalLayers.filter((layer) => answers.layers.includes(layer.name));
+  for (const name of skipped) {
+    if (!supported.has(name)) {
+      provideAnswer("skip-layers", undefined, {
+        given: name,
+        reason: `Choose from: ${optionalLayers.map((layer) => layer.name).join(", ")}.`,
+      });
+    }
 
-    printArgInUse(`layers`, result.map((layer) => layer.name).join(", "));
-
-    return result;
+    if (given.includes(name)) {
+      provideAnswer("skip-layers", undefined, { given: name, reason: "It is also in --layers." });
+    }
   }
 
   // Whenever we have a yes/no option, we use string values rather than true/false
-  const defaultValues = (
-    await Promise.all(
-      optionalLayers.map(async (layer) => {
-        let result = suggested.includes(layer.name) || (await layer.defaultValue?.(projectType));
+  const defaultValues = /** @type {string[]} */ (
+    (
+      await Promise.all(
+        optionalLayers.map(async (layer) => {
+          if (skipped.includes(layer.name)) return false;
 
-        return result && layer.name;
-      }),
-    )
-  ).filter(Boolean);
+          let result = suggested.includes(layer.name) || (await layer.defaultValue?.(projectType));
+
+          return result && layer.name;
+        }),
+      )
+    ).filter(Boolean)
+  );
+
+  /**
+   * For a new project, --layers adds to the default layers,
+   * so that a flag for one layer does not turn off the defaults.
+   * --skip-layers leaves a default out.
+   *
+   * An update applies only the given layers,
+   * because a default such as typescript would convert the existing project.
+   */
+  if (isValid(answers.layers)) {
+    let added = isUpdate ? [] : defaultValues.filter((name) => !answers.layers.includes(name));
+    let result = optionalLayers.filter(
+      (layer) => answers.layers.includes(layer.name) || added.includes(layer.name),
+    );
+
+    printArgInUse(
+      `layers`,
+      added.length
+        ? `${answers.layers.join(", ")} + defaults: ${added.join(", ")}`
+        : answers.layers.join(", "),
+    );
+
+    return result;
+  }
 
   if (!isTTY()) {
     let names = provideAnswer("layers", defaultValues, {

@@ -46,6 +46,21 @@ npx ember.nvp --name my-app --path ./my-app --type app --layers typescript
 
 `npx ember.nvp --help` lists every flag.
 
+### Default layers
+
+Some layers are on by default, for example `agents-md` and `readme`.
+For a new project, `--layers` adds to these defaults.
+To leave a default out, use `--skip-layers`:
+
+```bash
+npx ember.nvp --name my-app --path ./my-app --type app --layers ssr --skip-layers agents-md
+```
+
+The CLI prints the layers that it will apply, and asks for a confirmation before it generates the project.
+`--confirm yes` skips the confirmation.
+
+When you update an existing project, `--layers` applies only the layers that you give.
+
 ### Updating an existing project
 
 You can run `ember.nvp` on top of an existing project to add layers to it.

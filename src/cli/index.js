@@ -41,7 +41,11 @@ async function main() {
     replaceOrUpdate === "update"
       ? await checkForMigration(projectPath, projectName, projectType)
       : [];
-  const selectedLayers = await askLayers(projectType, migrationLayers);
+  const selectedLayers = await askLayers(
+    projectType,
+    migrationLayers,
+    replaceOrUpdate === "update",
+  );
   const packageManager = await askPackageManager();
 
   // Layer options start from what the project already uses
