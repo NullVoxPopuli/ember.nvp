@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
+import { isTTY, provideAnswer } from "./tty.js";
 
 const SUPPORTED = new Set(["yes", "no"]);
 
@@ -19,6 +20,10 @@ export async function askIfOK() {
     printArgInUse("confirm", answers.confirm);
 
     return answers.confirm;
+  }
+
+  if (!isTTY()) {
+    return provideAnswer("confirm", "yes", { given: answers.confirm });
   }
 
   const answer = await p.select({

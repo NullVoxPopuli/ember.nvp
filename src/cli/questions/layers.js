@@ -1,4 +1,5 @@
 import { answers, printArgInUse } from "#args";
+import { isTTY, provideAnswer } from "./tty.js";
 import { discoverLayers } from "#layers";
 
 import * as p from "@clack/prompts";
@@ -26,6 +27,11 @@ export async function askLayers(projectType, suggested = []) {
     return selected.every((name) => supported.has(name));
   }
 
+  /**
+   * Read before the check, which narrows `answers.layers` to undefined after it.
+   */
+  const given = answers.layers;
+
   if (isValid(answers.layers)) {
     let result = optionalLayers.filter((layer) => answers.layers.includes(layer.name));
 
@@ -44,6 +50,15 @@ export async function askLayers(projectType, suggested = []) {
       }),
     )
   ).filter(Boolean);
+
+  if (!isTTY()) {
+    let names = provideAnswer("layers", defaultValues, {
+      given: given?.length ? given.join(",") : undefined,
+      reason: `Choose from: ${optionalLayers.map((layer) => layer.name).join(", ")}.`,
+    });
+
+    return optionalLayers.filter((layer) => names.includes(layer.name));
+  }
 
   const selectedFeatures = await p.multiselect({
     message: "Select additional features:",

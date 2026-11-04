@@ -119,7 +119,16 @@ export async function generate({
 
 const cliPath = join(import.meta.dirname, "../src/cli/index.js");
 
-export function cli(args: string[] = [], options: { cwd?: string } = {}) {
+/**
+ * Runs the CLI. Its stdin is a pipe, not a TTY, so it asks nothing.
+ *
+ * With `tty: true`, the CLI runs in a pseudo-terminal (a TTY) from `script` (util-linux),
+ * so the prompts appear, and writes to stdin answer them.
+ */
+export function cli(
+  args: string[] = [],
+  { tty = false, ...options }: { cwd?: string; tty?: boolean } = {},
+) {
   let cmd = `node ${cliPath} ${args.join(" ")}`;
 
   console.log(`Running '${styleText("cyan", cmd)}'`);
@@ -127,7 +136,22 @@ export function cli(args: string[] = [], options: { cwd?: string } = {}) {
   let output = new MockWritable();
   let input = new MockReadable();
 
-  let execaPromise = execa("node", [cliPath, ...args], options);
+  let execaPromise = tty
+    ? execa(
+        "script",
+        [
+          "--quiet",
+          "--return",
+          "--command",
+          /**
+           * The new TTY has 0 columns, so clack would wrap after every character.
+           */
+          `stty cols 120 rows 40; ${shellCommand([process.execPath, cliPath].concat(args))}`,
+          "/dev/null",
+        ],
+        options,
+      )
+    : execa("node", [cliPath, ...args], options);
   if (execaPromise.stdout) {
     execaPromise.stdout.pipe(output);
   }
@@ -137,6 +161,10 @@ export function cli(args: string[] = [], options: { cwd?: string } = {}) {
     output,
     input,
   };
+}
+
+function shellCommand(words: string[]) {
+  return words.map((word) => `'${word.replaceAll("'", `'\\''`)}'`).join(" ");
 }
 
 export class MockWritable extends Writable {

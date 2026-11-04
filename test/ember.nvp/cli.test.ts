@@ -158,6 +158,53 @@ test("cli exits on an invalid layer option flag, before writing anything", async
   }
 });
 
+test("without a TTY, a question without a flag gets its default", async () => {
+  let parent = await mktemp("cli-no-tty");
+  let path = join(parent, "my-app");
+
+  try {
+    // No --layers: in a coding agent's shell, stdin is not a TTY, so the layers prompt cannot run
+    let res = await cli([
+      "--name",
+      "my-app",
+      "--path",
+      path,
+      "--type",
+      "app",
+      "--packageManager",
+      "pnpm",
+      "--confirm",
+      "yes",
+      "--write",
+      "yes",
+    ]).execaPromise;
+
+    expect(res.exitCode).toBe(0);
+    expect(stripVTControlCharacters(res.stdout)).toMatch(/using layers: .+ \(default\)/);
+    expect(existsSync(join(path, "package.json"))).toBe(true);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test("without a TTY, an invalid flag exits before writing anything", async () => {
+  let parent = await mktemp("cli-no-tty-invalid");
+
+  try {
+    let res = await cli(["--name", "my-app", "--path", "my-app", "--type", "app"], {
+      cwd: parent,
+    }).execaPromise.catch((error) => error);
+
+    expect(res.exitCode).toBe(1);
+    expect(stripVTControlCharacters(res.stdout)).toContain(
+      "Invalid value 'my-app' for --path. It must start with '.' or '/'.",
+    );
+    expect(existsSync(join(parent, "my-app"))).toBe(false);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
 test("in a project directory, asks to update first and defaults to the project's name and type", async () => {
   let dir = await mktemp("cli-update-here");
   await writeFile(
@@ -183,7 +230,7 @@ test("in a project directory, asks to update first and defaults to the project's
   ];
 
   try {
-    let { execaPromise } = cli(args, { cwd: dir });
+    let { execaPromise } = cli(args, { cwd: dir, tty: true });
     let output = "";
 
     execaPromise.stdout?.on("data", (chunk) => {
@@ -197,7 +244,7 @@ test("in a project directory, asks to update first and defaults to the project's
     });
 
     let res = await execaPromise;
-    let text = stripVTControlCharacters(output);
+    let text = stripVTControlCharacters(output).replaceAll("\r\n", "\n");
 
     expect(res.exitCode).toBe(0);
     expect(text.indexOf("This directory has a package.json")).toBeLessThan(

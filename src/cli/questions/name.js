@@ -3,6 +3,7 @@ import packageNameRegex from "package-name-regex";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
+import { isTTY, provideAnswer } from "./tty.js";
 
 const DEFAULT = "my-app";
 
@@ -21,6 +22,13 @@ export async function askName(existingProject) {
 
   let existingName = existingProject ? readName(existingProject) : undefined;
   let fallback = existingName ?? DEFAULT;
+
+  if (!isTTY()) {
+    return provideAnswer("name", fallback, {
+      given: answers.name,
+      reason: "It must be a valid npm package name.",
+    });
+  }
 
   const projectName = await text({
     message: "What is your project name?",
