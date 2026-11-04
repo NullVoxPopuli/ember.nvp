@@ -36,9 +36,14 @@ export async function maybeLintWithConcurrently(project) {
     await packageJson.modify(async (json) => {
       json.scripts ||= {};
       json.devDependencies ||= {};
-      json.scripts.lint = 'concurrently "pnpm:lint:*(!fix)" --names "lint:" --prefixColors auto';
+      /**
+       * concurrently runs package.json scripts with an "npm:" or "pnpm:" prefix.
+       */
+      let pm = project.packageManager;
+
+      json.scripts.lint = `concurrently "${pm}:lint:*(!fix)" --names "lint:" --prefixColors auto`;
       json.scripts["lint:fix"] =
-        'concurrently "pnpm:lint:*:fix" --names "fix:" --prefixColors auto && pnpm format';
+        `concurrently "${pm}:lint:*:fix" --names "fix:" --prefixColors auto && ${project.runPrefix} format`;
 
       Object.assign(
         json.devDependencies,
