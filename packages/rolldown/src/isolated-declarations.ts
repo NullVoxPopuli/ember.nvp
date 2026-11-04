@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { parseTsconfig, type TsConfigJsonResolved } from "get-tsconfig";
 import type { Plugin } from "rolldown";
-import type { UserConfig } from "tsdown";
+import type { ResolvedConfig, UserConfig } from "tsdown";
 
 /**
  * Resolve the tsconfig the build will use.
@@ -75,7 +75,6 @@ function resolveTsconfigPath(option: string | boolean | undefined): string | und
  */
 export function emberIsolatedDeclarations(): Plugin {
   let tsconfigOption: string | boolean | undefined;
-  let emitsDeclarations = true;
 
   return {
     name: "ember:isolated-declarations",
@@ -84,12 +83,34 @@ export function emberIsolatedDeclarations(): Plugin {
     // That means the cwd's tsconfig.json, the only thing it could mean there.
     tsdownConfig(config: UserConfig) {
       tsconfigOption = config.tsconfig;
-      // `emberConfig()` turns dts on unless the library turned it off,
-      // so an explicit `false` is the only "no declarations" signal.
+    },
+
+    /**
+     * Runs after every plugin's `tsdownConfig`, so `dts` is final here.
+     *
+     * Must run before the build starts:
+     * tsdown sets up rolldown-plugin-dts while it resolves build options,
+     * and without a tsconfig that throws before any `buildStart` hook.
+     */
+    tsdownConfigResolved(config: ResolvedConfig) {
+      if (config.tsconfig !== false || !config.dts) return;
+
+      // Without a tsconfig there is no `isolatedDeclarations`,
+      // so tsdown falls back to the tsc-based declaration pipeline.
       //
-      // Hook order between plugins isn't guaranteed,
-      // so don't rely on it having run.
-      emitsDeclarations = config.dts !== false;
+      // That pipeline reads source files from disk,
+      // and dies with "Source file not found" on every `.gts` / `.gjs`,
+      // since those only exist compiled in the module graph.
+      //
+      // Say so here instead of leaving that to be decoded.
+      throw new Error(
+        `\`tsconfig: false\` cannot be combined with declaration emit.\n\n` +
+          `Declarations are emitted by the isolated-declarations pipeline, which needs a ` +
+          `tsconfig setting "compilerOptions.isolatedDeclarations": true -- it is the only ` +
+          `pipeline that can see compiled .gts/.gjs modules.\n\n` +
+          `Either point tsdown's \`tsconfig\` option at such a config, or set \`dts: false\` ` +
+          `if this library ships no types.`,
+      );
     },
 
     buildStart: {
@@ -102,27 +123,6 @@ export function emberIsolatedDeclarations(): Plugin {
        */
       order: "pre",
       async handler() {
-        if (tsconfigOption === false) {
-          if (!emitsDeclarations) return;
-
-          // Without a tsconfig there is no `isolatedDeclarations`,
-          // so tsdown falls back to the tsc-based declaration pipeline.
-          //
-          // That pipeline reads source files from disk,
-          // and dies with "Source file not found" on every `.gts` / `.gjs`,
-          // since those only exist compiled in the module graph.
-          //
-          // Say so here instead of leaving that to be decoded.
-          this.error(
-            `\`tsconfig: false\` cannot be combined with declaration emit.\n\n` +
-              `Declarations are emitted by the isolated-declarations pipeline, which needs a ` +
-              `tsconfig setting "compilerOptions.isolatedDeclarations": true -- it is the only ` +
-              `pipeline that can see compiled .gts/.gjs modules.\n\n` +
-              `Either point tsdown's \`tsconfig\` option at such a config, or set \`dts: false\` ` +
-              `if this library ships no types.`,
-          );
-        }
-
         const tsconfigPath = resolveTsconfigPath(tsconfigOption);
 
         if (!tsconfigPath || !existsSync(tsconfigPath)) return;
