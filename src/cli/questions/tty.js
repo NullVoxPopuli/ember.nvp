@@ -2,8 +2,8 @@ import * as p from "@clack/prompts";
 import { printArgInUse } from "#args";
 
 /**
- * Prompts need a terminal.
- * Without one (CI, scripts, coding agents), clack ends each prompt as cancelled,
+ * Prompts need stdin to be a TTY.
+ * Without a TTY (CI, scripts, coding agents), clack ends each prompt as cancelled,
  * and the CLI would stop without writing anything.
  */
 export function isTTY() {

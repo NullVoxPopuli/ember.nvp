@@ -2,7 +2,7 @@ import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
 import { validateOption } from "./validate-option.js";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 
 /**
  * Prompt the user for options defined on the selected layers.

@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 
 const SUPPORTED = new Set(["yes", "no"]);
 

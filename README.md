@@ -34,9 +34,9 @@ pnpm dlx NullVoxPopuli/ember.nvp
 npx NullVoxPopuli/ember.nvp
 ```
 
-### Without a terminal
+### Without a TTY
 
-In CI, in scripts, and in coding agents, there is no terminal to ask questions in.
+In CI, in scripts, and in coding agents, stdin is often not a TTY, so the CLI cannot ask questions.
 Then each question without a flag gets its default, the answer that Enter would choose, and the CLI prints it.
 A question without a default, or an invalid flag value, stops the CLI before it writes anything.
 

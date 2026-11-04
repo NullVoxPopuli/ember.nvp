@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 
 import { answers, printArgInUse } from "#args";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";

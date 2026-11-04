@@ -158,12 +158,12 @@ test("cli exits on an invalid layer option flag, before writing anything", async
   }
 });
 
-test("without a terminal, a question without a flag gets its default", async () => {
-  let parent = await mktemp("cli-no-terminal");
+test("without a TTY, a question without a flag gets its default", async () => {
+  let parent = await mktemp("cli-no-tty");
   let path = join(parent, "my-app");
 
   try {
-    // No --layers: a coding agent's shell has no terminal for the layers prompt
+    // No --layers: in a coding agent's shell, stdin is not a TTY, so the layers prompt cannot run
     let res = await cli([
       "--name",
       "my-app",
@@ -187,8 +187,8 @@ test("without a terminal, a question without a flag gets its default", async () 
   }
 });
 
-test("without a terminal, an invalid flag exits before writing anything", async () => {
-  let parent = await mktemp("cli-no-terminal-invalid");
+test("without a TTY, an invalid flag exits before writing anything", async () => {
+  let parent = await mktemp("cli-no-tty-invalid");
 
   try {
     let res = await cli(["--name", "my-app", "--path", "my-app", "--type", "app"], {
@@ -230,7 +230,7 @@ test("in a project directory, asks to update first and defaults to the project's
   ];
 
   try {
-    let { execaPromise } = cli(args, { cwd: dir, terminal: true });
+    let { execaPromise } = cli(args, { cwd: dir, tty: true });
     let output = "";
 
     execaPromise.stdout?.on("data", (chunk) => {

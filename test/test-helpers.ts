@@ -120,14 +120,14 @@ export async function generate({
 const cliPath = join(import.meta.dirname, "../src/cli/index.js");
 
 /**
- * Runs the CLI. Its stdin is a pipe, so it has no terminal and asks nothing.
+ * Runs the CLI. Its stdin is a pipe, not a TTY, so it asks nothing.
  *
- * With `terminal: true`, the CLI runs in a pseudo-terminal from `script` (util-linux),
+ * With `tty: true`, the CLI runs in a pseudo-terminal (a TTY) from `script` (util-linux),
  * so the prompts appear, and writes to stdin answer them.
  */
 export function cli(
   args: string[] = [],
-  { terminal = false, ...options }: { cwd?: string; terminal?: boolean } = {},
+  { tty = false, ...options }: { cwd?: string; tty?: boolean } = {},
 ) {
   let cmd = `node ${cliPath} ${args.join(" ")}`;
 
@@ -136,7 +136,7 @@ export function cli(
   let output = new MockWritable();
   let input = new MockReadable();
 
-  let execaPromise = terminal
+  let execaPromise = tty
     ? execa(
         "script",
         [
@@ -144,7 +144,7 @@ export function cli(
           "--return",
           "--command",
           /**
-           * The new terminal has 0 columns, so clack would wrap after every character.
+           * The new TTY has 0 columns, so clack would wrap after every character.
            */
           `stty cols 120 rows 40; ${shellCommand([process.execPath, cliPath].concat(args))}`,
           "/dev/null",

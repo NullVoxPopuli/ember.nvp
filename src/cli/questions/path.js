@@ -1,7 +1,7 @@
 import { cancel, isCancel, text } from "@clack/prompts";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 import { cwd } from "#utils/cwd.js";
 
 /**

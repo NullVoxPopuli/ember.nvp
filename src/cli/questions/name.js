@@ -3,7 +3,7 @@ import packageNameRegex from "package-name-regex";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 
 const DEFAULT = "my-app";
 

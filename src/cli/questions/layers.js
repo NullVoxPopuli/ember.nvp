@@ -1,5 +1,5 @@
 import { answers, printArgInUse } from "#args";
-import { isTTY, provideAnswer } from "./terminal.js";
+import { isTTY, provideAnswer } from "./tty.js";
 import { discoverLayers } from "#layers";
 
 import * as p from "@clack/prompts";
