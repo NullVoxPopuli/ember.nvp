@@ -2,7 +2,7 @@ import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
 import { validateOption } from "./validate-option.js";
-import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
+import { answerWithoutTerminal, isTTY } from "./terminal.js";
 
 /**
  * Prompt the user for options defined on the selected layers.
@@ -34,7 +34,7 @@ export async function askLayerOptions(selectedLayers, existing) {
       const message = `${styleText("magentaBright", layer.name)}: ${schema.prompt}`;
       const detected = existing && schema.detect ? await schema.detect(existing) : undefined;
 
-      if (!hasTerminal()) {
+      if (!isTTY()) {
         layerResult[key] = answerWithoutTerminal(
           `${layer.name}.${key}`,
           defaultAnswer(schema, detected ?? schema.default),

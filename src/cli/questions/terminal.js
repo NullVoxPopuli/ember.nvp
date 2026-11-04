@@ -6,7 +6,7 @@ import { printArgInUse } from "#args";
  * Without one (CI, scripts, coding agents), clack ends each prompt as cancelled,
  * and the CLI would stop without writing anything.
  */
-export function hasTerminal() {
+export function isTTY() {
   return Boolean(process.stdin.isTTY);
 }
 

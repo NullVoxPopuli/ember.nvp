@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
 
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
+import { answerWithoutTerminal, isTTY } from "./terminal.js";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";
@@ -33,7 +33,7 @@ export async function askReplaceOrUpdate(projectPath) {
     }
   }
 
-  if (!hasTerminal()) {
+  if (!isTTY()) {
     return answerWithoutTerminal("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 
@@ -80,7 +80,7 @@ export async function askAboutProjectHere() {
     return answers.replaceOrUpdate;
   }
 
-  if (!hasTerminal()) {
+  if (!isTTY()) {
     return answerWithoutTerminal("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 

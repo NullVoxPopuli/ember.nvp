@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
+import { answerWithoutTerminal, isTTY } from "./terminal.js";
 import { detectProjectType } from "#bases";
 
 /**
@@ -45,7 +45,7 @@ export async function askProjectType(existingProject) {
 
   const initialValue = existingProject ? detectProjectType(existingProject) : undefined;
 
-  if (!hasTerminal()) {
+  if (!isTTY()) {
     return answerWithoutTerminal("type", initialValue ?? "app", { given: answers.type });
   }
 

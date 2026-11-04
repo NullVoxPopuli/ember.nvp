@@ -1,7 +1,7 @@
 import { cancel, isCancel, text } from "@clack/prompts";
 import { join } from "node:path";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
+import { answerWithoutTerminal, isTTY } from "./terminal.js";
 import { cwd } from "#utils/cwd.js";
 
 /**
@@ -29,7 +29,7 @@ export async function askPath(name) {
 
   const defaultValue = join(cwd, name);
 
-  if (!hasTerminal()) {
+  if (!isTTY()) {
     return answerWithoutTerminal("path", defaultValue, {
       given: answers.path,
       reason: "It must start with '.' or '/'.",

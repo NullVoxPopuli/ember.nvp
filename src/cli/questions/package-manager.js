@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
-import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
+import { answerWithoutTerminal, isTTY } from "./terminal.js";
 
 const SUPPORTED = new Set(["pnpm", "npm"]);
 
@@ -26,7 +26,7 @@ export async function askPackageManager() {
     return answers.packageManager;
   }
 
-  if (!hasTerminal()) {
+  if (!isTTY()) {
     return answerWithoutTerminal("packageManager", "pnpm", { given: answers.packageManager });
   }
 
