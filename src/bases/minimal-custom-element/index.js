@@ -34,6 +34,22 @@ export default {
   label: "Minimal Custom Element Base",
   description: "An Ember component packaged as a custom element (web component)",
 
+  agents: `## Project layout
+
+- \`src/components/\` holds the Ember components.
+- \`src/element\` is the custom element.
+  \`connectedCallback\` renders the component, and \`disconnectedCallback\` destroys that render.
+- \`src/register\` defines the tag. Consumers import it for its side effect.
+- \`src/index\` is the public entry point.
+- \`dist/\` is the build output, with ember bundled in. Do not edit it, because each build writes it again.
+
+To add an attribute:
+
+1. Add its name to \`observedAttributes\`.
+2. Give it a default value in the tracked object.
+3. Write the new value in \`attributeChangedCallback\`.
+4. Read it as an arg in the component.`,
+
   /**
    * @param {string} directory
    */

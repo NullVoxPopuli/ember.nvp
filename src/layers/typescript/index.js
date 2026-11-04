@@ -102,4 +102,13 @@ export default {
 
     return setup.readme(project);
   },
+
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async agents(project) {
+    let setup = await setupFor(project);
+
+    return setup.agents(project);
+  },
 };

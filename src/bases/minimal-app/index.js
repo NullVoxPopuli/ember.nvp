@@ -22,6 +22,17 @@ export default {
   label: "Minimal App Base",
   description: "Bare minimum Ember app structure",
 
+  agents: `## Project layout
+
+- \`app/app\` registers the modules in \`app/router\`, \`app/routes/\`, \`app/templates/\`, and \`app/services/\`.
+  Everything else (components, helpers, modifiers, utils) is imported where it is used.
+- Services from libraries are not registered automatically.
+  Re-export each one in \`app/services/\`, for example \`app/services/page-title.js\`:
+
+  \`\`\`js
+  export { default } from "ember-page-title/services/page-title";
+  \`\`\``,
+
   /**
    * @param {string} directory
    */

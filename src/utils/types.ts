@@ -105,6 +105,10 @@ export interface Base {
    */
   detect: (directory: string) => boolean;
   run: (project: Project) => Promise<void>;
+  /**
+   * Optional notes for coding agents about this type of project, in the same shape as `Layer["agents"]`.
+   */
+  agents?: Layer["agents"];
 }
 
 /**

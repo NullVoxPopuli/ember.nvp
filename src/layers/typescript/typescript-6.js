@@ -89,6 +89,16 @@ This project uses TypeScript and Glint for static type checking.
 /**
  * @param {import('#utils/project.js').Project} project
  */
+export function agents(project) {
+  return `## Types
+
+- \`${project.runPrefix} lint:types\` checks the types with Glint, templates included.
+  Plain \`tsc\` does not read \`<template>\`, so it reports errors that are not real.`;
+}
+
+/**
+ * @param {import('#utils/project.js').Project} project
+ */
 async function updatePackageJson(project) {
   await packageJson.modify(async (json) => {
     json.scripts ||= {};

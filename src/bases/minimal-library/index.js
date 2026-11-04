@@ -27,6 +27,24 @@ export default {
   description: "Bare minimum Ember v2 library (addon) structure",
 
   /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  agents(project) {
+    let types = project.wantsTypeScript
+      ? `
+- Declarations use isolated declarations, so each exported value needs an explicit type.
+  Annotate exported template-only components with \`TOC<...>\`.`
+      : "";
+
+    return `## Project layout
+
+- \`src/\` holds the source. \`src/index\` is the public entry point.
+  A module that consumers import must be re-exported from \`src/index\`, or be an \`entry\` in \`tsdown.config.js\`.
+- \`dist/\` is the build output. Do not edit it, because each build writes it again.
+- \`exports\` in \`package.json\` points consumers at \`dist/\`.${types}`;
+  },
+
+  /**
    * `ember-addon` marks v2 and classic addons.
    * A library from this base has no `ember-addon`, only a tsdown config.
    *
