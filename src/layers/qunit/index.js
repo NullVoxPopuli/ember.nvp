@@ -94,7 +94,7 @@ export default {
         "test:ci": isLibrary
           ? "testem ci --file config/test/testem.cjs --port 0"
           : "testem ci --port 0",
-        test: "pnpm build:test && pnpm test:ci",
+        test: `${project.runPrefix} build:test && ${project.runPrefix} test:ci`,
       },
       project.directory,
     );
