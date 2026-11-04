@@ -185,7 +185,7 @@ describe("base: minimal-library", () => {
             default: [];
           };
         }
-        declare const Badge: TOC<BadgeSignature>;
+        export declare const Badge: TOC<BadgeSignature>;
         interface GreetingSignature {
           Element: HTMLParagraphElement;
           Args: {
@@ -193,8 +193,8 @@ describe("base: minimal-library", () => {
           };
         }
         declare class Greeting extends Component<GreetingSignature> {}
-        declare function add(a: number, b: number): number;
-        export { Badge, type BadgeSignature, Greeting, type GreetingSignature, add };
+        export declare function add(a: number, b: number): number;
+        export { type BadgeSignature, Greeting, type GreetingSignature };
         //# sourceMappingURL=index.d.ts.map"
       `);
 
