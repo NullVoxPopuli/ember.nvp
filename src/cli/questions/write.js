@@ -2,6 +2,7 @@ import * as p from "@clack/prompts";
 import { styleText } from "node:util";
 
 import { answers, printArgInUse } from "#args";
+import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
 
 const SUPPORTED = new Set(["yes", "no"]);
 
@@ -36,6 +37,12 @@ export async function askToWrite(stage, changes) {
   }
 
   p.note(summarize(changes), `${changes.length} staged change${changes.length === 1 ? "" : "s"}`);
+
+  if (!hasTerminal()) {
+    return answerWithoutTerminal("write", "yes", { given: answers.write }) === "yes"
+      ? changes
+      : null;
+  }
 
   const answer = await p.select({
     message: `Write these changes to ${stage.targetDirectory}?`,

@@ -2,6 +2,7 @@ import { styleText } from "node:util";
 import * as p from "@clack/prompts";
 import { printArgInUse, parseLayerOptionsFromParsedArgs } from "#args";
 import { validateOption } from "./validate-option.js";
+import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
 
 /**
  * Prompt the user for options defined on the selected layers.
@@ -33,11 +34,44 @@ export async function askLayerOptions(selectedLayers, existing) {
       const message = `${styleText("magentaBright", layer.name)}: ${schema.prompt}`;
       const detected = existing && schema.detect ? await schema.detect(existing) : undefined;
 
+      if (!hasTerminal()) {
+        layerResult[key] = answerWithoutTerminal(
+          `${layer.name}.${key}`,
+          defaultAnswer(schema, detected ?? schema.default),
+        );
+        continue;
+      }
+
       layerResult[key] = await ask(message, schema, detected ?? schema.default);
     }
   }
 
   return result;
+}
+
+/**
+ * What Enter would choose for the question of this option.
+ *
+ * @param {import('#types').LayerOptionSchema} schema
+ * @param {any} initial
+ * @returns {unknown}
+ */
+function defaultAnswer(schema, initial) {
+  switch (schema.type) {
+    case "confirm":
+      return initial ?? true;
+    case "select":
+      return initial ?? schema.options?.[0]?.value;
+    case "multiselect":
+      return initial ?? [];
+    default: {
+      if (initial === undefined) return undefined;
+
+      const result = validateOption(schema, String(initial));
+
+      return result.ok ? result.value : undefined;
+    }
+  }
 }
 
 /**

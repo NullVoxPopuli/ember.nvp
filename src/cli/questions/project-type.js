@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts";
 import { answers, printArgInUse } from "#args";
+import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
 import { detectProjectType } from "#bases";
 
 /**
@@ -42,9 +43,15 @@ export async function askProjectType(existingProject) {
     return answers.type;
   }
 
+  const initialValue = existingProject ? detectProjectType(existingProject) : undefined;
+
+  if (!hasTerminal()) {
+    return answerWithoutTerminal("type", initialValue ?? "app", { given: answers.type });
+  }
+
   const answer = await p.select({
     message: "Which type of project?",
-    initialValue: existingProject ? detectProjectType(existingProject) : undefined,
+    initialValue,
     options: [
       { value: "app", label: "web app", hint: "generates html, js, and css to deploy to the web" },
       {

@@ -1,6 +1,7 @@
 import * as p from "@clack/prompts";
 
 import { answers, printArgInUse } from "#args";
+import { answerWithoutTerminal, hasTerminal } from "./terminal.js";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { cwd } from "#utils/cwd.js";
@@ -30,6 +31,10 @@ export async function askReplaceOrUpdate(projectPath) {
 
       return answers.replaceOrUpdate;
     }
+  }
+
+  if (!hasTerminal()) {
+    return answerWithoutTerminal("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 
   const answer = await p.select({
@@ -73,6 +78,10 @@ export async function askAboutProjectHere() {
     printArgInUse("replaceOrUpdate", answers.replaceOrUpdate);
 
     return answers.replaceOrUpdate;
+  }
+
+  if (!hasTerminal()) {
+    return answerWithoutTerminal("replaceOrUpdate", "update", { given: answers.replaceOrUpdate });
   }
 
   const answer = await p.select({
