@@ -225,6 +225,66 @@ Choose when pages render:
   The routes to render are in `vite.config.mjs`.
   `start` serves `dist` with `vite preview`.
 
+#### Page titles
+
+Set `document.title`.
+The render has a `document`, and the rendered `<head>` goes into the page.
+
+1. Delete the `<title>` line from `index.html`. If you keep it, the page has two titles, and the browser shows the first.
+2. Set a default title in `app/templates/application`, and a title in each page that needs one.
+   A page renders after the application template, so the title of the page wins.
+
+```js
+// app/utils/page-title.js
+export function pageTitle(title) {
+  document.title = title;
+}
+```
+
+```gjs
+// app/templates/about.gjs
+import { pageTitle } from "#utils/page-title.js";
+
+<template>
+  {{pageTitle "About"}}
+  <h1>About</h1>
+</template>
+```
+
+#### Not-found pages (404)
+
+The render answers `200`, or `500` if it fails.
+To answer `404` for a URL that has no page (server mode):
+
+1. Add a route for all other URLs, last in `app/router`:
+
+   ```js
+   Router.map(function () {
+     // your routes
+     this.route("not-found", { path: "/*path" });
+   });
+   ```
+
+2. Mark the page in `app/templates/not-found.gjs`:
+
+   ```gjs
+   <template>
+     <main data-not-found>
+       <h1>Page not found</h1>
+     </main>
+   </template>
+   ```
+
+3. In `render()` in `server.js`, use `404` for that page:
+
+   ```js
+   let status = rendered.body.includes("data-not-found") ? 404 : rendered.statusCode;
+
+   response.writeHead(status, { "content-type": "text/html" });
+   ```
+
+For the shoebox, lazy routes, and the full API, read the [vite-ember-ssr README](https://github.com/evoactivity/vite-ember-ssr#readme).
+
 ### ⚡ Vitest (optional)
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
