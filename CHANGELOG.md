@@ -2,6 +2,17 @@
 
 ## Release (2026-11-05)
 
+* ember.nvp 2.1.1 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#188](https://github.com/NullVoxPopuli/ember.nvp/pull/188) AGENTS.md: serve the build with vite preview, with env at build time ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-05)
+
 * ember.nvp 2.1.0 (minor)
 * @nullvoxpopuli/ember-vite 1.4.0 (minor)
 
