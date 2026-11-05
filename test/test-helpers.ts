@@ -1,9 +1,10 @@
-import { execa } from "execa";
+import { execa, type ResultPromise } from "execa";
 import { join, relative, sep } from "node:path";
 import { styleText } from "node:util";
 import { Readable, Writable } from "node:stream";
 import { mkdtemp, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { createServer, type Server } from "node:http";
 import { generateProject, Project } from "ember.nvp";
 import { discoverLayers } from "#layers";
 import type { Answers, DiscoveredLayer, ProjectType } from "#types";
@@ -248,4 +249,49 @@ export async function listFiles(
     .filter((path) => !path.split(sep).includes("node_modules"))
     .filter((path) => includeDist || !path.startsWith(`dist${sep}`))
     .sort();
+}
+
+export async function listen(server: Server) {
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  let address = server.address();
+
+  if (!address || typeof address === "string") throw new Error("no port");
+
+  return address.port;
+}
+
+/**
+ * A port that nothing listens on now.
+ */
+export async function freePort() {
+  let server = createServer();
+  let port = await listen(server);
+
+  await new Promise((resolve) => server.close(resolve));
+
+  return port;
+}
+
+/**
+ * Waits until the server answers, or throws with its output if it exits.
+ */
+export async function waitForServer(url: string, serve: ResultPromise) {
+  let exited = false;
+
+  serve.finally(() => (exited = true)).catch(() => {});
+
+  for (let i = 0; i < 600; i++) {
+    if (exited) throw new Error(`the server exited:\n${(await serve.catch((e) => e)).all}`);
+
+    try {
+      await fetch(url);
+
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
+  throw new Error(`no response from ${url}`);
 }

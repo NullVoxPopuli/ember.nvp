@@ -7,8 +7,7 @@ import { ember } from "./ember.ts";
 
 const ROLLDOWN = { meta: { rolldownVersion: "1.0.0" } } as ConfigPluginContext;
 
-async function configure(env: ConfigEnv) {
-  const config: any = {};
+async function configure(env: ConfigEnv, config: any = {}) {
   const [plugin] = ember();
 
   // @ts-expect-error the first entry is the config plugin
@@ -28,6 +27,42 @@ describe("ember", () => {
     expect(config.resolve.extensions).toEqual(extensions);
     expect(config.server.port).toBe(4200);
     expect(config.optimizeDeps.exclude).toContain("@embroider/macros");
+  });
+
+  describe("preview port", () => {
+    const original = process.env.PORT;
+
+    afterEach(() => {
+      if (original === undefined) delete process.env.PORT;
+      else process.env.PORT = original;
+    });
+
+    it("is 4200 without $PORT, like the dev server", async () => {
+      delete process.env.PORT;
+
+      const config = await configure({ command: "serve", mode: "production" });
+
+      expect(config.preview.port).toBe(4200);
+    });
+
+    it("comes from $PORT", async () => {
+      process.env.PORT = "3123";
+
+      const config = await configure({ command: "serve", mode: "production" });
+
+      expect(config.preview.port).toBe(3123);
+    });
+
+    it("keeps the port in the project's vite config", async () => {
+      process.env.PORT = "3123";
+
+      const config = await configure(
+        { command: "serve", mode: "production" },
+        { preview: { port: 8080 } },
+      );
+
+      expect(config.preview.port).toBe(8080);
+    });
   });
 
   it("gives @embroider/vite the plugin context, so that it configures rolldown", async () => {

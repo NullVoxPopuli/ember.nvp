@@ -45,6 +45,7 @@ const SERVER = {
   scripts: {
     build: "vite build && vite build --ssr app/app-ssr",
     dev: "node server.js --dev",
+    preview: "node server.js",
     start: "node server.js",
   },
   /**
@@ -75,6 +76,7 @@ const STATIC = {
   scripts: {
     build: "vite build",
     dev: "vite",
+    preview: "vite preview",
     start: "vite preview",
   },
   testemCwd: "dist",

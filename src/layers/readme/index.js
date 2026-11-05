@@ -34,10 +34,13 @@ To start the local development server:
 ${project.runPrefix} dev
 \`\`\`
 
-or
+### Production build
+
+To build the app, then serve the build on \`$PORT\` (default 4200):
 
 \`\`\`sh
-${project.runPrefix} start
+${project.runPrefix} build
+${project.runPrefix} preview
 \`\`\`
 ${layerDocsMarkdown}`;
 }

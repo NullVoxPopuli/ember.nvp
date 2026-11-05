@@ -225,6 +225,8 @@ export function ember(nvpConfig: Config = {}) {
          */
         await emberConfig.call(this, viteConfig, env);
 
+        applyPreviewPort(viteConfig);
+
         if ("plugins" in babel) {
           babel.plugins.length = 0;
 
@@ -279,6 +281,17 @@ export function ember(nvpConfig: Config = {}) {
       filter,
     }),
   ];
+}
+
+/**
+ * `vite preview` serves the build on `$PORT`, the port that hosts and CI give,
+ * or on 4200, the port of the dev server.
+ * Vite itself reads no `$PORT`, and `@embroider/vite` only sets the dev server's port.
+ * A port in the project's own vite config wins.
+ */
+function applyPreviewPort(viteConfig: UserConfig) {
+  viteConfig.preview ||= {};
+  viteConfig.preview.port ??= Number(process.env.PORT) || 4200;
 }
 
 const MODE_DEV = "development";

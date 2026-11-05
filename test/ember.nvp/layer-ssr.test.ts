@@ -1,5 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, reapply } from "#test-helpers";
+import { freePort, generate, listen, reapply, waitForServer } from "#test-helpers";
 import { layers } from "#layers";
 import { execa, type ResultPromise } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -17,25 +17,6 @@ import type { Project } from "ember.nvp";
  */
 
 const ssr = layers.find((layer) => layer.name === "ssr")!;
-
-async function listen(server: Server) {
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-
-  let address = server.address();
-
-  if (!address || typeof address === "string") throw new Error("no port");
-
-  return address.port;
-}
-
-async function freePort() {
-  let server = createServer();
-  let port = await listen(server);
-
-  await new Promise((resolve) => server.close(resolve));
-
-  return port;
-}
 
 async function emit(project: Project, files: Record<string, string>) {
   for (let [path, contents] of Object.entries(files)) {
@@ -93,26 +74,6 @@ async function startApi() {
   });
 
   return { api, apiPort: await listen(api) };
-}
-
-async function waitForServer(url: string, serve: ResultPromise) {
-  let exited = false;
-
-  serve.finally(() => (exited = true)).catch(() => {});
-
-  for (let i = 0; i < 600; i++) {
-    if (exited) throw new Error(`the server exited:\n${(await serve.catch((e) => e)).all}`);
-
-    try {
-      await fetch(url);
-
-      return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-  }
-
-  throw new Error(`no response from ${url}`);
 }
 
 describe.each([
