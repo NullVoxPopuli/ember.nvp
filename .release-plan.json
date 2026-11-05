@@ -1,14 +1,14 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "minor",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.1.0",
+      "impact": "patch",
+      "oldVersion": "2.1.0",
+      "newVersion": "2.1.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -20,18 +20,8 @@
       "oldVersion": "2.13.0"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "minor",
-      "oldVersion": "1.3.1",
-      "newVersion": "1.4.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.4.0"
     }
   },
-  "description": "## Release (2026-11-05)\n\n* ember.nvp 2.1.0 (minor)\n* @nullvoxpopuli/ember-vite 1.4.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`, `@nullvoxpopuli/ember-vite`\n  * [#186](https://github.com/NullVoxPopuli/ember.nvp/pull/186) Apps: a preview script that serves the build on $PORT ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-05)\n\n* ember.nvp 2.1.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#188](https://github.com/NullVoxPopuli/ember.nvp/pull/188) AGENTS.md: serve the build with vite preview, with env at build time ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
