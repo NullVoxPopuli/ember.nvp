@@ -5,6 +5,43 @@ import { getLatest } from "#utils/npm.js";
 import { applyFolderTo, readJSON } from "#utils/fs.js";
 import { removeConfiguredPlugin } from "#utils/babel.js";
 
+const LAYOUT = `## Project layout
+
+- \`app/app\` registers the modules in \`app/router\`, \`app/routes/\`, \`app/templates/\`, and \`app/services/\`.
+  Everything else (components, helpers, modifiers, utils) is imported where it is used.
+- Services from libraries are not registered automatically.
+  Re-export each one in \`app/services/\`, for example \`app/services/page-title.js\`:
+
+  \`\`\`js
+  export { default } from "ember-page-title/services/page-title";
+  \`\`\``;
+
+/**
+ * `vite preview` serves the build as static files,
+ * so a value that the browser needs must go into the build.
+ *
+ * @param {string} run
+ */
+function productionBuild(run) {
+  return `## Production build
+
+\`${run} build\`, then \`${run} preview\`, serves the build on \`$PORT\`.
+\`vite preview\` answers \`index.html\` for a URL with no file, so the router handles deep URLs.
+This app needs no server of its own: to serve the build, for example from \`start\`, use \`vite preview\`.
+
+\`vite preview\` does not build, and the code in the browser cannot read environment variables.
+Vite writes them into the code when it builds:
+
+- \`VITE_\` variables are on \`import.meta.env\`, for example \`import.meta.env.VITE_API_URL\`.
+- For a variable without the prefix, add it with \`define\` in \`vite.config.mjs\`, then build again:
+
+  \`\`\`js
+  define: {
+    "import.meta.env.API_URL": JSON.stringify(process.env.API_URL ?? ""),
+  },
+  \`\`\``;
+}
+
 /**
  * Minimal App Base
  *
@@ -22,16 +59,19 @@ export default {
   label: "Minimal App Base",
   description: "Bare minimum Ember app structure",
 
-  agents: `## Project layout
+  /**
+   * @param {import('#utils/project.js').Project} project
+   */
+  async agents(project) {
+    let manifest = await packageJson.read(project.directory);
+    let sections = [LAYOUT];
 
-- \`app/app\` registers the modules in \`app/router\`, \`app/routes/\`, \`app/templates/\`, and \`app/services/\`.
-  Everything else (components, helpers, modifiers, utils) is imported where it is used.
-- Services from libraries are not registered automatically.
-  Re-export each one in \`app/services/\`, for example \`app/services/page-title.js\`:
+    if (manifest.scripts?.preview === "vite preview") {
+      sections.push(productionBuild(project.runPrefix));
+    }
 
-  \`\`\`js
-  export { default } from "ember-page-title/services/page-title";
-  \`\`\``,
+    return sections.join("\n\n");
+  },
 
   /**
    * @param {string} directory
