@@ -40,7 +40,7 @@ To build the app, then serve the build on \`$PORT\` (default 4200):
 
 \`\`\`sh
 ${project.runPrefix} build
-${project.runPrefix} start
+${project.runPrefix} preview
 \`\`\`
 ${layerDocsMarkdown}`;
 }

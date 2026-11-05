@@ -261,7 +261,7 @@ describe("javascript", () => {
     expect(exitCode).toBe(0);
   });
 
-  it("start serves the production build on $PORT", async () => {
+  it("preview serves the production build on $PORT", async () => {
     let { exitCode } = await build(project, "production");
 
     hardExpect(exitCode).toBe(0);
@@ -270,10 +270,11 @@ describe("javascript", () => {
     let origin = `http://127.0.0.1:${port}`;
     let manifest = await packageJson.read(project.directory);
 
-    expect(manifest.scripts?.start).toBe("vite preview");
+    expect(manifest.scripts?.preview).toBe("vite preview");
+    expect(manifest.scripts?.start, "start stays the dev server").toBe("vite");
 
     /**
-     * The "start" script, without pnpm in between,
+     * The "preview" script, without pnpm in between,
      * so that kill() stops the server itself.
      * --host picks IPv4, because "localhost" can resolve to ::1.
      */

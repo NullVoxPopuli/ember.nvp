@@ -197,8 +197,8 @@ The base layer, matching the `--minimal` flag from [ember-cli/ember-app-blueprin
 - ✅ No ember-welcome-page
 - ✅ Vite-based with modern Ember
 
-In apps, `dev` starts the Vite dev server.
-`start` serves the build in `dist` with `vite preview`, on `$PORT` (default 4200), so run `build` first.
+In apps, `dev` and `start` start the Vite dev server.
+`preview` serves the build in `dist` with `vite preview`, on `$PORT` (default 4200), so run `build` first.
 
 Perfect for demos, reproductions, and learning!
 

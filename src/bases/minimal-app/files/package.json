@@ -22,7 +22,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "start": "vite preview"
+    "preview": "vite preview",
+    "start": "vite"
   },
   "dependencies": {
     "@embroider/macros": "^1.21.4",

@@ -60,7 +60,7 @@ describe("layer: readme", () => {
 
         \`\`\`sh
         pnpm build
-        pnpm start
+        pnpm preview
         \`\`\`
 
         ## Features & Tooling
