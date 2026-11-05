@@ -69,6 +69,12 @@ After a change, run these scripts in this order:
     expect(agents).toContain("### 404 pages");
   });
 
+  it("has no vite preview notes, because server.js serves the build", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).not.toContain("## Production build");
+  });
+
   it("keeps text outside its section when it runs again", async () => {
     let agents = (await project.read("AGENTS.md"))!;
 
@@ -221,6 +227,16 @@ describe("agents-md layer, app with vitest and typescript", () => {
     expect(agents).toContain("## Tests (Vitest)");
     expect(agents).toContain("## Types");
     expect(agents).toContain("Imports of `.gts` and `.gjs` modules must include the extension.");
+  });
+
+  it("tells how vite preview serves the build", async () => {
+    let agents = (await project.read("AGENTS.md"))!;
+
+    expect(agents).toContain("## Production build");
+    expect(agents).toContain("`pnpm build`, then `pnpm preview`, serves the build on `$PORT`.");
+    expect(agents).toContain(
+      '"import.meta.env.API_URL": JSON.stringify(process.env.API_URL ?? ""),',
+    );
   });
 });
 
