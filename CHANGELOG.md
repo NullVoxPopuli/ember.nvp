@@ -1,5 +1,17 @@
 # Changelog
 
+## Release (2026-11-05)
+
+* ember.nvp 2.1.0 (minor)
+* @nullvoxpopuli/ember-vite 1.4.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`, `@nullvoxpopuli/ember-vite`
+  * [#186](https://github.com/NullVoxPopuli/ember.nvp/pull/186) Apps: a preview script that serves the build on $PORT ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-04)
 
 * ember.nvp 2.0.0 (major)
