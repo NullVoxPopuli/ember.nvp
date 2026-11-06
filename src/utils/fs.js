@@ -7,7 +7,7 @@ import { rewriteImportsToMatchFiles } from "./rewrite-imports.js";
 
 /**
  * `**\/*` alone skips dotfiles, which bases legitimately provide
- * (`.gitignore`, `.env.development`, ...).
+ * (`.env.development`, `.github/`, ...).
  *
  * The extra patterns match:
  * - dotfiles at any depth
@@ -33,6 +33,20 @@ export function readJSON(path) {
 }
 
 /**
+ * npm leaves every `.gitignore` out of a published package,
+ * so the source folders name it `gitignore`.
+ *
+ *   files/gitignore → <project>/.gitignore
+ *
+ * @param {string} entry
+ */
+function dotfileName(entry) {
+  let { dir, base } = parsePath(entry);
+
+  return base === "gitignore" ? join(dir, ".gitignore") : entry;
+}
+
+/**
  * Modified version of applyFolder from ember-apply.
  *
  * Here, the caller decides the final output path and contents.
@@ -50,7 +64,7 @@ export async function applyFolder(from, options) {
     cwd: from,
   })) {
     let sourcePath = join(from, entry);
-    let targetPath = join(options.to.directory, entry);
+    let targetPath = join(options.to.directory, dotfileName(entry));
     let directory = dirname(targetPath);
 
     if (directory) {
