@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 
-const VITE_EMBER_SSR = { "vite-ember-ssr": "^0.6.2" };
+const VITE_EMBER_SSR = { "vite-ember-ssr": "^0.7.0" };
 
 /**
  * The server bundle includes settled() from here,
@@ -415,15 +415,23 @@ ${modeFor(project).readme(project.runPrefix)}`;
         ? `
 ### 404 pages
 
-The render answers \`200\`, or \`500\` if it fails. To answer \`404\` for a URL with no page:
+A URL with no route answers \`404\`. To show a page for it, add a catch-all route that sets the code:
 
 1. Add \`this.route("not-found", { path: "/*path" });\` last in \`Router.map\`.
-2. Mark that page's template: \`<main data-not-found>\`.
-3. In \`render()\` in \`server.js\`:
+2. Set the code in \`app/routes/not-found.js\`:
 
    \`\`\`js
-   let status = rendered.body.includes("data-not-found") ? 404 : rendered.statusCode;
+   import Route from "@ember/routing/route";
+   import { setStatusCode } from "vite-ember-ssr/client";
+
+   export default class NotFoundRoute extends Route {
+     model() {
+       setStatusCode(404);
+     }
+   }
    \`\`\`
+
+\`setStatusCode()\` works in any route, for example \`setStatusCode(response.status)\` after a failed \`fetch()\`. In the browser, it does nothing.
 `
         : "";
 
