@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "2.1.0",
-      "newVersion": "2.1.1",
+      "oldVersion": "2.1.1",
+      "newVersion": "2.1.2",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.4.0"
     }
   },
-  "description": "## Release (2026-11-05)\n\n* ember.nvp 2.1.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#188](https://github.com/NullVoxPopuli/ember.nvp/pull/188) AGENTS.md: serve the build with vite preview, with env at build time ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-06)\n\n* ember.nvp 2.1.2 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#190](https://github.com/NullVoxPopuli/ember.nvp/pull/190) Publish the .gitignore of each base, and keep dist/ out of the type check ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

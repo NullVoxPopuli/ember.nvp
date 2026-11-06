@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-11-06)
+
+* ember.nvp 2.1.2 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#190](https://github.com/NullVoxPopuli/ember.nvp/pull/190) Publish the .gitignore of each base, and keep dist/ out of the type check ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-05)
 
 * ember.nvp 2.1.1 (patch)
