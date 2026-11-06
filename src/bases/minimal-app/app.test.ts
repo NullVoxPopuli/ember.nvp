@@ -55,6 +55,23 @@ describe("typescript", () => {
     expect(exitCode).toBe(0);
   });
 
+  /**
+   * `allowJs` and no `include` would type check the built JS in `dist/` too.
+   */
+  it("the type check skips the build output", async () => {
+    let { exitCode } = await build(project);
+
+    hardExpect(exitCode).toBe(0);
+
+    let { stdout } = await project.run("pnpm exec tsc --noEmit --listFiles --runExternalCode");
+    let files = String(stdout)
+      .split("\n")
+      .filter((file) => file.startsWith(project.directory) && !file.includes("node_modules"));
+
+    expect(files.length, "the type check lists the app files").toBeGreaterThan(0);
+    expect(files.filter((file) => file.includes("/dist/"))).toEqual([]);
+  });
+
   it("has no JS files", async () => {
     let results = globSync("app/**/*", {
       exclude: ["node_modules", "dist"],

@@ -1,5 +1,6 @@
 {
   "extends": "@ember/app-tsconfig",
+  "exclude": ["dist", "node_modules"],
   "compilerOptions": {
     "allowJs": true,
     "lib": ["esnext", "dom", "dom.iterable"],
