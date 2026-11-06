@@ -46,6 +46,27 @@ export default class ItemRoute extends Route {
   };
 }
 
+/**
+ * The 404 page from the ssr section of AGENTS.md.
+ */
+function notFoundRoute(ext: "ts" | "js") {
+  return {
+    [`app/routes/not-found.${ext}`]: `import Route from "@ember/routing/route";
+import { setStatusCode } from "vite-ember-ssr/client";
+
+export default class NotFoundRoute extends Route {
+  model() {
+    setStatusCode(404);
+  }
+}
+`,
+    [`app/templates/not-found.g${ext}`]: `<template>
+  <p id="not-found">Not found</p>
+</template>
+`,
+  };
+}
+
 async function addItemRoute(project: Project, ext: "ts" | "js", apiPort: number) {
   await emit(project, itemRoute(ext, apiPort));
 
@@ -96,6 +117,18 @@ describe.each([
     });
 
     await addItemRoute(project, ext, apiPort);
+    await emit(project, notFoundRoute(ext));
+
+    let router = join(project.directory, `app/router.${ext}`);
+    let code = (await project.read(`app/router.${ext}`))!;
+
+    await writeFile(
+      router,
+      code.replace(
+        '  this.route("item");\n',
+        '  this.route("item");\n  this.route("not-found", { path: "/*path" });\n',
+      ),
+    );
 
     await execa("pnpm install", { cwd: project.directory, shell: true });
     await execa("pnpm build", { cwd: project.directory, shell: true });
@@ -157,6 +190,17 @@ describe.each([
 
   it("answers 404 for a missing file", async () => {
     expect((await fetch(`${origin}/favicon.ico`)).status).toBe(404);
+  });
+
+  it("answers 404 with the page of a route that calls setStatusCode(404)", async () => {
+    let response = await fetch(`${origin}/no/such/page`);
+
+    expect(response.status).toBe(404);
+    expect(await response.text()).toMatch(/<p id="not-found">(<!--[^>]*-->)?Not found/);
+  });
+
+  it("answers 200 for a page after a 404", async () => {
+    expect((await fetch(`${origin}/item`)).status).toBe(200);
   });
 
   it("runs the tests from the client build", async () => {

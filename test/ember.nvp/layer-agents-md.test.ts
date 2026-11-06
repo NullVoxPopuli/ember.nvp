@@ -67,6 +67,7 @@ After a change, run these scripts in this order:
 
     expect(agents).toContain("## Server-side rendering (vite-ember-ssr)");
     expect(agents).toContain("### 404 pages");
+    expect(agents).toContain("setStatusCode(404);");
   });
 
   it("has no vite preview notes, because server.js serves the build", async () => {
