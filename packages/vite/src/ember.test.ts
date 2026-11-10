@@ -1,4 +1,5 @@
 import { extensions } from "@embroider/vite";
+import { interpreter, type TopLevelFilterExpression } from "@rolldown/pluginutils";
 import { fileURLToPath } from "node:url";
 import type { ConfigEnv, ConfigPluginContext, Plugin } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
@@ -141,5 +142,41 @@ describe("default babel plugins", () => {
 
     expect(code).not.toContain("development build");
     expect(code).toContain("other build");
+  });
+});
+
+describe("babel.include", () => {
+  function usesBabel(options: Parameters<typeof ember>[0], source: string) {
+    const plugins = ember(options) as Plugin[];
+    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+    // @ts-expect-error maybeBabel sets the filter on the transform hook
+    const filter = babel.transform.filter as TopLevelFilterExpression[];
+
+    return interpreter(filter, source, "/app/services/a.ts");
+  }
+
+  const source = `owner.register(Key, Impl);`;
+
+  it("leaves files without a babel-only pattern to oxc", () => {
+    expect(usesBabel({}, source)).toBe(false);
+  });
+
+  it("sends files that contain a whenMatching string to babel", () => {
+    expect(usesBabel({ babel: { include: { whenMatching: [".register("] } } }, source)).toBe(true);
+  });
+
+  it("sends files that match a whenMatching regular expression to babel", () => {
+    expect(usesBabel({ babel: { include: { whenMatching: [/\.register\(/] } } }, source)).toBe(
+      true,
+    );
+  });
+
+  it("sends files that import a whenImporting module to babel", () => {
+    expect(
+      usesBabel(
+        { babel: { include: { whenImporting: ["my-lib"] } } },
+        `import { a } from "my-lib";`,
+      ),
+    ).toBe(true);
   });
 });

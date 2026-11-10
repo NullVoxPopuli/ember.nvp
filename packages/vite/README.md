@@ -53,6 +53,7 @@ ember({
     parallel: false,
     include: {
       whenImporting: ["ember-concurrency", "ember-intl/format-message"],
+      whenMatching: [/\bmyMacro\(/],
     },
   },
 });

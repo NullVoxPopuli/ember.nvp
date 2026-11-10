@@ -177,6 +177,9 @@ importers:
       '@babel/plugin-transform-typescript':
         specifier: ^7.28.10 || ^8.0.0
         version: 7.29.7(@babel/core@7.29.7)
+      '@rolldown/pluginutils':
+        specifier: ^1.0.1
+        version: 1.0.1
       babel-plugin-ember-template-compilation:
         specifier: ^4.0.1
         version: 4.0.1
