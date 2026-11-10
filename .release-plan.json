@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "2.1.2",
-      "newVersion": "2.2.0",
+      "oldVersion": "2.2.0",
+      "newVersion": "2.3.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -20,8 +20,18 @@
       "oldVersion": "2.13.0"
     },
     "@nullvoxpopuli/ember-vite": {
-      "oldVersion": "1.4.0"
+      "impact": "minor",
+      "oldVersion": "1.4.0",
+      "newVersion": "1.5.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        }
+      ],
+      "pkgJSONPath": "./packages/vite/package.json"
     }
   },
-  "description": "## Release (2026-11-06)\n\n* ember.nvp 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#192](https://github.com/NullVoxPopuli/ember.nvp/pull/192) ssr layer: vite-ember-ssr 0.7, 404 pages with setStatusCode() ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-10)\n\n* ember.nvp 2.3.0 (minor)\n* @nullvoxpopuli/ember-vite 1.5.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#194](https://github.com/NullVoxPopuli/ember.nvp/pull/194) ember-vite: add babel.include.whenMatching for code patterns ([@NullVoxPopuli](https://github.com/NullVoxPopuli))\n\n#### Committers: 1\n- [@NullVoxPopuli](https://github.com/NullVoxPopuli)\n"
 }
