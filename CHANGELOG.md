@@ -1,5 +1,17 @@
 # Changelog
 
+## Release (2026-11-10)
+
+* ember.nvp 2.3.0 (minor)
+* @nullvoxpopuli/ember-vite 1.5.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#194](https://github.com/NullVoxPopuli/ember.nvp/pull/194) ember-vite: add babel.include.whenMatching for code patterns ([@NullVoxPopuli](https://github.com/NullVoxPopuli))
+
+#### Committers: 1
+- [@NullVoxPopuli](https://github.com/NullVoxPopuli)
+
 ## Release (2026-11-06)
 
 * ember.nvp 2.2.0 (minor)
