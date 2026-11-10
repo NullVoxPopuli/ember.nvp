@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-typescript": "^7.28.10 || ^8.0.0",
+    "@rolldown/pluginutils": "^1.0.1",
     "babel-plugin-ember-template-compilation": "^4.0.1",
     "decorator-transforms": "^2.4.0",
     "rolldown": "^1.1.2",

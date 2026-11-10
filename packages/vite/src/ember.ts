@@ -148,7 +148,11 @@ function babelFilter(nvpConfig: Config) {
         "ember-intl/helpers/format-message",
         ...(nvpConfig.babel?.include?.whenImporting ?? []),
       ],
-      code: [/\bintl\.formatMessage\b/, "initializeRuntimeMacrosConfig"] as (string | RegExp)[],
+      code: [
+        /\bintl\.formatMessage\b/,
+        "initializeRuntimeMacrosConfig",
+        ...(nvpConfig.babel?.include?.whenMatching ?? []),
+      ] as (string | RegExp)[],
     },
   };
 }
@@ -185,6 +189,18 @@ interface Config {
        * For example: ['ember-concurrency'],
        */
       whenImporting?: (string | "ember-concurrency" | "ember-scoped-css")[];
+
+      /**
+       * if a file's source contains any of these strings,
+       * or matches any of these regular expressions,
+       * use babel instead of oxc for that file.
+       *
+       * Use this for babel plugins that look for a code pattern rather than
+       * an import.
+       *
+       * For example: [/\.register\(/],
+       */
+      whenMatching?: (string | RegExp)[];
     };
   };
   /**
