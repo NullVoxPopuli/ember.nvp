@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-11-18)
+
+* ember.nvp 2.4.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#196](https://github.com/NullVoxPopuli/ember.nvp/pull/196) Use QUnit 3 in the qunit layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-10)
 
 * ember.nvp 2.3.0 (minor)
