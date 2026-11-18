@@ -8,9 +8,9 @@ import { join } from "node:path";
 const deps = {
   "@ember/test-helpers": "^5.4.1",
   "@ember/test-waiters": "^4.1.0",
-  "ember-qunit": "^9.0.4",
+  "ember-qunit": "^9.2.1",
   "qunit-theme-ember": "^1.0.0",
-  qunit: "^2.25.0",
+  qunit: "^3.0.0",
   "qunit-dom": "3.5.0",
   testem: "3.17.0",
 };
