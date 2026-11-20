@@ -87,7 +87,8 @@ Code from older Ember versions does not work here.
 - Write components in \`.gjs\` or \`.gts\` files, with \`<template>\`. Do not add \`.hbs\` files.
 - Import \`Component\` from \`@glimmer/component\`, not from \`@ember/component\`.
 - Use native classes, \`@tracked\`, and getters. Do not use \`EmberObject\`, \`computed\`, \`get\`, or \`set\`.
-- Use \`{{on}}\` and \`{{fn}}\` in templates, not \`{{action}}\`.`;
+- Use \`{{on}}\` and \`{{fn}}\` in templates, not \`{{action}}\`.
+- Import \`trustHTML\` from \`@ember/template\` to mark a string as safe HTML. Do not use \`htmlSafe\`.`;
 
 /**
  * @param {import('#utils/project.js').Project} project

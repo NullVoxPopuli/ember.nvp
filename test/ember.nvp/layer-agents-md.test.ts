@@ -57,6 +57,7 @@ After a change, run these scripts in this order:
     let agents = (await project.read("AGENTS.md"))!;
 
     expect(agents).toContain("## Modern Ember");
+    expect(agents).toContain("Do not use `htmlSafe`.");
     expect(agents).toContain("## Project layout");
     expect(agents).toContain("- `app/app` registers the modules");
     expect(agents).toContain("## Tests (QUnit)");
