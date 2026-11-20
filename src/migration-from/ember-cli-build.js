@@ -73,6 +73,7 @@ const COMPAT_ONLY_OPTIONS = new Set([
  * @property {string[]} imports modules beyond the ones that the blueprints import
  * @property {string[]} appImports the source of each `app.import(...)` call
  * @property {{ from: string, options: string } | undefined} warpDrive the `setConfig(app, dir, options)` call
+ * @property {string[] | undefined} emberData the source of each property of the `emberData` option
  * @property {boolean} usesVite whether the build runs through `@embroider/vite`
  */
 
@@ -98,6 +99,7 @@ export function readEmberCliBuild(root, file) {
     imports: [],
     appImports: [],
     warpDrive: undefined,
+    emberData: undefined,
     usesVite: modules.has("@embroider/vite"),
   };
 
@@ -113,6 +115,16 @@ export function readEmberCliBuild(root, file) {
 
       for (let name of propertyNames(node.arguments?.[1])) {
         if (!BUILD_ONLY_OPTIONS.has(name)) build.options.push(name);
+      }
+
+      let emberData = propertyValue(node.arguments?.[1], "emberData");
+
+      if (emberData?.type === "ObjectExpression") {
+        build.emberData = (emberData.properties ?? []).map(
+          (/** @type {import('./javascript.js').Node} */ property) => sourceOf(source, property),
+        );
+      } else if (emberData) {
+        build.emberData = [`...${sourceOf(source, emberData)}`];
       }
 
       return;
