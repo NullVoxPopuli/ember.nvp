@@ -580,7 +580,11 @@ export async function migrateApp(project, report, { indexHtml }) {
     initializers,
   });
 
-  await replaceBabelConfig(project, report, build?.warpDrive);
+  await replaceBabelConfig(
+    project,
+    report,
+    build?.warpDrive ?? (await emberDataConfig(project, manifest, build, report)),
+  );
   await replaceViteConfig(project, report);
   await rewriteImports(project, modulePrefix, manifest.name);
 
@@ -888,6 +892,62 @@ function toIdentifier(path) {
     suffix.charAt(0).toUpperCase() +
     suffix.slice(1)
   );
+}
+
+/**
+ * The ember-data addon sets the WarpDrive config in its `included` hook,
+ * from the `emberData` option of `new EmberApp`.
+ * An app without ember-cli runs no `included` hooks,
+ * so babel.config.js must make the same call.
+ *
+ * @param {Project} project
+ * @param {Record<string, any>} manifest
+ * @param {import('./ember-cli-build.js').EmberCliBuild | undefined} build
+ * @param {MigrationReport} report
+ * @returns {Promise<{ from: string, options: string } | undefined>}
+ */
+async function emberDataConfig(project, manifest, build, report) {
+  let range = manifest.dependencies?.["ember-data"] ?? manifest.devDependencies?.["ember-data"];
+
+  if (!range) return;
+
+  let version = semver.validRange(range) ? semver.minVersion(range) : undefined;
+
+  /**
+   * ember-data moved setConfig into @warp-drive/core in 5.6
+   */
+  if (!version || semver.lt(version, "5.6.0")) {
+    report.todo.push({
+      title: "WarpDrive build config",
+      where: [`ember-data@${range}`],
+      action:
+        "Upgrade ember-data to 5.6 or later, or call setConfig in the configure hook of babel.config.js.\n" +
+        "Without ember-cli, the ember-data addon does not set the WarpDrive config.",
+    });
+
+    return;
+  }
+
+  let core = "@warp-drive/core";
+
+  if (!manifest.dependencies?.[core] && !manifest.devDependencies?.[core]) {
+    if (manifest.dependencies?.["ember-data"]) {
+      await packageJson.addDependencies({ [core]: range }, project.directory);
+    } else {
+      await packageJson.addDevDependencies({ [core]: range }, project.directory);
+    }
+  }
+
+  /**
+   * The addon adds this flag.
+   * It tells setConfig that the config comes from the old `emberData` option.
+   */
+  let properties = (build?.emberData ?? []).concat("___legacy_support: true");
+
+  return {
+    from: `${core}/build-config`,
+    options: `{\n${properties.map((property) => `  ${indent(property, "  ")},\n`).join("")}}`,
+  };
 }
 
 /**

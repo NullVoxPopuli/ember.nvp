@@ -447,6 +447,34 @@ module.exports = {
   ),
 };
 
+/**
+ * Files to put over `classicApp` for an app with ember-data,
+ * whose addon reads the `emberData` option.
+ */
+export const classicAppEmberData: Record<string, string> = {
+  "package.json": json({
+    ...JSON.parse(classicApp["package.json"]!),
+    dependencies: { "ember-data": "~5.8.2" },
+  }),
+  "ember-cli-build.js": `'use strict';
+
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+
+module.exports = function (defaults) {
+  const app = new EmberApp(defaults, {
+    'ember-cli-babel': { enableTypeScriptTransform: true },
+    emberData: {
+      deprecations: {
+        DEPRECATE_STORE_EXTENDS_EMBER_OBJECT: false,
+      },
+    },
+  });
+
+  return app.toTree();
+};
+`,
+};
+
 export const classicAddon: Record<string, string> = {
   "package.json": json({
     name: "my-classic-addon",

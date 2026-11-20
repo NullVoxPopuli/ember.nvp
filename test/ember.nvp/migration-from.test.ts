@@ -14,6 +14,7 @@ import {
   appBlueprint,
   classicAddon,
   classicApp,
+  classicAppEmberData,
 } from "./migration-from-fixtures.ts";
 
 const FIXTURES = {
@@ -299,6 +300,54 @@ describe("@ember-tooling/classic-build-app-blueprint", () => {
 
     expect(manifest.devDependencies).not.toHaveProperty("ember-cli-app-version");
     expect(manifest.devDependencies).not.toHaveProperty("@tsconfig/ember");
+  });
+});
+
+describe("ember-data", () => {
+  it("moves the emberData option into babel.config.js", async () => {
+    let dir = await fixture("classic-build-app-blueprint", classicAppEmberData);
+
+    await migrate(dir, "app", ["typescript"]);
+
+    let babel = await read(dir, "babel.config.js");
+
+    expect(babel).toContain(`import { setConfig } from "@warp-drive/core/build-config";`);
+    expect(babel).toContain(`    setConfig(config, {
+      deprecations: {
+        DEPRECATE_STORE_EXTENDS_EMBER_OBJECT: false,
+      },
+      ___legacy_support: true,
+    });`);
+
+    let manifest = await packageJson.read(dir);
+
+    expect(manifest.dependencies).toHaveProperty("@warp-drive/core", "~5.8.2");
+  });
+
+  it("sets the WarpDrive config when ember-cli-build does not", async () => {
+    let dir = await fixture("classic-build-app-blueprint", {
+      "package.json": classicAppEmberData["package.json"]!,
+    });
+
+    await migrate(dir, "app", ["typescript"]);
+
+    expect(await read(dir, "babel.config.js")).toContain(`    setConfig(config, {
+      ___legacy_support: true,
+    });`);
+  });
+
+  it("keeps the setConfig call of ember-cli-build", async () => {
+    let dir = await fixture("app-blueprint");
+
+    await packageJson.addDevDependencies({ "ember-data": "~5.8.2" }, dir);
+    await migrate(dir, "app", ["typescript"]);
+
+    let babel = await read(dir, "babel.config.js");
+
+    expect(babel).toContain(`    setConfig(config, {
+      compatWith: '5.8',
+    });`);
+    expect(babel).not.toContain("___legacy_support");
   });
 });
 
