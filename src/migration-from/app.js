@@ -216,6 +216,21 @@ export async function checkApp(project) {
     });
   }
 
+  let appModule = firstExisting(root, ["app/app.ts", "app/app.js"]);
+  let legacy = appModule
+    ? splitAppModule(readFileSync(join(root, appModule), "utf-8"), appModule, new Set()).legacy
+    : [];
+
+  if (legacy.length > 0) {
+    report.unsupported.push({
+      title: "Code in the app module that needs the classic resolver",
+      where: legacy,
+      action:
+        "Remove the use of ember-resolver, ember-load-initializers, and the module prefix.\n" +
+        "ember.nvp apps use the strict resolver: the App class lists its modules in `modules`, so they have no module prefix.",
+    });
+  }
+
   let pods = podsIn(root);
 
   if (pods.length > 0) {
@@ -722,6 +737,8 @@ const MODULE_SCRIPT = /^[ \t]*<script\b[^>]*\btype="module"[^>]*>[\s\S]*?<\/scri
 const BLUEPRINT_APP_IMPORTS =
   /^(@ember\/application|@embroider\/virtual\/compat-modules|ember-resolver|ember-load-initializers|@embroider\/macros|@embroider\/legacy-inspector-support.*|@warp-drive\/ember\/install|.*\/config\/environment|\.\/config\/environment|\.\/deprecation-workflow)$/;
 const BLUEPRINT_APP_MEMBERS = new Set(["modulePrefix", "podModulePrefix", "Resolver", "inspector"]);
+const CLASSIC_RESOLVER_MODULES = /^(ember-resolver|ember-load-initializers)$/;
+const CONFIG_MODULE = /(^|\/)config\/environment$/;
 
 /**
  * @typedef {object} AppModuleOptions
@@ -789,7 +806,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
 
   let old = oldFile
     ? splitAppModule(oldSource, oldFile, provided)
-    : { before: [], after: [], custom: [] };
+    : { before: [], after: [], custom: [], config: [], legacy: [] };
   let workflow = {
     code: [
       "if (macroCondition(isDevelopingApp())) {",
@@ -805,6 +822,11 @@ async function writeAppModule(project, report, { typescript, services, initializ
   if (deprecationWorkflow && !old.before.some((chunk) => chunk.workflow)) {
     before.push(workflow);
   }
+
+  /**
+   * The app's own code keeps its config, which the new module gets from `#config`.
+   */
+  for (let name of old.config) lines.push(`import ${name} from "#config";`);
 
   pushCode(lines, before);
 
@@ -867,6 +889,8 @@ async function writeAppModule(project, report, { typescript, services, initializ
  * @property {Chunk[]} before the app's own code above the class
  * @property {Chunk[]} after the app's own code below the class
  * @property {string[]} custom what the new module still does not have
+ * @property {string[]} config the names that the app's own code uses from config/environment
+ * @property {string[]} legacy the app's own code that needs the classic resolver
  */
 
 /**
@@ -880,7 +904,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
  */
 function splitAppModule(source, file, provided) {
   /** @type {OldAppModule} */
-  let result = { before: [], after: [], custom: [] };
+  let result = { before: [], after: [], custom: [], config: [], legacy: [] };
   let program = parseProgram(source, file);
 
   if (!program) {
@@ -943,6 +967,10 @@ function splitAppModule(source, file, provided) {
 
   /** @type {Set<string>} */
   let missing = new Set();
+  /** @type {Set<string>} */
+  let config = new Set();
+  /** @type {Set<string>} */
+  let legacy = new Set();
 
   walk(kept, (node, parent) => {
     if (node.type !== "Identifier") return;
@@ -951,10 +979,39 @@ function splitAppModule(source, file, provided) {
 
     let module = dropped.get(node.name);
 
-    if (module && !provided.has(node.name)) missing.add(`${node.name} from ${module}`);
+    if (!module) return;
+
+    /**
+     * The strict resolver has no module prefix, and no ember-resolver or ember-load-initializers.
+     * Code that still needs them cannot work after the migration, so it stops the migration.
+     */
+    if (CLASSIC_RESOLVER_MODULES.test(module)) {
+      legacy.add(`${file}: ${node.name} from ${module}`);
+      return;
+    }
+
+    if (CONFIG_MODULE.test(module)) {
+      let member =
+        parent?.type === "MemberExpression" && parent.object === node
+          ? parent.property?.name
+          : undefined;
+
+      if (member === "modulePrefix" || member === "podModulePrefix") {
+        legacy.add(`${file}: ${node.name}.${member}`);
+      } else {
+        config.add(node.name);
+      }
+
+      return;
+    }
+
+    if (!provided.has(node.name)) missing.add(`${node.name} from ${module}`);
   });
 
   for (let name of missing) result.custom.push(name);
+
+  result.config = Array.from(config);
+  result.legacy = Array.from(legacy);
 
   return result;
 }

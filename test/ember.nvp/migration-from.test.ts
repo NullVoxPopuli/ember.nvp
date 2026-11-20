@@ -332,28 +332,34 @@ describe("@ember/app-blueprint", () => {
     `);
   });
 
-  it("lists names that the app's own code imports from the blueprint's modules", async () => {
+  it("imports the config of the app's own code from #config", async () => {
     let dir = await fixture("app-blueprint", {
       "app/app.ts": appBlueprint["app/app.ts"]!.replace(
         "\nexport default",
-        "\nconsole.log(config.modulePrefix);\n\nexport default",
+        "\nconsole.log(config.environment);\n\nexport default",
       ),
     });
-    let project = new Project(dir, {
-      name: "my-app",
-      type: "app",
-      path: dir,
-      layers: [],
-      packageManager: "pnpm",
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(app).toContain(`import config from "#config";`);
+    expect(app).toContain("console.log(config.environment);");
+    expect(app).not.toContain("config/environment");
+  });
+
+  it("stops when the app's own code needs the classic resolver", async () => {
+    let dir = await fixture("app-blueprint", {
+      "app/app.ts": appBlueprint["app/app.ts"]!.replace(
+        "\nexport default",
+        "\nconsole.log(config.modulePrefix, Resolver);\n\nexport default",
+      ),
     });
 
-    let result = await runMigration(project);
-    let todo = result?.report.todo.find((finding) =>
-      finding.title.startsWith("Code in the old app"),
-    );
-
-    expect(todo?.where).toEqual(["config from my-app/config/environment"]);
-    expect(await read(dir, "app/app.js")).toContain("console.log(config.modulePrefix);");
+    expect(await unsupported(dir, "app")).toEqual([
+      "Code in the app module that needs the classic resolver",
+    ]);
   });
 
   it("stops at an ember-source older than 7.2", async () => {
