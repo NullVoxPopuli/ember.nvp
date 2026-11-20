@@ -20,6 +20,7 @@ import {
   propertyNames,
   propertyValue,
   sourceOf,
+  stringValue,
   walk,
 } from "./javascript.js";
 import { removeToolingOfWantedLayers } from "./layers.js";
@@ -736,6 +737,7 @@ const BLUEPRINT_APP_MEMBERS = new Set(["modulePrefix", "podModulePrefix", "Resol
  * - the services that addons provided through app-js
  * - the app's folders that Ember looks up by name, beyond the base's
  * - the app's initializers
+ * - the app's own top-level code, in its old order
  *
  * @param {Project} project
  * @param {MigrationReport} report
@@ -744,7 +746,7 @@ const BLUEPRINT_APP_MEMBERS = new Set(["modulePrefix", "podModulePrefix", "Resol
 async function writeAppModule(project, report, { typescript, services, initializers }) {
   let root = project.directory;
   let oldFile = firstExisting(root, ["app/app.ts", "app/app.js"]);
-  let old = oldFile ? readFileSync(project.path(oldFile), "utf-8") : "";
+  let oldSource = oldFile ? readFileSync(project.path(oldFile), "utf-8") : "";
   let base = readFileSync(join(BASE_FILES, "app/app.ts"), "utf-8");
   let comment = base.slice(0, base.indexOf("import Application"));
   let baseEntries = /** @type {string} */ (/  modules = \{\n([\s\S]*?)\n  \};/.exec(base)?.[1]);
@@ -752,7 +754,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   /** @type {string[]} */
   let lines = [comment.trimEnd()];
 
-  if (/["']@warp-drive\/ember\/install["']/.test(old)) {
+  if (/["']@warp-drive\/ember\/install["']/.test(oldSource)) {
     lines.push(`import "@warp-drive/ember/install";`);
   }
 
@@ -771,18 +773,40 @@ async function writeAppModule(project, report, { typescript, services, initializ
     lines.push(`import loadInitializers from "ember-load-initializers";`);
   }
 
-  for (let service of services) {
-    lines.push(`import ${toIdentifier(service.path)} from "${service.specifier}";`);
-  }
+  /** @type {Set<string>} */
+  let provided = new Set(["Application"]);
 
   if (deprecationWorkflow) {
-    lines.push(
-      "",
+    provided.add("importSync").add("isDevelopingApp").add("macroCondition");
+  }
+
+  if (initializers) provided.add("loadInitializers");
+
+  for (let service of services) {
+    lines.push(`import ${toIdentifier(service.path)} from "${service.specifier}";`);
+    provided.add(toIdentifier(service.path));
+  }
+
+  let old = oldFile
+    ? splitAppModule(oldSource, oldFile, provided)
+    : { before: [], after: [], custom: [] };
+  let workflow = {
+    code: [
       "if (macroCondition(isDevelopingApp())) {",
       `  importSync("./deprecation-workflow");`,
       "}",
-    );
+    ].join("\n"),
+    blankBefore: true,
+  };
+  let before = old.before
+    .filter((chunk) => deprecationWorkflow || !chunk.workflow)
+    .map((chunk) => (chunk.workflow ? workflow : chunk));
+
+  if (deprecationWorkflow && !old.before.some((chunk) => chunk.workflow)) {
+    before.push(workflow);
   }
+
+  pushCode(lines, before);
 
   lines.push("", "export default class App extends Application {", "  modules = {");
 
@@ -817,12 +841,12 @@ async function writeAppModule(project, report, { typescript, services, initializ
     );
   }
 
-  let custom = oldFile ? customAppCode(old, oldFile) : [];
+  pushCode(lines, old.after);
 
-  if (custom.length > 0) {
+  if (old.custom.length > 0) {
     report.todo.push({
       title: "Code in the old app module that the new one does not have",
-      where: custom,
+      where: old.custom,
       action: `Add the code that you still need to ${typescript ? "app/app.ts" : "app/app.js"}.`,
     });
   }
@@ -832,50 +856,133 @@ async function writeAppModule(project, report, { typescript, services, initializ
 }
 
 /**
+ * @typedef {object} Chunk
+ * @property {string} code a top-level statement, with the comments above it
+ * @property {boolean} blankBefore whether a blank line came before it
+ * @property {boolean} [workflow] marks where the old module loaded the deprecation workflow
+ */
+
+/**
+ * @typedef {object} OldAppModule
+ * @property {Chunk[]} before the app's own code above the class
+ * @property {Chunk[]} after the app's own code below the class
+ * @property {string[]} custom what the new module still does not have
+ */
+
+/**
+ * Splits the old app module into the blueprint's code, which the new module replaces,
+ * and the app's own code, which the new module keeps.
+ *
  * @param {string} source
  * @param {string} file
- * @returns {string[]} imports and class members beyond the blueprints'
+ * @param {Set<string>} provided names that the new module imports
+ * @returns {OldAppModule}
  */
-function customAppCode(source, file) {
+function splitAppModule(source, file, provided) {
+  /** @type {OldAppModule} */
+  let result = { before: [], after: [], custom: [] };
   let program = parseProgram(source, file);
 
-  if (!program) return [`${file}: ember.nvp cannot read this file`];
-
-  /** @type {string[]} */
-  let custom = [];
-
-  for (let module of new Set(importedNames(program).values())) {
-    if (!BLUEPRINT_APP_IMPORTS.test(module)) custom.push(`import from ${module}`);
+  if (!program) {
+    result.custom.push(`${file}: ember.nvp cannot read this file`);
+    return result;
   }
 
-  walk(program, (node) => {
-    if (node.type !== "ClassBody") return;
+  /**
+   * Names from the imports that the migration drops.
+   * The app's own code can still use them.
+   *
+   * @type {Map<string, string>}
+   */
+  let dropped = new Map();
+  /** @type {import('./javascript.js').Node[]} */
+  let kept = [];
+  let section = result.before;
+  let end = 0;
 
-    for (let member of node.body ?? []) {
-      let name = member.key?.name ?? "...";
+  for (let statement of program.body ?? []) {
+    let text = source.slice(end, statement.end);
+    let blankBefore = /\n[ \t]*\n/.test(/^\s*/.exec(text)?.[0] ?? "");
+    let module = statement.type === "ImportDeclaration" ? stringValue(statement.source) : undefined;
 
-      if (!BLUEPRINT_APP_MEMBERS.has(name)) custom.push(`class member ${name}`);
+    end = statement.end;
+
+    if (module && BLUEPRINT_APP_IMPORTS.test(module)) {
+      for (let specifier of statement.specifiers ?? []) {
+        dropped.set(specifier.local.name, module);
+      }
+
+      continue;
     }
+
+    if (isAppClass(statement, dropped)) {
+      let body = statement.declaration?.body ?? statement.body;
+
+      for (let member of body?.body ?? []) {
+        let name = member.key?.name ?? "...";
+
+        if (!BLUEPRINT_APP_MEMBERS.has(name)) result.custom.push(`class member ${name}`);
+      }
+
+      section = result.after;
+      continue;
+    }
+
+    let code = sourceOf(source, statement);
+
+    if (statement.type === "ExpressionStatement" && /^loadInitializers\(/.test(code)) continue;
+
+    if (statement.type === "IfStatement" && code.includes("deprecation-workflow")) {
+      section.push({ code: "", blankBefore, workflow: true });
+      continue;
+    }
+
+    section.push({ code: text.trimStart(), blankBefore });
+    kept.push(statement);
+  }
+
+  /** @type {Set<string>} */
+  let missing = new Set();
+
+  walk(kept, (node, parent) => {
+    if (node.type !== "Identifier") return;
+    if (parent?.type === "MemberExpression" && parent.property === node && !parent.computed) return;
+    if (parent?.type === "Property" && parent.key === node && !parent.shorthand) return;
+
+    let module = dropped.get(node.name);
+
+    if (module && !provided.has(node.name)) missing.add(`${node.name} from ${module}`);
   });
 
-  for (let statement of program.body ?? []) {
-    if (statement.type !== "ExpressionStatement") continue;
+  for (let name of missing) result.custom.push(name);
 
-    let code = sourceOf(source, statement).replace(/\s+/g, " ");
+  return result;
+}
 
-    if (!/^loadInitializers\(/.test(code)) custom.push(code);
+/**
+ * @param {import('./javascript.js').Node} statement
+ * @param {Map<string, string>} dropped
+ * @returns {boolean} whether the statement is the blueprint's `App` class, or its default export
+ */
+function isAppClass(statement, dropped) {
+  if (statement.type === "ExportDefaultDeclaration") return true;
+
+  return (
+    statement.type === "ClassDeclaration" &&
+    dropped.get(statement.superClass?.name) === "@ember/application"
+  );
+}
+
+/**
+ * @param {string[]} lines
+ * @param {Chunk[]} chunks
+ */
+function pushCode(lines, chunks) {
+  for (let [index, chunk] of chunks.entries()) {
+    if (index === 0 || chunk.blankBefore) lines.push("");
+
+    lines.push(chunk.code);
   }
-
-  for (let statement of program.body ?? []) {
-    if (
-      statement.type === "IfStatement" &&
-      !sourceOf(source, statement).includes("deprecation-workflow")
-    ) {
-      custom.push(sourceOf(source, statement).replace(/\s+/g, " "));
-    }
-  }
-
-  return custom;
 }
 
 /**

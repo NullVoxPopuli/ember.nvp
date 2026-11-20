@@ -331,6 +331,53 @@ export function start() {
   }),
 };
 
+/**
+ * Files to put over `appBlueprint` for an app with top-level code of its own,
+ * from ember-learn/super-rentals after its move to Vite.
+ */
+export const appWithOwnCode: Record<string, string> = {
+  "app/app.js": `import Application from '@ember/application';
+import Resolver from 'ember-resolver';
+import loadInitializers from 'ember-load-initializers';
+import config from "./config/environment";
+import { importSync, isDevelopingApp, macroCondition } from '@embroider/macros';
+import { setBuildURLConfig } from '@ember-data/request-utils';
+
+setBuildURLConfig({
+  namespace: 'api',
+});
+
+import setupInspector from "@embroider/legacy-inspector-support/ember-source-4.12";
+import compatModules from "@embroider/virtual/compat-modules";
+
+/* This is to account for a deprecation that shipped in ember-cli 6.4
+   with ember-data v5.6 which needs a blueprint update to avoid the
+   deprecation that is otherwise irrelevant for tutorial purposes.
+*/
+import { registerDeprecationHandler } from '@ember/debug';
+registerDeprecationHandler((message, options, next) => {
+  if (message.includes('Using WarpDrive with EmberJS requires')) {
+    return;
+  } else {
+    next(message, options);
+  }
+});
+
+if (macroCondition(isDevelopingApp())) {
+  importSync('./deprecation-workflow');
+}
+
+export default class App extends Application {
+  modulePrefix = config.modulePrefix;
+  podModulePrefix = config.podModulePrefix;
+  Resolver = Resolver.withModules(compatModules);
+  inspector = setupInspector(this);
+}
+
+loadInitializers(App, config.modulePrefix, compatModules);
+`,
+};
+
 export const classicApp: Record<string, string> = {
   "package.json": json({
     name: "my-classic-app",
