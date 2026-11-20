@@ -5,13 +5,20 @@ import { dirname, join } from "node:path";
 import { rm } from "node:fs/promises";
 import { stripVTControlCharacters } from "node:util";
 import { packageJson } from "ember-apply";
-import { checkMigration, detectMigration, formatFindings, MigrationError } from "#migration-from";
+import {
+  checkMigration,
+  detectMigration,
+  formatFindings,
+  migrate as runMigration,
+  MigrationError,
+} from "#migration-from";
 import { Project } from "#utils/project.js";
 import { cli, generate, mktemp } from "#test-helpers";
 import type { ProjectType } from "#types";
 import {
   addonBlueprint,
   appBlueprint,
+  appWithOwnCode,
   classicAddon,
   classicApp,
   classicAppEmberData,
@@ -264,6 +271,95 @@ describe("@ember/app-blueprint", () => {
 
     expect(app).toContain(`import SessionService from "@acme/session/_app_/services/session";`);
     expect(app).toContain(`"./services/session": SessionService,`);
+  });
+
+  it("keeps the app's own code in the app module", async () => {
+    let dir = await fixture("app-blueprint", appWithOwnCode);
+
+    await rm(join(dir, "app/app.ts"));
+
+    await migrate(dir, "app", []);
+
+    expect(await read(dir, "app/app.js")).toMatchInlineSnapshot(`
+      "/**
+       * Looking for services that come from addons?
+       *
+       * App-tree merging from libraries is not supported.
+       * See: https://github.com/embroider-build/embroider/issues/2659
+       *
+       * For services, look in to either of:
+       * - https://github.com/chancancode/ember-polaris-service-
+       * - https://ember-primitives.pages.dev/6-utils/createService.md
+       *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
+       */
+      import Application from "@ember/application";
+      import { importSync, isDevelopingApp, macroCondition } from "@embroider/macros";
+      import PageTitleService from "ember-page-title/services/page-title";
+
+      import { setBuildURLConfig } from '@ember-data/request-utils';
+
+      setBuildURLConfig({
+        namespace: 'api',
+      });
+
+      /* This is to account for a deprecation that shipped in ember-cli 6.4
+         with ember-data v5.6 which needs a blueprint update to avoid the
+         deprecation that is otherwise irrelevant for tutorial purposes.
+      */
+      import { registerDeprecationHandler } from '@ember/debug';
+      registerDeprecationHandler((message, options, next) => {
+        if (message.includes('Using WarpDrive with EmberJS requires')) {
+          return;
+        } else {
+          next(message, options);
+        }
+      });
+
+      if (macroCondition(isDevelopingApp())) {
+        importSync("./deprecation-workflow");
+      }
+
+      export default class App extends Application {
+        modules = {
+          "./services/page-title": PageTitleService,
+          ...import.meta.glob("./router.*", { eager: true }),
+          ...import.meta.glob("./routes/**/*", { eager: true }),
+          ...import.meta.glob("./templates/**/*", { eager: true }),
+          ...import.meta.glob("./services/**/*", { eager: true }),
+        };
+      }
+      "
+    `);
+  });
+
+  it("imports the config of the app's own code from #config", async () => {
+    let dir = await fixture("app-blueprint", {
+      "app/app.ts": appBlueprint["app/app.ts"]!.replace(
+        "\nexport default",
+        "\nconsole.log(config.environment);\n\nexport default",
+      ),
+    });
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(app).toContain(`import config from "#config";`);
+    expect(app).toContain("console.log(config.environment);");
+    expect(app).not.toContain("config/environment");
+  });
+
+  it("stops when the app's own code needs the classic resolver", async () => {
+    let dir = await fixture("app-blueprint", {
+      "app/app.ts": appBlueprint["app/app.ts"]!.replace(
+        "\nexport default",
+        "\nconsole.log(config.modulePrefix, Resolver);\n\nexport default",
+      ),
+    });
+
+    expect(await unsupported(dir, "app")).toEqual([
+      "Code in the app module that needs the classic resolver",
+    ]);
   });
 
   it("stops at an ember-source older than 7.2", async () => {
