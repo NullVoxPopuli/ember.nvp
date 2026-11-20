@@ -2,6 +2,17 @@
 
 ## Release (2026-11-20)
 
+* ember.nvp 2.5.2 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#203](https://github.com/NullVoxPopuli/ember.nvp/pull/203) Keep the app's own top-level code in the migrated app module ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-20)
+
 * ember.nvp 2.5.1 (patch)
 
 #### :bug: Bug Fix
