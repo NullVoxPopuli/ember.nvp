@@ -39,6 +39,8 @@ import type { TsdownPlugin, UserConfig } from "tsdown";
  *   The consuming app's template compiler accepts only direct references there.
  *   The library still builds, type-checks, and lints clean,
  *   so the app boot is the first place the error shows.
+ *   The compiler-side fix, which accepts literal scope values, is
+ *   https://github.com/emberjs/babel-plugin-ember-template-compilation/pull/125
  *
  * Externals are handled by `emberExternals()` (a `resolveId` hook) in both cases.
  *
