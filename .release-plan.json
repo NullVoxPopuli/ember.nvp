@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "2.5.1",
-      "newVersion": "2.5.2",
+      "oldVersion": "2.5.2",
+      "newVersion": "2.5.3",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.5.0"
     }
   },
-  "description": "## Release (2026-11-20)\n\n* ember.nvp 2.5.2 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#203](https://github.com/NullVoxPopuli/ember.nvp/pull/203) Keep the app's own top-level code in the migrated app module ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-21)\n\n* ember.nvp 2.5.3 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#206](https://github.com/NullVoxPopuli/ember.nvp/pull/206) Keep the app's own plugins, and its relative config imports, in an app migration ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#205](https://github.com/NullVoxPopuli/ember.nvp/pull/205) Keep the user's workspace dependencies in a migration ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
