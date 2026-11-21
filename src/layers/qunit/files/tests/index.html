@@ -20,11 +20,8 @@
 
     <script type="module">
       import { start } from "./test-helper";
-      // traditional test locations
-      import.meta.glob("./**/*.{js,ts,gjs,gts}", { eager: true });
-      // co-located test locations
-      import.meta.glob("./**/*-test.{js,ts,gjs,gts}", { eager: true, base: "../app" });
-      start();
+
+      await start();
     </script>
   </body>
 </html>

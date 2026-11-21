@@ -13,7 +13,6 @@ import { setup } from "qunit-dom";
 import { setupEmberOnerrorValidation, start as qunitStart } from "ember-qunit";
 import { setTesting } from "@embroider/macros";
 
-import Application from "#app/app";
 import config from "#config";
 
 Object.assign(window, {
@@ -36,12 +35,29 @@ Object.assign(window, {
   },
 });
 
-export function start() {
+/**
+ * The test modules, in their traditional location and co-located with the app.
+ */
+const tests = Object.assign(
+  import.meta.glob(["./**/*.{js,ts,gjs,gts}", "!./test-helper.*"]),
+  import.meta.glob("./**/*-test.{js,ts,gjs,gts}", { base: "../app" }),
+);
+
+/**
+ * Addons such as ember-window-mock read `isTesting()` when their module loads,
+ * so the app and the tests load only after `setTesting(true)`.
+ */
+export async function start() {
   config.locationType = "none";
   config.APP.rootElement = "#ember-testing";
   config.APP.autoboot = false;
 
   setTesting(true);
+
+  const { default: Application } = await import("#app/app");
+
+  await Promise.all(Object.values(tests).map((load) => load()));
+
   setApplication(Application.create(config.APP));
   setup(QUnit.assert);
   setupEmberOnerrorValidation();

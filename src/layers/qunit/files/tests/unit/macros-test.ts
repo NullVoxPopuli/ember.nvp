@@ -2,6 +2,12 @@ import { assert as emberAssert } from "@ember/debug";
 import { module, test } from "qunit";
 import { isTesting } from "@embroider/macros";
 
+/**
+ * Addons such as ember-window-mock read `isTesting()` when their module loads,
+ * which is before tests/test-helper.ts calls `setTesting(true)`.
+ */
+const isTestingAtLoad = isTesting();
+
 module("@embroider/macros | runtime mode in tests", function () {
   /**
    * In compile-time mode `isTesting()` is inlined as `false` at build time,
@@ -12,6 +18,10 @@ module("@embroider/macros | runtime mode in tests", function () {
    */
   test("isTesting() is true", function (assert) {
     assert.true(isTesting());
+  });
+
+  test("isTesting() is true when a module loads", function (assert) {
+    assert.true(isTestingAtLoad);
   });
 
   /**
