@@ -2,6 +2,22 @@
 
 ## Release (2026-11-21)
 
+* ember.nvp 2.6.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.13.1 (patch)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#117](https://github.com/NullVoxPopuli/ember.nvp/pull/117) Add tailwind4 layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-rolldown`
+  * [#214](https://github.com/NullVoxPopuli/ember.nvp/pull/214) rolldown: turn off constant inlining by default ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-21)
+
 * ember.nvp 2.5.5 (patch)
 
 #### :bug: Bug Fix
