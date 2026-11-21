@@ -1,5 +1,17 @@
 # Changelog
 
+## Release (2026-11-21)
+
+* ember.nvp 2.5.3 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#206](https://github.com/NullVoxPopuli/ember.nvp/pull/206) Keep the app's own plugins, and its relative config imports, in an app migration ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#205](https://github.com/NullVoxPopuli/ember.nvp/pull/205) Keep the user's workspace dependencies in a migration ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-20)
 
 * ember.nvp 2.5.2 (patch)
