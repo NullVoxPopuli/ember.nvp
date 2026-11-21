@@ -319,25 +319,91 @@ export default defineConfig({
     let { todo } = await generateProject(
       new Project(dir, { name, type: "app", path: dir, layers: [], packageManager: "pnpm" }),
     );
-    let babel = await read(dir, "babel.config.js");
+    expect(await read(dir, "babel.config.js")).toMatchInlineSnapshot(`
+      "import { buildMacros } from "@embroider/macros/babel";
+      import { setConfig } from "@warp-drive/core/build-config";
+      import { scopedCSS } from "ember-scoped-css/babel";
 
-    expect(babel).toContain(`import { scopedCSS } from "ember-scoped-css/babel";`);
-    expect(babel).toContain("transforms: [...macros.templateMacros, scopedCSS.template({})]");
-    expect(babel).toMatch(
-      /'ember-concurrency\/async-arrow-task-transform',\s*\.\.\.macros\.babelMacros/,
-    );
-    expect(babel).not.toContain("some-plugin");
+      const isProduction = process.env.NODE_ENV === "production";
 
-    let vite = await read(dir, "vite.config.mjs");
+      const macros = buildMacros({
+        configure(config) {
+          setConfig(config, {
+            compatWith: '5.8',
+          });
 
-    expect(vite).toContain(`import { scopedCSS } from "ember-scoped-css/vite";`);
-    expect(vite).toContain(`import svgJar from "@svg-jar/plugin/vite";`);
-    expect(vite).toContain("plugins: [scopedCSS(), ember(), svgJar({ target: 'ember' })]");
+          if (process.env.EMBER_ENV === "test") {
+            config.enableRuntimeMode();
+          }
+        },
+      });
 
-    expect(todo.find((finding) => finding.title.startsWith("Babel plugins"))?.where).toEqual([
-      "some-plugin",
-    ]);
-    expect(todo.find((finding) => finding.title.startsWith("Vite settings"))).toBeUndefined();
+      export default {
+        plugins: [[
+          "babel-plugin-ember-template-compilation",
+          {
+            transforms: [...macros.templateMacros, scopedCSS.template({})],
+          },
+        ], [
+          "module:decorator-transforms",
+          {
+            runtime: {
+              import: import.meta.resolve("decorator-transforms/runtime-esm"),
+            },
+          },
+        ], [
+          "@babel/plugin-transform-runtime",
+          {
+            absoluteRuntime: import.meta.dirname,
+            useESModules: true,
+            regenerator: false,
+          },
+        ], isProduction && [
+          "babel-plugin-debug-macros",
+          {
+            debugTools: {
+              isDebug: false,
+              source: "@ember/debug",
+              assertPredicateIndex: 1,
+            },
+            externalizeHelpers: {
+              module: "@ember/debug",
+            },
+          },
+          "@ember/debug stripping",
+        ], 'ember-concurrency/async-arrow-task-transform', ...macros.babelMacros].filter(Boolean),
+
+        generatorOpts: {
+          compact: false,
+        },
+      };
+      "
+    `);
+    expect(await read(dir, "vite.config.mjs")).toMatchInlineSnapshot(`
+      "import { defineConfig } from "vite";
+      import { ember } from "@nullvoxpopuli/ember-vite";
+      import { scopedCSS } from "ember-scoped-css/vite";
+      import svgJar from "@svg-jar/plugin/vite";
+
+      export default defineConfig({
+        plugins: [scopedCSS(), ember(), svgJar({ target: 'ember' })],
+      });
+      "
+    `);
+    expect(
+      todo
+        .filter((finding) => /^(Babel plugins|Vite settings)/.test(finding.title))
+        .map((finding) => [finding.title, finding.where]),
+    ).toMatchInlineSnapshot(`
+      [
+        [
+          "Babel plugins that the new babel.config.js does not have",
+          [
+            "some-plugin",
+          ],
+        ],
+      ]
+    `);
   });
 
   it("keeps the app's own code in the app module", async () => {
@@ -411,12 +477,17 @@ export default defineConfig({
 
     await migrate(dir, "app", []);
 
-    expect(await read(dir, "app/sentry.js")).toBe(
-      "import config from '#config';\n\nexport default config;\n",
-    );
-    expect(await read(dir, "app/routes/crate.js")).toBe(
-      "import config from '#config';\nimport other from './config/environment';\n",
-    );
+    expect(await read(dir, "app/sentry.js")).toMatchInlineSnapshot(`
+      "import config from '#config';
+
+      export default config;
+      "
+    `);
+    expect(await read(dir, "app/routes/crate.js")).toMatchInlineSnapshot(`
+      "import config from '#config';
+      import other from './config/environment';
+      "
+    `);
   });
 
   it("imports app modules by the package name where a test left tests/ with a relative path", async () => {
@@ -430,9 +501,11 @@ export default defineConfig({
 
     await migrate(dir, "app", []);
 
-    expect(await read(dir, "tests/utils/license-test.js")).toBe(
-      "import { parseLicense } from 'my-app/utils/license';\nimport { setup } from '../helpers';\n",
-    );
+    expect(await read(dir, "tests/utils/license-test.js")).toMatchInlineSnapshot(`
+      "import { parseLicense } from 'my-app/utils/license';
+      import { setup } from '../helpers';
+      "
+    `);
   });
 
   it("imports the config of the app's own code from #config", async () => {
