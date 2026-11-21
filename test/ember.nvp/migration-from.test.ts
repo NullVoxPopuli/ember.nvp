@@ -399,6 +399,26 @@ export default defineConfig({
     `);
   });
 
+  it("imports the config from #config where the app used a relative path", async () => {
+    /**
+     * From rust-lang/crates.io: app/router.js and app/sentry.js.
+     */
+    let dir = await fixture("app-blueprint", {
+      "app/sentry.js": "import config from './config/environment';\n\nexport default config;\n",
+      "app/routes/crate.js":
+        "import config from '../config/environment';\nimport other from './config/environment';\n",
+    });
+
+    await migrate(dir, "app", []);
+
+    expect(await read(dir, "app/sentry.js")).toBe(
+      "import config from '#config';\n\nexport default config;\n",
+    );
+    expect(await read(dir, "app/routes/crate.js")).toBe(
+      "import config from '#config';\nimport other from './config/environment';\n",
+    );
+  });
+
   it("imports the config of the app's own code from #config", async () => {
     let dir = await fixture("app-blueprint", {
       "app/app.ts": appBlueprint["app/app.ts"]!.replace(

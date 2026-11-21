@@ -1,7 +1,7 @@
 import { packageJson } from "ember-apply";
 import { existsSync, readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, posix } from "node:path";
 import semver from "semver";
 import { readJSON } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
@@ -1388,6 +1388,10 @@ async function rewriteImports(project, modulePrefix, name) {
   let prefix = modulePrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   let config = new RegExp(`(["'])${prefix}/config/environment(\\.\\w+)?\\1`, "g");
   let other = new RegExp(`(["'])${prefix}/`, "g");
+  /**
+   * `./config/environment` in app/router.js, for example.
+   */
+  let relativeConfig = /(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\1/g;
 
   for (let file of filesWithExtension(
     project.directory,
@@ -1396,7 +1400,13 @@ async function rewriteImports(project, modulePrefix, name) {
   )) {
     let path = project.path(file);
     let source = readFileSync(path, "utf-8");
-    let result = source.replace(config, "$1#config$1");
+    let result = source
+      .replace(config, "$1#config$1")
+      .replace(relativeConfig, (match, quote, specifier) =>
+        posix.join(posix.dirname(file), specifier) === "app/config/environment"
+          ? `${quote}#config${quote}`
+          : match,
+      );
 
     if (modulePrefix !== name) {
       result = result.replace(other, `$1${name}/`);
