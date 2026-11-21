@@ -606,6 +606,40 @@ function addonServices(root, modules) {
 }
 
 /**
+ * Files in app/ that only re-export a package's module, as ember-cli merged an addon's app tree.
+ * The addon's own templates can look these up by name, so the app module registers them,
+ * while the app's other components, helpers, and modifiers stay imports.
+ *
+ * @param {string} root
+ * @returns {import('./addons.js').AppModule[]}
+ */
+function reexportedByName(root) {
+  /** @type {import('./addons.js').AppModule[]} */
+  let modules = [];
+
+  for (let folder of ["components", "helpers", "modifiers"]) {
+    for (let file of listFiles(root, `app/${folder}`)) {
+      let source = readFileSync(join(root, file), "utf-8").trim();
+      let specifiers = Array.from(
+        source.matchAll(/^export (?:\*|\{ default \}) from ["']([^."'#][^"']*)["'];?$/gm),
+        (match) => String(match[1]),
+      );
+
+      if (specifiers.length === 0 || source.split("\n").length !== specifiers.length) continue;
+      if (new Set(specifiers).size !== 1) continue;
+
+      modules.push({
+        addon: String(specifiers[0]),
+        path: file.replace(/^app\//, "").replace(/\.\w+$/, ""),
+        specifier: specifiers[0],
+      });
+    }
+  }
+
+  return modules;
+}
+
+/**
  * @param {Record<string, string>} dependencies
  * @param {MigrationReport} report
  */
@@ -796,7 +830,9 @@ export async function migrateApp(project, report, { indexHtml }) {
 
   await writeAppModule(project, report, {
     typescript,
-    services: addonServices(root, appModules).filter((module) => module.specifier),
+    services: addonServices(root, appModules)
+      .filter((module) => module.specifier)
+      .concat(reexportedByName(root)),
     initializers,
   });
 

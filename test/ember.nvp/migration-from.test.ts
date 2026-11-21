@@ -860,6 +860,35 @@ module.exports = function (environment) {
     `);
   });
 
+  it("registers the components that re-export an addon's app tree", async () => {
+    /**
+     * From rust-lang/crates.io, after ember-upgrade's app-tree stage:
+     * ember-cli-notifications' own templates use <NotificationMessage> by name.
+     */
+    let dir = await fixture("app-blueprint", {
+      "app/components/notification-message.js":
+        'export * from "ember-cli-notifications/_app_/components/notification-message";\n' +
+        'export { default } from "ember-cli-notifications/_app_/components/notification-message";\n',
+      "app/components/footer.gjs": "<template>footer</template>\n",
+    });
+
+    await rm(join(dir, "app/app.ts"));
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(
+      app
+        .split("\n")
+        .filter((line) => /notification|footer|components/i.test(line))
+        .join("\n"),
+    ).toMatchInlineSnapshot(`
+      "import NotificationMessageComponent from "ember-cli-notifications/_app_/components/notification-message";
+          "./components/notification-message": NotificationMessageComponent,"
+    `);
+  });
+
   it("imports the config of the app's own code from #config", async () => {
     let dir = await fixture("app-blueprint", {
       "app/app.ts": appBlueprint["app/app.ts"]!.replace(
