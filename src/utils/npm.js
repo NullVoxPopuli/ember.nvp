@@ -59,7 +59,12 @@ export async function getLatest(deps) {
       } else if (alias) {
         version = `npm:${alias.name}@${await bump(alias.name, alias.range)}`;
       } else {
-        if (range == "workspace:*") {
+        /**
+         * The templates use `workspace:*` for the packages in this repo, which are published.
+         * A workspace package of the user's project stays `workspace:`, because it is not on npm,
+         * or another package has its name there.
+         */
+        if (range == "workspace:*" && LOCAL_PACKAGES[dep]) {
           range = "latest";
         }
         version = isFromRegistry(range) ? await bump(dep, range) : range;
