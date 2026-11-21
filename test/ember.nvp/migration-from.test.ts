@@ -13,6 +13,7 @@ import {
   MigrationError,
 } from "#migration-from";
 import { Project } from "#utils/project.js";
+import { generateProject } from "ember.nvp";
 import { cli, generate, mktemp } from "#test-helpers";
 import type { ProjectType } from "#types";
 import {
@@ -271,6 +272,72 @@ describe("@ember/app-blueprint", () => {
 
     expect(app).toContain(`import SessionService from "@acme/session/_app_/services/session";`);
     expect(app).toContain(`"./services/session": SessionService,`);
+  });
+
+  it("keeps the app's own babel and vite plugins", async () => {
+    /**
+     * From rust-lang/crates.io, after ember-upgrade, shortened.
+     */
+    let dir = await fixture("app-blueprint", {
+      "babel.config.mjs": `import { babelCompatSupport, templateCompatSupport } from '@embroider/compat/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
+
+const local = {};
+
+export default {
+  plugins: [
+    ['@babel/plugin-transform-typescript', { allExtensions: true }],
+    [
+      'babel-plugin-ember-template-compilation',
+      { transforms: [...templateCompatSupport(), scopedCSS.template({})] },
+    ],
+    'ember-concurrency/async-arrow-task-transform',
+    ['some-plugin', local],
+    ...babelCompatSupport(),
+  ],
+};
+`,
+      "vite.config.mjs": `import { defineConfig } from 'vite';
+import { extensions, classicEmberSupport, ember } from '@embroider/vite';
+import { babel } from '@rollup/plugin-babel';
+import { scopedCSS } from 'ember-scoped-css/vite';
+import svgJar from '@svg-jar/plugin/vite';
+
+export default defineConfig({
+  plugins: [
+    scopedCSS(),
+    classicEmberSupport(),
+    ember(),
+    babel({ babelHelpers: 'runtime', extensions }),
+    svgJar({ target: 'ember' }),
+  ],
+});
+`,
+    });
+
+    let { name } = await packageJson.read(dir);
+    let { todo } = await generateProject(
+      new Project(dir, { name, type: "app", path: dir, layers: [], packageManager: "pnpm" }),
+    );
+    let babel = await read(dir, "babel.config.js");
+
+    expect(babel).toContain(`import { scopedCSS } from "ember-scoped-css/babel";`);
+    expect(babel).toContain("transforms: [...macros.templateMacros, scopedCSS.template({})]");
+    expect(babel).toMatch(
+      /'ember-concurrency\/async-arrow-task-transform',\s*\.\.\.macros\.babelMacros/,
+    );
+    expect(babel).not.toContain("some-plugin");
+
+    let vite = await read(dir, "vite.config.mjs");
+
+    expect(vite).toContain(`import { scopedCSS } from "ember-scoped-css/vite";`);
+    expect(vite).toContain(`import svgJar from "@svg-jar/plugin/vite";`);
+    expect(vite).toContain("plugins: [scopedCSS(), ember(), svgJar({ target: 'ember' })]");
+
+    expect(todo.find((finding) => finding.title.startsWith("Babel plugins"))?.where).toEqual([
+      "some-plugin",
+    ]);
+    expect(todo.find((finding) => finding.title.startsWith("Vite settings"))).toBeUndefined();
   });
 
   it("keeps the app's own code in the app module", async () => {
