@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "2.5.3",
-      "newVersion": "2.5.4",
+      "oldVersion": "2.5.4",
+      "newVersion": "2.5.5",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.5.0"
     }
   },
-  "description": "## Release (2026-11-21)\n\n* ember.nvp 2.5.4 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#208](https://github.com/NullVoxPopuli/ember.nvp/pull/208) Fix three app migration gaps found on crates.io: router.ts, test load order, test setup ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-21)\n\n* ember.nvp 2.5.5 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#212](https://github.com/NullVoxPopuli/ember.nvp/pull/212) Add an npm override only where an installed package has an older peer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#211](https://github.com/NullVoxPopuli/ember.nvp/pull/211) Register the app config as config:environment, and keep the app's own config settings ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n  * [#210](https://github.com/NullVoxPopuli/ember.nvp/pull/210) Reach app/ from tests through #app subpath imports ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
