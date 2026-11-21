@@ -10,9 +10,14 @@
  *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
  */
 import Application from "@ember/application";
+import config from "#config";
 
+/**
+ * `./config/environment` is there because addons look up the app's config as `config:environment`.
+ */
 export default class App extends Application {
   modules = {
+    "./config/environment": { default: config },
     ...import.meta.glob("./router.*", { eager: true }),
     ...import.meta.glob("./routes/**/*", { eager: true }),
     ...import.meta.glob("./templates/**/*", { eager: true }),

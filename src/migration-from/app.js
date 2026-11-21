@@ -909,6 +909,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   let base = readFileSync(join(BASE_FILES, "app/app.ts"), "utf-8");
   let comment = base.slice(0, base.indexOf("import Application"));
   let baseEntries = /** @type {string} */ (/  modules = \{\n([\s\S]*?)\n  \};/.exec(base)?.[1]);
+  let classComment = /\n(\/\*\*[\s\S]*?\*\/)\nexport default class App/.exec(base)?.[1];
 
   /** @type {string[]} */
   let lines = [comment.trimEnd()];
@@ -918,6 +919,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   lines.push(`import Application from "@ember/application";`);
+  lines.push(`import config from "#config";`);
 
   let deprecationWorkflow = firstExisting(root, [
     "app/deprecation-workflow.ts",
@@ -933,7 +935,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   /** @type {Set<string>} */
-  let provided = new Set(["Application"]);
+  let provided = new Set(["Application", "config"]);
 
   if (deprecationWorkflow) {
     provided.add("importSync").add("isDevelopingApp").add("macroCondition");
@@ -968,11 +970,17 @@ async function writeAppModule(project, report, { typescript, services, initializ
   /**
    * The app's own code keeps its config, which the new module gets from `#config`.
    */
-  for (let name of old.config) lines.push(`import ${name} from "#config";`);
+  for (let name of old.config) {
+    if (name !== "config") lines.push(`import ${name} from "#config";`);
+  }
 
   pushCode(lines, before);
 
-  lines.push("", "export default class App extends Application {", "  modules = {");
+  lines.push("");
+
+  if (classComment) lines.push(classComment);
+
+  lines.push("export default class App extends Application {", "  modules = {");
 
   // first, so that the app's own services of the same name win
   for (let service of services) {
@@ -1532,7 +1540,8 @@ async function rewriteImports(project, modulePrefix, name) {
   /**
    * `./config/environment` in app/router.js, for example.
    */
-  let relativeConfig = /(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\1/g;
+  let relativeConfig =
+    /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\2/g;
   let relativeImport = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/[^"'\n]*)\2/g;
 
   for (let file of filesWithExtension(
@@ -1544,9 +1553,9 @@ async function rewriteImports(project, modulePrefix, name) {
     let source = readFileSync(path, "utf-8");
     let result = source
       .replace(config, "$1#config$1")
-      .replace(relativeConfig, (match, quote, specifier) =>
+      .replace(relativeConfig, (match, before, quote, specifier) =>
         posix.join(posix.dirname(file), specifier) === "app/config/environment"
-          ? `${quote}#config${quote}`
+          ? `${before}${quote}#config${quote}`
           : match,
       );
 

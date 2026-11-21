@@ -427,6 +427,7 @@ export default defineConfig({
        *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
        */
       import Application from "@ember/application";
+      import config from "#config";
       import { importSync, isDevelopingApp, macroCondition } from "@embroider/macros";
       import PageTitleService from "ember-page-title/services/page-title";
 
@@ -453,9 +454,13 @@ export default defineConfig({
         importSync("./deprecation-workflow");
       }
 
+      /**
+       * \`./config/environment\` is there because addons look up the app's config as \`config:environment\`.
+       */
       export default class App extends Application {
         modules = {
           "./services/page-title": PageTitleService,
+          "./config/environment": { default: config },
           ...import.meta.glob("./router.*", { eager: true }),
           ...import.meta.glob("./routes/**/*", { eager: true }),
           ...import.meta.glob("./templates/**/*", { eager: true }),
@@ -676,7 +681,7 @@ export function start() {
 
     expect(app).toContain(`import config from "#config";`);
     expect(app).toContain("console.log(config.environment);");
-    expect(app).not.toContain("config/environment");
+    expect(app).not.toMatch(/from ["'][^"']*config\/environment/);
   });
 
   it("stops when the app's own code needs the classic resolver", async () => {
