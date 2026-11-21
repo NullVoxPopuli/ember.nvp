@@ -13,6 +13,7 @@ import {
   MigrationError,
 } from "#migration-from";
 import { Project } from "#utils/project.js";
+import { generateProject } from "ember.nvp";
 import { cli, generate, mktemp } from "#test-helpers";
 import type { ProjectType } from "#types";
 import {
@@ -273,6 +274,138 @@ describe("@ember/app-blueprint", () => {
     expect(app).toContain(`"./services/session": SessionService,`);
   });
 
+  it("keeps the app's own babel and vite plugins", async () => {
+    /**
+     * From rust-lang/crates.io, after ember-upgrade, shortened.
+     */
+    let dir = await fixture("app-blueprint", {
+      "babel.config.mjs": `import { babelCompatSupport, templateCompatSupport } from '@embroider/compat/babel';
+import { scopedCSS } from 'ember-scoped-css/babel';
+
+const local = {};
+
+export default {
+  plugins: [
+    ['@babel/plugin-transform-typescript', { allExtensions: true }],
+    [
+      'babel-plugin-ember-template-compilation',
+      { transforms: [...templateCompatSupport(), scopedCSS.template({})] },
+    ],
+    'ember-concurrency/async-arrow-task-transform',
+    ['some-plugin', local],
+    ...babelCompatSupport(),
+  ],
+};
+`,
+      "vite.config.mjs": `import { defineConfig } from 'vite';
+import { extensions, classicEmberSupport, ember } from '@embroider/vite';
+import { babel } from '@rollup/plugin-babel';
+import { scopedCSS } from 'ember-scoped-css/vite';
+import svgJar from '@svg-jar/plugin/vite';
+
+export default defineConfig({
+  plugins: [
+    scopedCSS(),
+    classicEmberSupport(),
+    ember(),
+    babel({ babelHelpers: 'runtime', extensions }),
+    svgJar({ target: 'ember' }),
+  ],
+});
+`,
+    });
+
+    let { name } = await packageJson.read(dir);
+    let { todo } = await generateProject(
+      new Project(dir, { name, type: "app", path: dir, layers: [], packageManager: "pnpm" }),
+    );
+    expect(await read(dir, "babel.config.js")).toMatchInlineSnapshot(`
+      "import { buildMacros } from "@embroider/macros/babel";
+      import { setConfig } from "@warp-drive/core/build-config";
+      import { scopedCSS } from "ember-scoped-css/babel";
+
+      const isProduction = process.env.NODE_ENV === "production";
+
+      const macros = buildMacros({
+        configure(config) {
+          setConfig(config, {
+            compatWith: '5.8',
+          });
+
+          if (process.env.EMBER_ENV === "test") {
+            config.enableRuntimeMode();
+          }
+        },
+      });
+
+      export default {
+        plugins: [[
+          "babel-plugin-ember-template-compilation",
+          {
+            transforms: [...macros.templateMacros, scopedCSS.template({})],
+          },
+        ], [
+          "module:decorator-transforms",
+          {
+            runtime: {
+              import: import.meta.resolve("decorator-transforms/runtime-esm"),
+            },
+          },
+        ], [
+          "@babel/plugin-transform-runtime",
+          {
+            absoluteRuntime: import.meta.dirname,
+            useESModules: true,
+            regenerator: false,
+          },
+        ], isProduction && [
+          "babel-plugin-debug-macros",
+          {
+            debugTools: {
+              isDebug: false,
+              source: "@ember/debug",
+              assertPredicateIndex: 1,
+            },
+            externalizeHelpers: {
+              module: "@ember/debug",
+            },
+          },
+          "@ember/debug stripping",
+        ], 'ember-concurrency/async-arrow-task-transform', ...macros.babelMacros].filter(Boolean),
+
+        generatorOpts: {
+          compact: false,
+        },
+      };
+      "
+    `);
+    expect(await read(dir, "vite.config.mjs")).toMatchInlineSnapshot(`
+      "import { defineConfig } from "vite";
+      import { ember } from "@nullvoxpopuli/ember-vite";
+      import { scopedCSS } from "ember-scoped-css/vite";
+      import svgJar from "@svg-jar/plugin/vite";
+
+      export default defineConfig({
+        plugins: [scopedCSS(), ember(), svgJar({ target: 'ember' })],
+      });
+      "
+    `);
+    expect(
+      todo
+        .filter((finding) => /^(Babel plugins|Vite settings)/.test(finding.title))
+        .map((finding) => [finding.title, finding.where]),
+    ).toMatchInlineSnapshot(`
+      [
+        [
+          "Babel plugins that the new babel.config.js does not have",
+          [
+            "some-plugin",
+          ],
+        ],
+      ]
+    `);
+  });
+
   it("keeps the app's own code in the app module", async () => {
     let dir = await fixture("app-blueprint", appWithOwnCode);
 
@@ -328,6 +461,49 @@ describe("@ember/app-blueprint", () => {
           ...import.meta.glob("./services/**/*", { eager: true }),
         };
       }
+      "
+    `);
+  });
+
+  it("imports the config from #config where the app used a relative path", async () => {
+    /**
+     * From rust-lang/crates.io: app/router.js and app/sentry.js.
+     */
+    let dir = await fixture("app-blueprint", {
+      "app/sentry.js": "import config from './config/environment';\n\nexport default config;\n",
+      "app/routes/crate.js":
+        "import config from '../config/environment';\nimport other from './config/environment';\n",
+    });
+
+    await migrate(dir, "app", []);
+
+    expect(await read(dir, "app/sentry.js")).toMatchInlineSnapshot(`
+      "import config from '#config';
+
+      export default config;
+      "
+    `);
+    expect(await read(dir, "app/routes/crate.js")).toMatchInlineSnapshot(`
+      "import config from '#config';
+      import other from './config/environment';
+      "
+    `);
+  });
+
+  it("imports app modules by the package name where a test left tests/ with a relative path", async () => {
+    /**
+     * From rust-lang/crates.io: tests/utils/license-test.js.
+     */
+    let dir = await fixture("app-blueprint", {
+      "tests/utils/license-test.js":
+        "import { parseLicense } from '../../utils/license';\nimport { setup } from '../helpers';\n",
+    });
+
+    await migrate(dir, "app", []);
+
+    expect(await read(dir, "tests/utils/license-test.js")).toMatchInlineSnapshot(`
+      "import { parseLicense } from 'my-app/utils/license';
+      import { setup } from '../helpers';
       "
     `);
   });

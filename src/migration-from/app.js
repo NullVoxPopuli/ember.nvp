@@ -1,12 +1,13 @@
 import { packageJson } from "ember-apply";
 import { existsSync, readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, posix } from "node:path";
 import semver from "semver";
 import { readJSON } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 import { appModulesIn, installedDependencies, v1AddonsIn } from "./addons.js";
 import { readBabelConfig } from "./babel.js";
+import { addImports, carry } from "./carry-over.js";
 import {
   EMBER_CLI_BUILD,
   readEmberCliBuild,
@@ -1135,11 +1136,19 @@ async function replaceBabelConfig(project, report, warpDrive) {
   let transforms = (config?.templateTransforms ?? []).filter(
     (transform) => !/templateCompatSupport|templateMacros/.test(transform),
   );
+  let carried = old ? carryBabelPlugins(root, old, new Set(extra), new Set(transforms)) : undefined;
+  let left = extra
+    .filter((plugin) => !carried?.plugins.has(plugin))
+    .concat(
+      transforms
+        .filter((transform) => !carried?.transforms.has(transform))
+        .map((transform) => `template transform: ${transform}`),
+    );
 
-  if (extra.length > 0 || transforms.length > 0) {
+  if (left.length > 0) {
     report.todo.push({
       title: "Babel plugins that the new babel.config.js does not have",
-      where: extra.concat(transforms.map((transform) => `template transform: ${transform}`)),
+      where: left,
       action: "Add the plugins that you still need to babel.config.js.",
     });
   }
@@ -1160,7 +1169,89 @@ async function replaceBabelConfig(project, report, warpDrive) {
       );
   }
 
+  if (carried) {
+    let plugins = Array.from(carried.plugins.values(), (code) => `    ${indent(code, "    ")},\n`);
+    let added = Array.from(carried.transforms.values()).join(", ");
+
+    base = addImports(base, carried.imports)
+      .replace("    ...macros.babelMacros,\n", (line) => plugins.join("") + line)
+      .replace("[...macros.templateMacros]", (list) =>
+        added ? `[...macros.templateMacros, ${added}]` : list,
+      );
+  }
+
   await writeFile(project.path("babel.config.js"), base);
+}
+
+/**
+ * The plugins and template transforms of the old babel config that the new one can take as they are:
+ * code that uses only imports and globals.
+ *
+ * @param {string} root
+ * @param {string} file
+ * @param {Set<string>} names the plugins to take
+ * @param {Set<string>} transforms the template transforms to take, by source
+ * @returns {{ plugins: Map<string, string>, transforms: Map<string, string>, imports: string[] } | undefined}
+ */
+function carryBabelPlugins(root, file, names, transforms) {
+  if (!/\.[cm]?js$/.test(file)) return;
+
+  let source = readFileSync(join(root, file), "utf-8");
+  let program = parseProgram(source, file);
+
+  if (!program) return;
+
+  /** @type {Map<string, string>} */
+  let plugins = new Map();
+  /** @type {Map<string, string>} */
+  let carriedTransforms = new Map();
+  /** @type {string[]} */
+  let imports = [];
+
+  walk(program, (node) => {
+    if (node.type !== "ObjectExpression") return;
+
+    let list = propertyValue(node, "plugins");
+
+    if (list?.type !== "ArrayExpression") return;
+
+    for (let element of list.elements ?? []) {
+      let entry = element?.type === "ArrayExpression" ? element.elements?.[0] : element;
+      let name =
+        stringValue(entry) ??
+        (entry?.type === "CallExpression" && entry.callee?.property?.name === "resolve"
+          ? stringValue(entry.arguments?.[0])
+          : undefined);
+
+      if (name && names.has(name)) {
+        let code = carry(source, program, element);
+
+        if (code) {
+          plugins.set(name, code.code);
+          imports = imports.concat(code.imports);
+        }
+      }
+
+      let options = element?.type === "ArrayExpression" ? element.elements?.[1] : undefined;
+      let list = propertyValue(options, "transforms");
+
+      if (name !== "babel-plugin-ember-template-compilation" || list?.type !== "ArrayExpression") {
+        continue;
+      }
+
+      for (let transform of list.elements ?? []) {
+        let text = transform ? sourceOf(source, transform) : "";
+        let code = transforms.has(text) ? carry(source, program, transform) : undefined;
+
+        if (code) {
+          carriedTransforms.set(text, code.code);
+          imports = imports.concat(code.imports);
+        }
+      }
+    }
+  });
+
+  return { plugins, transforms: carriedTransforms, imports };
 }
 
 /**
@@ -1190,7 +1281,8 @@ function indent(source, prefix) {
 
 /**
  * The blueprint's vite.config builds with @embroider/vite and compat.
- * The base writes its own, so this lists what the old one had beyond the blueprint's.
+ * The new one is the base's, with the old plugins that use only imports and globals.
+ * The rest is listed for the user.
  *
  * @param {Project} project
  * @param {MigrationReport} report
@@ -1209,6 +1301,12 @@ async function replaceViteConfig(project, report) {
   let program = parseProgram(source, file);
   /** @type {string[]} */
   let extra = [];
+  /**
+   * Plugins that the new config takes as they are, before or after the ember plugin, as in the old one.
+   *
+   * @type {{ before: string[], after: string[], imports: string[] }}
+   */
+  let carried = { before: [], after: [], imports: [] };
 
   if (program) {
     let imports = importedNames(program);
@@ -1223,17 +1321,29 @@ async function replaceViteConfig(project, report) {
       }
 
       let plugins = propertyValue(options, "plugins");
+      let afterEmber = false;
 
       for (let plugin of plugins?.elements ?? []) {
         let callee = plugin?.type === "CallExpression" ? plugin.callee : undefined;
         let from = callee?.type === "Identifier" ? imports.get(callee.name) : undefined;
 
-        if (from === "@embroider/vite" || from === "@rollup/plugin-babel") continue;
+        if (from === "@embroider/vite" || from === "@rollup/plugin-babel") {
+          afterEmber = true;
+          continue;
+        }
         if (
           plugin?.type === "SpreadElement" &&
           /classicEmberSupport/.test(sourceOf(source, plugin))
         )
           continue;
+
+        let code = plugin ? carry(source, program, plugin) : undefined;
+
+        if (code) {
+          (afterEmber ? carried.after : carried.before).push(code.code);
+          carried.imports = carried.imports.concat(code.imports);
+          continue;
+        }
 
         extra.push(sourceOf(source, plugin).replace(/\s+/g, " "));
       }
@@ -1251,6 +1361,16 @@ async function replaceViteConfig(project, report) {
   }
 
   await remove(project, [file]);
+
+  if (carried.before.length > 0 || carried.after.length > 0) {
+    let base = readFileSync(join(BASE_FILES, "vite.config.mjs"), "utf-8");
+    let list = carried.before.concat("ember()", carried.after).join(", ");
+
+    await writeFile(
+      project.path("vite.config.mjs"),
+      addImports(base, carried.imports).replace("plugins: [ember()]", `plugins: [${list}]`),
+    );
+  }
 }
 
 /**
@@ -1268,6 +1388,11 @@ async function rewriteImports(project, modulePrefix, name) {
   let prefix = modulePrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   let config = new RegExp(`(["'])${prefix}/config/environment(\\.\\w+)?\\1`, "g");
   let other = new RegExp(`(["'])${prefix}/`, "g");
+  /**
+   * `./config/environment` in app/router.js, for example.
+   */
+  let relativeConfig = /(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\1/g;
+  let relativeImport = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/[^"'\n]*)\2/g;
 
   for (let file of filesWithExtension(
     project.directory,
@@ -1276,10 +1401,31 @@ async function rewriteImports(project, modulePrefix, name) {
   )) {
     let path = project.path(file);
     let source = readFileSync(path, "utf-8");
-    let result = source.replace(config, "$1#config$1");
+    let result = source
+      .replace(config, "$1#config$1")
+      .replace(relativeConfig, (match, quote, specifier) =>
+        posix.join(posix.dirname(file), specifier) === "app/config/environment"
+          ? `${quote}#config${quote}`
+          : match,
+      );
 
     if (modulePrefix !== name) {
       result = result.replace(other, `$1${name}/`);
+    }
+
+    /**
+     * The classic build gave tests/ the module names `<modulePrefix>/tests/...`,
+     * so `../../utils/ajax` in tests/acceptance/ named app/utils/ajax.
+     * Now the path is a file path, and the package name maps to app/.
+     */
+    if (file.startsWith("tests/")) {
+      result = result.replace(relativeImport, (match, before, quote, specifier) => {
+        let target = posix.join(posix.dirname(file), specifier);
+
+        return target.startsWith("tests/") || target.startsWith("../")
+          ? match
+          : `${before}${quote}${name}/${target}${quote}`;
+      });
     }
 
     if (result !== source) await writeFile(path, result);
