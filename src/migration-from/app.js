@@ -8,6 +8,7 @@ import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
 import { appModulesIn, installedDependencies, v1AddonsIn } from "./addons.js";
 import { readBabelConfig } from "./babel.js";
+import { readEnvironmentSettings } from "./environment.js";
 import { addImports, carry } from "./carry-over.js";
 import {
   EMBER_CLI_BUILD,
@@ -132,6 +133,7 @@ const KNOWN_ENVIRONMENT = new Set([
   "EmberENV._NO_IMPLICIT_ROUTE_MODEL",
   "EmberENV._TEMPLATE_ONLY_GLIMMER_COMPONENTS",
   "environment",
+  "historySupportMiddleware",
   "locationType",
   "modulePrefix",
   "podModulePrefix",
@@ -315,9 +317,17 @@ export async function checkApp(project) {
     report.todo.push({
       title: "Settings in config/environment.js",
       where: environment,
-      action:
-        "Add the settings that you still need to app/config.ts.\n" +
-        "Values from process.env move to import.meta.env, with a VITE_ prefix.",
+      action: "Add the settings that you still need to app/config.ts.",
+    });
+  }
+
+  let variables = environmentSettings(root)?.variables ?? [];
+
+  if (variables.length > 0) {
+    report.todo.push({
+      title: "Environment variables that app/config.ts reads",
+      where: variables.map((name) => `process.env.${name} is import.meta.env.VITE_${name} now`),
+      action: "Set each VITE_ variable where the app builds, such as in CI and on the host.",
     });
   }
 
@@ -666,26 +676,82 @@ function changedOptionalFeatures(root) {
  * @returns {string[]} settings that the base's app/config.ts does not have
  */
 function customEnvironment(root) {
+  let settings = environmentSettings(root);
+
+  if (!settings) return [];
+
+  return settings.unreadable;
+}
+
+/**
+ * @param {string} root
+ * @returns {import('./environment.js').EnvironmentSettings | undefined}
+ */
+function environmentSettings(root) {
   let file = firstExisting(root, ["config/environment.js", "config/environment.cjs"]);
 
-  if (!file) return [];
+  if (!file) return;
 
-  let keys = readEnvironmentKeys(root, file);
+  return readEnvironmentSettings(root, file, (key) => KNOWN_ENVIRONMENT.has(key));
+}
 
-  if (!keys) return [`${file}: ember.nvp cannot read this file`];
+/**
+ * Writes the base's app/config with the app's own settings from config/environment.js.
+ * The base then keeps the file, as it keeps the babel.config.js that the migration writes.
+ *
+ * @param {Project} project
+ * @param {import('./environment.js').EnvironmentSettings} settings
+ * @param {boolean} typescript
+ */
+async function writeConfig(project, settings, typescript) {
+  let { properties, statements } = settings;
 
-  /** @type {string[]} */
-  let custom = [];
-
-  for (let key of keys) {
-    if (KNOWN_ENVIRONMENT.has(key)) continue;
-    // only the parent is interesting
-    if (custom.some((parent) => key.startsWith(`${parent}.`))) continue;
-
-    custom.push(key);
+  if (
+    properties.length === 0 &&
+    statements.all.length === 0 &&
+    statements.development.length === 0 &&
+    statements.production.length === 0
+  ) {
+    return;
   }
 
-  return custom.map((key) => `ENV.${key}`);
+  let base = readFileSync(join(BASE_FILES, "app/config.ts"), "utf-8");
+  /** @type {string[]} */
+  let code = [];
+
+  if (properties.length > 0) {
+    code.push(
+      [
+        "Object.assign(ENV, {",
+        properties.map((property) => `  ${indent(property, "  ")},`).join("\n"),
+        "});",
+      ].join("\n"),
+    );
+  }
+
+  for (let statement of statements.all) code.push(indent(statement, ""));
+
+  for (let [environment, check] of /** @type {const} */ ([
+    ["development", "import.meta.env.DEV"],
+    ["production", "import.meta.env.PROD"],
+  ])) {
+    if (statements[environment].length === 0) continue;
+
+    code.push(
+      `if (${check}) {\n${statements[environment].map((statement) => `  ${indent(statement, "  ")}`).join("\n")}\n}`,
+    );
+  }
+
+  let source = base
+    .replace(
+      "interface Config {\n",
+      "interface Config {\n  /**\n   * The app's own settings, which addons read.\n   */\n  [key: string]: any;\n",
+    )
+    .replace("\nexport default ENV;", `\n${code.join("\n\n")}\n\nexport default ENV;`);
+
+  if (!typescript) source = await removeTypes(".ts", source);
+
+  await writeFile(project.path(typescript ? "app/config.ts" : "app/config.js"), source);
 }
 
 /**
@@ -742,7 +808,19 @@ export async function migrateApp(project, report, { indexHtml }) {
   await replaceViteConfig(project, report);
   await rewriteImports(project, modulePrefix, manifest.name);
 
+  let environment = environmentSettings(root);
   let testSetup = readTestSetup(root);
+
+  /**
+   * The qunit layer's test-helper sets the test config in start(), so the app's own test settings go there too.
+   */
+  if (environment && environment.statements.test.length > 0) {
+    let statements = environment.statements.test.map((code) => code.replace(/\bENV\b/g, "config"));
+
+    testSetup = testSetup
+      ? { ...testSetup, statements: testSetup.statements.concat(statements) }
+      : { file: "config/environment.js", imports: [], statements };
+  }
 
   await remove(project, EMBER_CLI_BUILD);
   await remove(project, [
@@ -763,6 +841,7 @@ export async function migrateApp(project, report, { indexHtml }) {
   ]);
 
   if (testSetup) await writeTestHelper(project, report, testSetup, typescript);
+  if (environment) await writeConfig(project, environment, typescript);
 
   if (listFiles(root, "app/config").length === 0) {
     await remove(project, ["app/config"]);
