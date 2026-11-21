@@ -1,5 +1,6 @@
 import { applyFolderTo } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
+import { outdatedPeers } from "#utils/peers.js";
 import { hasConfiguredPlugin, prependPlugin, removeConfiguredPlugin } from "#utils/babel.js";
 import { addTsdownConfigProperty } from "#utils/tsdown-config.js";
 import { packageJson, tsconfig } from "ember-apply";
@@ -104,13 +105,30 @@ export default {
       }
     }
 
-    await packageJson.addDevDependencies(
-      await getLatest({
-        ...depsFor(project),
-        ...(ts ? tsDepsFor(project) : {}),
-      }),
-      project.directory,
-    );
+    let devDependencies = await getLatest({
+      ...depsFor(project),
+      ...(ts ? tsDepsFor(project) : {}),
+    });
+
+    await packageJson.addDevDependencies(devDependencies, project.directory);
+
+    /**
+     * An installed package can declare a peer range that the new versions do not satisfy,
+     * such as ember-data's optional peer `qunit@^2`. pnpm warns, but npm stops the install,
+     * so npm gets told that the app's version is the one for every package.
+     */
+    let outdated =
+      project.packageManager === "npm" ? outdatedPeers(project.directory, devDependencies) : [];
+
+    if (outdated.length > 0) {
+      await packageJson.modify((json) => {
+        json.overrides = Object.assign(
+          {},
+          json.overrides,
+          Object.fromEntries(outdated.map((name) => [name, `$${name}`])),
+        );
+      }, project.directory);
+    }
 
     await packageJson.addScripts(
       {
