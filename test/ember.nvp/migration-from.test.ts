@@ -419,6 +419,22 @@ export default defineConfig({
     );
   });
 
+  it("imports app modules by the package name where a test left tests/ with a relative path", async () => {
+    /**
+     * From rust-lang/crates.io: tests/utils/license-test.js.
+     */
+    let dir = await fixture("app-blueprint", {
+      "tests/utils/license-test.js":
+        "import { parseLicense } from '../../utils/license';\nimport { setup } from '../helpers';\n",
+    });
+
+    await migrate(dir, "app", []);
+
+    expect(await read(dir, "tests/utils/license-test.js")).toBe(
+      "import { parseLicense } from 'my-app/utils/license';\nimport { setup } from '../helpers';\n",
+    );
+  });
+
   it("imports the config of the app's own code from #config", async () => {
     let dir = await fixture("app-blueprint", {
       "app/app.ts": appBlueprint["app/app.ts"]!.replace(

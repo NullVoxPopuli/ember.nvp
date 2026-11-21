@@ -1392,6 +1392,7 @@ async function rewriteImports(project, modulePrefix, name) {
    * `./config/environment` in app/router.js, for example.
    */
   let relativeConfig = /(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\1/g;
+  let relativeImport = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/[^"'\n]*)\2/g;
 
   for (let file of filesWithExtension(
     project.directory,
@@ -1410,6 +1411,21 @@ async function rewriteImports(project, modulePrefix, name) {
 
     if (modulePrefix !== name) {
       result = result.replace(other, `$1${name}/`);
+    }
+
+    /**
+     * The classic build gave tests/ the module names `<modulePrefix>/tests/...`,
+     * so `../../utils/ajax` in tests/acceptance/ named app/utils/ajax.
+     * Now the path is a file path, and the package name maps to app/.
+     */
+    if (file.startsWith("tests/")) {
+      result = result.replace(relativeImport, (match, before, quote, specifier) => {
+        let target = posix.join(posix.dirname(file), specifier);
+
+        return target.startsWith("tests/") || target.startsWith("../")
+          ? match
+          : `${before}${quote}${name}/${target}${quote}`;
+      });
     }
 
     if (result !== source) await writeFile(path, result);
