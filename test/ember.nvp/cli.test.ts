@@ -38,10 +38,10 @@ const BASIC_HELP_OUTPUT = `
           Bypass target confirmation step [choices: "yes", "no"]
 
           --layers <string> [--layers <string> ...]
-          Layers to apply to the project, in addition to the default layers [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "tailwind4", "typescript", "vitest"]
+          Layers to apply to the project, in addition to the default layers [choices: "agents-md", "are-the-types-wrong", "css", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
 
           --skip-layers <string> [--skip-layers <string> ...]
-          Default layers to leave out [choices: "agents-md", "are-the-types-wrong", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "tailwind4", "typescript", "vitest"]
+          Default layers to leave out [choices: "agents-md", "are-the-types-wrong", "css", "eslint-bundled", "expect-type", "git", "github-actions", "inspector-support", "prettier", "publint", "qunit", "readme", "renovate", "ssr", "typescript", "vitest"]
 
           --packageManager <string>
           Package manager to configure for the project [choices: "npm", "pnpm"]
@@ -62,6 +62,10 @@ const BASIC_HELP_OUTPUT = `
 
     Layer Options:
       Without a TTY, an option without a flag gets its default.
+
+      Layer: css
+          --css.tools <string> [--css.tools <string> ...]
+          Which CSS tools? [choices: "tailwind", "scoped-css"] [default: ["tailwind","scoped-css"]]
 
       Layer: eslint-bundled
           --eslint-bundled.preset <string>

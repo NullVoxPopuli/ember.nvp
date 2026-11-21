@@ -1,7 +1,7 @@
 import { packageJson } from "ember-apply";
-import { rm, writeFile } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import { join } from "node:path";
-import { applyFolderTo } from "#utils/fs.js";
+import { applyFolderTo, editFile } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 
 const VITE_EMBER_SSR = { "vite-ember-ssr": "^0.7.0" };
@@ -211,22 +211,6 @@ function wireIndexHtml(html) {
 }
 
 /**
- * @param {import('#utils/project.js').Project} project
- * @param {string} file
- * @param {(contents: string) => string} change
- */
-async function edit(project, file, change) {
-  if (!project.hasFile(file)) return;
-
-  let contents = (await project.read(file)) ?? "";
-  let changed = change(contents);
-
-  if (changed !== contents) {
-    await writeFile(project.path(file), changed);
-  }
-}
-
-/**
  * @type {import('#types').Layer}
  */
 export default {
@@ -281,9 +265,9 @@ export default {
       await rm(project.path("server.js"));
     }
 
-    await edit(project, VITE_CONFIG, (code) => wireViteConfig(code, mode));
-    await edit(project, "index.html", wireIndexHtml);
-    await edit(project, "testem.cjs", (code) =>
+    await editFile(project, VITE_CONFIG, (code) => wireViteConfig(code, mode));
+    await editFile(project, "index.html", wireIndexHtml);
+    await editFile(project, "testem.cjs", (code) =>
       code.replace(TESTEM_CWD, `cwd: "${mode.testemCwd}"`),
     );
 

@@ -173,3 +173,21 @@ export async function applyFolderTo(from, project) {
     }
   }
 }
+
+/**
+ * Writes the file only when `change` changes it, so a re-run leaves the file alone.
+ *
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} file
+ * @param {(contents: string) => string} change
+ */
+export async function editFile(project, file, change) {
+  if (!project.hasFile(file)) return;
+
+  let contents = (await project.read(file)) ?? "";
+  let changed = change(contents);
+
+  if (changed !== contents) {
+    await writeFile(project.path(file), changed);
+  }
+}
