@@ -115,6 +115,15 @@ export async function applyFolderTo(from, project) {
       let ext = pathInfo.ext;
       if (ext === ".gts" || ext === ".ts") {
         let wantsTS = await project.hasOrWantsLayer("typescript");
+        let jsPath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");
+
+        /**
+         * A migrated app keeps its own JavaScript files, such as app/router.js.
+         * A second router.ts next to it would also match `import.meta.glob("./router.*")`.
+         */
+        if (wantsTS && existsSync(jsPath)) {
+          return;
+        }
 
         if (!wantsTS) {
           let filePath = entry.replace(/\.gts$/, ".gjs").replace(/\.ts$/, ".js");

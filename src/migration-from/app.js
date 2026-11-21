@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { join, posix } from "node:path";
 import semver from "semver";
 import { readJSON } from "#utils/fs.js";
+import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
 import { appModulesIn, installedDependencies, v1AddonsIn } from "./addons.js";
 import { readBabelConfig } from "./babel.js";
@@ -39,6 +40,7 @@ const BASE_FILES = join(import.meta.dirname, "../bases/minimal-app/files");
  * Read from the base, so that a migrated app matches a generated one.
  */
 const BASE_MANIFEST = readJSON(join(BASE_FILES, "package.json"));
+const QUNIT_TEST_HELPER = join(import.meta.dirname, "../layers/qunit/files/tests/test-helper.ts");
 
 /**
  * The app base boots with the strict resolver (RFC 1132),
@@ -357,7 +359,7 @@ export async function checkApp(project) {
     });
   }
 
-  let testSetup = customTestHelper(root);
+  let testSetup = readTestSetup(root) ? [] : customTestHelper(root);
 
   if (testSetup.length > 0) {
     report.todo.push({
@@ -387,6 +389,141 @@ export async function checkApp(project) {
  */
 const BLUEPRINT_TEST_HELPER_IMPORTS =
   /^(@ember\/test-helpers|@embroider\/macros|@warp-drive\/ember\/install|ember-qunit|qunit|qunit-dom|.*\/app|.*\/config\/environment)$/;
+
+/**
+ * @typedef {object} TestSetup
+ * @property {string} file the old tests/test-helper
+ * @property {string[]} imports the import declarations beyond the blueprints', as `await import()`
+ * @property {string[]} statements the statements of `start()` that use those imports
+ */
+
+/**
+ * The app's own part of tests/test-helper, which the qunit layer's test-helper does not have.
+ *
+ * @param {string} root
+ * @returns {TestSetup | undefined} undefined when the test-helper has nothing of the app's own
+ */
+function readTestSetup(root) {
+  let file = firstExisting(root, ["tests/test-helper.ts", "tests/test-helper.js"]);
+
+  if (!file) return;
+
+  let source = readFileSync(join(root, file), "utf-8");
+  let program = parseProgram(source, file);
+
+  if (!program) return;
+
+  /** @type {string[]} */
+  let imports = [];
+  /** @type {Set<string>} */
+  let names = new Set();
+
+  for (let statement of program.body ?? []) {
+    if (statement.type !== "ImportDeclaration") continue;
+    if (BLUEPRINT_TEST_HELPER_IMPORTS.test(stringValue(statement.source) ?? "")) continue;
+
+    imports.push(dynamicImport(statement));
+
+    for (let specifier of statement.specifiers ?? []) names.add(specifier.local.name);
+  }
+
+  if (imports.length === 0) return;
+
+  /** @type {string[]} */
+  let statements = [];
+
+  walk(program, (node) => {
+    if (node.type !== "FunctionDeclaration" || node.id?.name !== "start") return;
+
+    for (let statement of node.body?.body ?? []) {
+      /** @type {Set<string>} */
+      let used = new Set();
+
+      walk(statement, (child) => {
+        if (child.type === "Identifier") used.add(child.name);
+      });
+
+      if (Array.from(used).some((name) => names.has(name))) {
+        statements.push(sourceOf(source, statement));
+      }
+    }
+  });
+
+  return { file, imports, statements };
+}
+
+/**
+ * The same bindings as an import declaration, from an `await import()`.
+ *
+ *   import a, { b as c } from "x";   →   const { default: a, b: c } = await import("x");
+ *   import "./x.css";                →   await import("./x.css");
+ *
+ * @param {import('./javascript.js').Node} declaration
+ * @returns {string}
+ */
+function dynamicImport(declaration) {
+  let from = JSON.stringify(stringValue(declaration.source));
+  let specifiers = declaration.specifiers ?? [];
+  let namespace = specifiers.find(
+    (/** @type {any} */ specifier) => specifier.type === "ImportNamespaceSpecifier",
+  );
+
+  if (namespace) return `const ${namespace.local.name} = await import(${from});`;
+  if (specifiers.length === 0) return `await import(${from});`;
+
+  let bindings = specifiers.map((/** @type {any} */ specifier) => {
+    let imported =
+      specifier.type === "ImportDefaultSpecifier"
+        ? "default"
+        : (specifier.imported.name ?? stringValue(specifier.imported));
+
+    return imported === specifier.local.name ? imported : `${imported}: ${specifier.local.name}`;
+  });
+
+  return `const { ${bindings.join(", ")} } = await import(${from});`;
+}
+
+/**
+ * Writes the qunit layer's tests/test-helper with the app's own test setup, just before `qunitStart()`.
+ * The layer then keeps the file, as the base keeps the babel.config.js that the migration writes.
+ * The setup's modules load with `await import()`, after `setTesting(true)`,
+ * because they can import addons that read `isTesting()` when they load.
+ *
+ * @param {Project} project
+ * @param {MigrationReport} report
+ * @param {TestSetup} setup
+ * @param {boolean} typescript
+ */
+async function writeTestHelper(project, report, setup, typescript) {
+  if (!project.wantsLayer("qunit")) {
+    report.todo.push({
+      title: "Test setup of your own",
+      where: setup.imports.map((line) => `${setup.file}: ${line}`),
+      action: "Add the setup that you still need to the qunit layer's tests/test-helper.ts.",
+    });
+    return;
+  }
+
+  let layer = readFileSync(QUNIT_TEST_HELPER, "utf-8");
+  let code = layer.replace(
+    "  qunitStart();",
+    setup.imports
+      .concat(setup.statements)
+      .map((line) => `  ${line}\n`)
+      .join("") + "\n  qunitStart();",
+  );
+  /**
+   * The import carries the extension of the app module that the migration wrote.
+   * package.json does not map `#app/*` yet, so nothing can look the file up.
+   */
+  let app = firstExisting(project.directory, ["app/app.ts", "app/app.js"]) ?? "app/app.js";
+
+  code = code.replace(`"#app/app"`, `"#${app}"`);
+
+  if (!typescript) code = await removeTypes(".ts", code);
+
+  await writeFile(project.path(typescript ? "tests/test-helper.ts" : "tests/test-helper.js"), code);
+}
 
 /**
  * @param {string} root
@@ -605,6 +742,8 @@ export async function migrateApp(project, report, { indexHtml }) {
   await replaceViteConfig(project, report);
   await rewriteImports(project, modulePrefix, manifest.name);
 
+  let testSetup = readTestSetup(root);
+
   await remove(project, EMBER_CLI_BUILD);
   await remove(project, [
     ".ember-cli",
@@ -622,6 +761,8 @@ export async function migrateApp(project, report, { indexHtml }) {
     "tests/test-helper.js",
     "tests/test-helper.ts",
   ]);
+
+  if (testSetup) await writeTestHelper(project, report, testSetup, typescript);
 
   if (listFiles(root, "app/config").length === 0) {
     await remove(project, ["app/config"]);
