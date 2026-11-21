@@ -44,6 +44,11 @@ describe("getLatest", () => {
       "my-linked": "link:../my-linked",
       "my-tarball": "https://example.com/my-tarball.tgz",
       "my-catalog": "catalog:",
+      /**
+       * From rust-lang/crates.io: a package of the app's own pnpm workspace, which is not on npm.
+       */
+      "@crates-io/msw": "workspace:*",
+      "my-workspace-range": "workspace:^1.0.0",
     };
 
     expect(await getLatest(specs)).toEqual(specs);
