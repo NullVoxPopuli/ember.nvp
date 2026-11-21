@@ -2,6 +2,19 @@
 
 ## Release (2026-11-21)
 
+* ember.nvp 2.5.5 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#212](https://github.com/NullVoxPopuli/ember.nvp/pull/212) Add an npm override only where an installed package has an older peer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#211](https://github.com/NullVoxPopuli/ember.nvp/pull/211) Register the app config as config:environment, and keep the app's own config settings ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+  * [#210](https://github.com/NullVoxPopuli/ember.nvp/pull/210) Reach app/ from tests through #app subpath imports ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-21)
+
 * ember.nvp 2.5.4 (patch)
 
 #### :bug: Bug Fix
