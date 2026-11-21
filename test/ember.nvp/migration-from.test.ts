@@ -496,16 +496,30 @@ export default defineConfig({
      * From rust-lang/crates.io: tests/utils/license-test.js.
      */
     let dir = await fixture("app-blueprint", {
+      "app/utils/license.js": "export function parseLicense() {}\n",
+      "app/components/rendered-html.gjs": "<template></template>\n",
       "tests/utils/license-test.js":
         "import { parseLicense } from '../../utils/license';\nimport { setup } from '../helpers';\n",
+      "tests/components/rendered-html-test.gjs":
+        "import RenderedHtml from '../../app/components/rendered-html.gjs';\n",
     });
 
     await migrate(dir, "app", []);
 
-    expect(await read(dir, "tests/utils/license-test.js")).toMatchInlineSnapshot(`
-      "import { parseLicense } from 'my-app/utils/license';
+    expect({
+      "tests/utils/license-test.js": await read(dir, "tests/utils/license-test.js"),
+      "tests/components/rendered-html-test.gjs": await read(
+        dir,
+        "tests/components/rendered-html-test.gjs",
+      ),
+    }).toMatchInlineSnapshot(`
+      {
+        "tests/components/rendered-html-test.gjs": "import RenderedHtml from '../../app/components/rendered-html.gjs';
+      ",
+        "tests/utils/license-test.js": "import { parseLicense } from 'my-app/utils/license';
       import { setup } from '../helpers';
-      "
+      ",
+      }
     `);
   });
 

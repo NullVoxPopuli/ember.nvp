@@ -1,5 +1,5 @@
 import { packageJson } from "ember-apply";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join, posix } from "node:path";
 import semver from "semver";
@@ -1515,6 +1515,19 @@ async function replaceViteConfig(project, report) {
 }
 
 /**
+ * @param {string} root
+ * @param {string} path relative to `root`, with or without an extension
+ * @returns {boolean} a file is at the path, as a bundler would look it up
+ */
+function resolvesTo(root, path) {
+  return ["", ".js", ".ts", ".gjs", ".gts", "/index.js", "/index.ts"].some((suffix) => {
+    let file = join(root, path + suffix);
+
+    return existsSync(file) && !lstatSync(file).isDirectory();
+  });
+}
+
+/**
  * `<modulePrefix>/config/environment` is `#config` now.
  *
  * When the module prefix is not the package name,
@@ -1558,14 +1571,21 @@ async function rewriteImports(project, modulePrefix, name) {
      * The classic build gave tests/ the module names `<modulePrefix>/tests/...`,
      * so `../../utils/ajax` in tests/acceptance/ named app/utils/ajax.
      * Now the path is a file path, and the package name maps to app/.
+     * A path to a file that exists, such as `../../app/components/x.gjs`, stays.
      */
     if (file.startsWith("tests/")) {
       result = result.replace(relativeImport, (match, before, quote, specifier) => {
         let target = posix.join(posix.dirname(file), specifier);
 
-        return target.startsWith("tests/") || target.startsWith("../")
-          ? match
-          : `${before}${quote}${name}/${target}${quote}`;
+        if (target.startsWith("tests/") || target.startsWith("../")) return match;
+        if (
+          resolvesTo(project.directory, target) ||
+          !resolvesTo(project.directory, `app/${target}`)
+        ) {
+          return match;
+        }
+
+        return `${before}${quote}${name}/${target}${quote}`;
       });
     }
 
