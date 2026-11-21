@@ -43,6 +43,9 @@ interface Config {
  * - `emberConfig()`
  *   applies sensible tsdown defaults for a library build
  *   (sourcemaps, `clean`, `dts`, `.js` / `.d.ts` extensions, quiet logging).
+ *   It also turns off rolldown's constant inlining.
+ *   Inlined literals break `precompileTemplate` scope objects,
+ *   which must hold direct references.
  *   Anything you set explicitly still wins.
  *
  * - `emberIsolatedDeclarations()`
