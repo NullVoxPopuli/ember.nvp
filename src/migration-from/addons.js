@@ -1,5 +1,5 @@
-import { existsSync, globSync } from "node:fs";
-import { join, sep } from "node:path";
+import { existsSync, globSync, readFileSync, realpathSync } from "node:fs";
+import { dirname, join, sep } from "node:path";
 import { readJSON } from "#utils/fs.js";
 
 /**
@@ -151,4 +151,57 @@ function exportedAs(name, manifest, target) {
       return `${name}/${key.replace(/^\.\//, "").replace("*", matched)}`;
     }
   }
+}
+
+/**
+ * @param {string} from a package's directory
+ * @param {string} name
+ * @returns {string | undefined} where `name` is installed, as Node finds it from `from`
+ */
+function packageDirectory(from, name) {
+  for (let directory = from; ; directory = dirname(directory)) {
+    let candidate = join(directory, "node_modules", name);
+
+    if (existsSync(join(candidate, "package.json"))) return realpathSync(candidate);
+    if (dirname(directory) === directory) return;
+  }
+}
+
+/**
+ * The installed addons, and the addons of those addons, whose code looks up the app's config
+ * as `config:environment`, such as ember-page-title and ember-cli-notifications.
+ *
+ * @param {string} directory the project
+ * @param {Record<string, string>} dependencies the project's dependencies, by name
+ * @returns {string[]}
+ */
+export function configReaders(directory, dependencies) {
+  /** @type {string[]} */
+  let readers = [];
+  let seen = new Set();
+  let queue = Object.keys(dependencies).map((name) => ({ name, from: directory }));
+
+  for (let item = queue.shift(); item; item = queue.shift()) {
+    if (seen.has(item.name)) continue;
+
+    seen.add(item.name);
+
+    let location = packageDirectory(item.from, item.name);
+    let manifest = location ? readJSON(join(location, "package.json")) : undefined;
+
+    if (!location || !manifest?.keywords?.includes("ember-addon")) continue;
+
+    let reads = globSync("**/*.{js,mjs}", {
+      cwd: location,
+      exclude: (name) => name === "node_modules",
+    }).some((file) => readFileSync(join(location, file), "utf-8").includes("config:environment"));
+
+    if (reads) readers.push(item.name);
+
+    for (let name of Object.keys(manifest.dependencies ?? {})) {
+      queue.push({ name, from: location });
+    }
+  }
+
+  return readers.sort();
 }

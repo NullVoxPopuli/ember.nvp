@@ -676,6 +676,261 @@ export function start() {
     expect(todo.map((finding) => finding.title)).not.toContain("Test setup of your own");
   });
 
+  it("keeps the app's own settings from config/environment.js", async () => {
+    /**
+     * From rust-lang/crates.io.
+     */
+    let dir = await fixture("app-blueprint", {
+      "config/environment.js": `'use strict';
+
+module.exports = function (environment) {
+  let ENV = {
+    modulePrefix: 'crates-io',
+    environment,
+    rootURL: '/',
+    locationType: 'history',
+    historySupportMiddleware: true,
+    EmberENV: {
+      FEATURES: {
+        // Here you can enable experimental features on an ember canary build
+        // e.g. 'with-controller': true
+      },
+      EXTEND_PROTOTYPES: {
+        // Prevent Ember Data from overriding Date.parse.
+        Date: false,
+      },
+    },
+
+    APP: {
+      // Here you can pass flags/options to your application instance
+      // when it is created
+    },
+
+    'ember-cli-notifications': {
+      autoClear: true,
+      clearDuration: 10_000,
+    },
+
+    '@sentry/ember': {
+      disablePerformance: true,
+    },
+  };
+
+  if (environment === 'development') {
+    // ENV.APP.LOG_RESOLVER = true;
+    // ENV.APP.LOG_ACTIVE_GENERATION = true;
+    // ENV.APP.LOG_TRANSITIONS = true;
+    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
+    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV['ember-a11y-testing'] = {
+      componentOptions: {
+        turnAuditOff: true,
+      },
+    };
+  }
+
+  if (environment === 'test') {
+    // Testem prefers this...
+    ENV.locationType = 'none';
+
+    // keep test console output quieter
+    ENV.APP.LOG_ACTIVE_GENERATION = false;
+    ENV.APP.LOG_VIEW_LOOKUPS = false;
+
+    ENV.APP.rootElement = '#ember-testing';
+    ENV.APP.autoboot = false;
+
+    // disable auto clearing so that we can manually clear the queue if needed
+    ENV['ember-cli-notifications'].autoClear = false;
+  }
+
+  if (environment === 'production') {
+    // here you can enable a production-specific feature
+    ENV.sentry = {
+      dsn: process.env.SENTRY_DSN_WEB,
+    };
+
+    // Heroku Git Hash support
+    if (process.env.SOURCE_VERSION) {
+      ENV.sentry.release = process.env.SOURCE_VERSION.slice(0, 7);
+    }
+  }
+
+  return ENV;
+};
+`,
+    });
+
+    let { name } = await packageJson.read(dir);
+    let { todo } = await generateProject(
+      new Project(dir, {
+        name,
+        type: "app",
+        path: dir,
+        layers: layers.filter((layer) => ["qunit", "typescript"].includes(layer.name)),
+        packageManager: "pnpm",
+      }),
+    );
+    let helper = await read(dir, "tests/test-helper.ts");
+
+    expect(await read(dir, "app/config.ts")).toMatchInlineSnapshot(`
+      "interface Config {
+        /**
+         * The app's own settings, which addons read.
+         */
+        [key: string]: any;
+        environment: "development" | "production";
+        locationType: "history" | "hash" | "none" | "auto";
+        rootURL: string;
+        EmberENV?: Record<string, unknown>;
+        APP: Record<string, unknown> & { rootElement?: string; autoboot?: boolean };
+      }
+
+      const ENV: Config = {
+        environment: import.meta.env.DEV ? "development" : "production",
+        rootURL: "/",
+        locationType: "history",
+        EmberENV: {},
+        APP: {},
+      };
+
+      Object.assign(ENV, {
+        'ember-cli-notifications': {
+          autoClear: true,
+          clearDuration: 10_000,
+        },
+        '@sentry/ember': {
+          disablePerformance: true,
+        },
+      });
+
+      if (import.meta.env.DEV) {
+        ENV['ember-a11y-testing'] = {
+          componentOptions: {
+            turnAuditOff: true,
+          },
+        };
+      }
+
+      if (import.meta.env.PROD) {
+        ENV.sentry = {
+          dsn: import.meta.env.VITE_SENTRY_DSN_WEB,
+        };
+        if (import.meta.env.VITE_SOURCE_VERSION) {
+          ENV.sentry.release = import.meta.env.VITE_SOURCE_VERSION.slice(0, 7);
+        }
+      }
+
+      export default ENV;
+      "
+    `);
+    expect(helper.slice(helper.indexOf("export async function start"))).toMatchInlineSnapshot(`
+      "export async function start() {
+        config.locationType = "none";
+        config.APP.rootElement = "#ember-testing";
+        config.APP.autoboot = false;
+
+        setTesting(true);
+
+        const { default: Application } = await import("#app/app.ts");
+
+        await Promise.all(Object.values(tests).map((load) => load()));
+
+        setApplication(Application.create(config.APP));
+        setup(QUnit.assert);
+        setupEmberOnerrorValidation();
+
+        QUnit.moduleStart(({ name }) => console.group(name));
+        QUnit.testStart(({ name }) => console.group(name));
+        QUnit.testDone(() => console.groupEnd());
+        QUnit.moduleDone(() => console.groupEnd());
+        QUnit.testDone(resetOnerror);
+
+        config['ember-cli-notifications'].autoClear = false;
+
+        qunitStart();
+      }
+      "
+    `);
+    expect(
+      todo
+        .filter((finding) => /config|Environment/.test(finding.title))
+        .map((finding) => [finding.title, finding.where]),
+    ).toMatchInlineSnapshot(`
+      [
+        [
+          "Environment variables that app/config.ts reads",
+          [
+            "process.env.SENTRY_DSN_WEB is import.meta.env.VITE_SENTRY_DSN_WEB now",
+            "process.env.SOURCE_VERSION is import.meta.env.VITE_SOURCE_VERSION now",
+          ],
+        ],
+      ]
+    `);
+  });
+
+  it("registers the components that re-export an addon's app tree", async () => {
+    /**
+     * From rust-lang/crates.io, after ember-upgrade's app-tree stage:
+     * ember-cli-notifications' own templates use <NotificationMessage> by name.
+     */
+    let dir = await fixture("app-blueprint", {
+      "app/components/notification-message.js":
+        'export * from "ember-cli-notifications/_app_/components/notification-message";\n' +
+        'export { default } from "ember-cli-notifications/_app_/components/notification-message";\n',
+      "app/components/footer.gjs": "<template>footer</template>\n",
+    });
+
+    await rm(join(dir, "app/app.ts"));
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(
+      app
+        .split("\n")
+        .filter((line) => /notification|footer|components/i.test(line))
+        .join("\n"),
+    ).toMatchInlineSnapshot(`
+      "import NotificationMessageComponent from "ember-cli-notifications/_app_/components/notification-message";
+          "./components/notification-message": NotificationMessageComponent,"
+    `);
+  });
+
+  it("registers the config as config:environment only for addons that look it up", async () => {
+    /**
+     * From rust-lang/crates.io: ember-page-title's service reads the config from the owner.
+     */
+    let dir = await fixture("app-blueprint", {
+      "node_modules/ember-page-title/package.json": JSON.stringify({
+        name: "ember-page-title",
+        keywords: ["ember-addon"],
+        "ember-addon": { version: 2 },
+      }),
+      "node_modules/ember-page-title/dist/services/page-title.js":
+        "const config = owner.resolveRegistration('config:environment');\n",
+    });
+
+    await rm(join(dir, "app/app.ts"));
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(
+      app
+        .split("\n")
+        .filter((line) => /config|page-title/.test(line))
+        .join("\n"),
+    ).toMatchInlineSnapshot(`
+      "import config from "#config";
+       * \`./config/environment\` is there because these addons look up the app's config as \`config:environment\`:
+       * ember-page-title.
+          "./config/environment": { default: config },"
+    `);
+  });
+
   it("imports the config of the app's own code from #config", async () => {
     let dir = await fixture("app-blueprint", {
       "app/app.ts": appBlueprint["app/app.ts"]!.replace(
@@ -690,7 +945,7 @@ export function start() {
 
     expect(app).toContain(`import config from "#config";`);
     expect(app).toContain("console.log(config.environment);");
-    expect(app).not.toContain("config/environment");
+    expect(app).not.toMatch(/from ["'][^"']*config\/environment/);
   });
 
   it("stops when the app's own code needs the classic resolver", async () => {

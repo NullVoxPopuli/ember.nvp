@@ -6,8 +6,9 @@ import semver from "semver";
 import { readJSON } from "#utils/fs.js";
 import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
-import { appModulesIn, installedDependencies, v1AddonsIn } from "./addons.js";
+import { appModulesIn, configReaders, installedDependencies, v1AddonsIn } from "./addons.js";
 import { readBabelConfig } from "./babel.js";
+import { readEnvironmentSettings } from "./environment.js";
 import { addImports, carry } from "./carry-over.js";
 import {
   EMBER_CLI_BUILD,
@@ -132,6 +133,7 @@ const KNOWN_ENVIRONMENT = new Set([
   "EmberENV._NO_IMPLICIT_ROUTE_MODEL",
   "EmberENV._TEMPLATE_ONLY_GLIMMER_COMPONENTS",
   "environment",
+  "historySupportMiddleware",
   "locationType",
   "modulePrefix",
   "podModulePrefix",
@@ -315,9 +317,17 @@ export async function checkApp(project) {
     report.todo.push({
       title: "Settings in config/environment.js",
       where: environment,
-      action:
-        "Add the settings that you still need to app/config.ts.\n" +
-        "Values from process.env move to import.meta.env, with a VITE_ prefix.",
+      action: "Add the settings that you still need to app/config.ts.",
+    });
+  }
+
+  let variables = environmentSettings(root)?.variables ?? [];
+
+  if (variables.length > 0) {
+    report.todo.push({
+      title: "Environment variables that app/config.ts reads",
+      where: variables.map((name) => `process.env.${name} is import.meta.env.VITE_${name} now`),
+      action: "Set each VITE_ variable where the app builds, such as in CI and on the host.",
     });
   }
 
@@ -596,6 +606,40 @@ function addonServices(root, modules) {
 }
 
 /**
+ * Files in app/ that only re-export a package's module, as ember-cli merged an addon's app tree.
+ * The addon's own templates can look these up by name, so the app module registers them,
+ * while the app's other components, helpers, and modifiers stay imports.
+ *
+ * @param {string} root
+ * @returns {import('./addons.js').AppModule[]}
+ */
+function reexportedByName(root) {
+  /** @type {import('./addons.js').AppModule[]} */
+  let modules = [];
+
+  for (let folder of ["components", "helpers", "modifiers"]) {
+    for (let file of listFiles(root, `app/${folder}`)) {
+      let source = readFileSync(join(root, file), "utf-8").trim();
+      let specifiers = Array.from(
+        source.matchAll(/^export (?:\*|\{ default \}) from ["']([^."'#][^"']*)["'];?$/gm),
+        (match) => String(match[1]),
+      );
+
+      if (specifiers.length === 0 || source.split("\n").length !== specifiers.length) continue;
+      if (new Set(specifiers).size !== 1) continue;
+
+      modules.push({
+        addon: String(specifiers[0]),
+        path: file.replace(/^app\//, "").replace(/\.\w+$/, ""),
+        specifier: specifiers[0],
+      });
+    }
+  }
+
+  return modules;
+}
+
+/**
  * @param {Record<string, string>} dependencies
  * @param {MigrationReport} report
  */
@@ -666,26 +710,82 @@ function changedOptionalFeatures(root) {
  * @returns {string[]} settings that the base's app/config.ts does not have
  */
 function customEnvironment(root) {
+  let settings = environmentSettings(root);
+
+  if (!settings) return [];
+
+  return settings.unreadable;
+}
+
+/**
+ * @param {string} root
+ * @returns {import('./environment.js').EnvironmentSettings | undefined}
+ */
+function environmentSettings(root) {
   let file = firstExisting(root, ["config/environment.js", "config/environment.cjs"]);
 
-  if (!file) return [];
+  if (!file) return;
 
-  let keys = readEnvironmentKeys(root, file);
+  return readEnvironmentSettings(root, file, (key) => KNOWN_ENVIRONMENT.has(key));
+}
 
-  if (!keys) return [`${file}: ember.nvp cannot read this file`];
+/**
+ * Writes the base's app/config with the app's own settings from config/environment.js.
+ * The base then keeps the file, as it keeps the babel.config.js that the migration writes.
+ *
+ * @param {Project} project
+ * @param {import('./environment.js').EnvironmentSettings} settings
+ * @param {boolean} typescript
+ */
+async function writeConfig(project, settings, typescript) {
+  let { properties, statements } = settings;
 
-  /** @type {string[]} */
-  let custom = [];
-
-  for (let key of keys) {
-    if (KNOWN_ENVIRONMENT.has(key)) continue;
-    // only the parent is interesting
-    if (custom.some((parent) => key.startsWith(`${parent}.`))) continue;
-
-    custom.push(key);
+  if (
+    properties.length === 0 &&
+    statements.all.length === 0 &&
+    statements.development.length === 0 &&
+    statements.production.length === 0
+  ) {
+    return;
   }
 
-  return custom.map((key) => `ENV.${key}`);
+  let base = readFileSync(join(BASE_FILES, "app/config.ts"), "utf-8");
+  /** @type {string[]} */
+  let code = [];
+
+  if (properties.length > 0) {
+    code.push(
+      [
+        "Object.assign(ENV, {",
+        properties.map((property) => `  ${indent(property, "  ")},`).join("\n"),
+        "});",
+      ].join("\n"),
+    );
+  }
+
+  for (let statement of statements.all) code.push(indent(statement, ""));
+
+  for (let [environment, check] of /** @type {const} */ ([
+    ["development", "import.meta.env.DEV"],
+    ["production", "import.meta.env.PROD"],
+  ])) {
+    if (statements[environment].length === 0) continue;
+
+    code.push(
+      `if (${check}) {\n${statements[environment].map((statement) => `  ${indent(statement, "  ")}`).join("\n")}\n}`,
+    );
+  }
+
+  let source = base
+    .replace(
+      "interface Config {\n",
+      "interface Config {\n  /**\n   * The app's own settings, which addons read.\n   */\n  [key: string]: any;\n",
+    )
+    .replace("\nexport default ENV;", `\n${code.join("\n\n")}\n\nexport default ENV;`);
+
+  if (!typescript) source = await removeTypes(".ts", source);
+
+  await writeFile(project.path(typescript ? "app/config.ts" : "app/config.js"), source);
 }
 
 /**
@@ -730,8 +830,14 @@ export async function migrateApp(project, report, { indexHtml }) {
 
   await writeAppModule(project, report, {
     typescript,
-    services: addonServices(root, appModules).filter((module) => module.specifier),
+    services: addonServices(root, appModules)
+      .filter((module) => module.specifier)
+      .concat(reexportedByName(root)),
     initializers,
+    configReaders: configReaders(root, {
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+    }),
   });
 
   await replaceBabelConfig(
@@ -742,7 +848,19 @@ export async function migrateApp(project, report, { indexHtml }) {
   await replaceViteConfig(project, report);
   await rewriteImports(project, modulePrefix, manifest.name);
 
+  let environment = environmentSettings(root);
   let testSetup = readTestSetup(root);
+
+  /**
+   * The qunit layer's test-helper sets the test config in start(), so the app's own test settings go there too.
+   */
+  if (environment && environment.statements.test.length > 0) {
+    let statements = environment.statements.test.map((code) => code.replace(/\bENV\b/g, "config"));
+
+    testSetup = testSetup
+      ? { ...testSetup, statements: testSetup.statements.concat(statements) }
+      : { file: "config/environment.js", imports: [], statements };
+  }
 
   await remove(project, EMBER_CLI_BUILD);
   await remove(project, [
@@ -763,6 +881,7 @@ export async function migrateApp(project, report, { indexHtml }) {
   ]);
 
   if (testSetup) await writeTestHelper(project, report, testSetup, typescript);
+  if (environment) await writeConfig(project, environment, typescript);
 
   if (listFiles(root, "app/config").length === 0) {
     await remove(project, ["app/config"]);
@@ -887,6 +1006,7 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * @property {boolean} typescript
  * @property {import('./addons.js').AppModule[]} services addon services to register
  * @property {boolean} initializers whether the app has initializers
+ * @property {string[]} configReaders the addons that look up the app's config as `config:environment`
  */
 
 /**
@@ -894,6 +1014,7 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * - WarpDrive's reactivity, when the old app module installed it
  * - the deprecation workflow in development, when the app has one
  * - the services that addons provided through app-js
+ * - the app's config as `config:environment`, when addons look it up
  * - the app's folders that Ember looks up by name, beyond the base's
  * - the app's initializers
  * - the app's own top-level code, in its old order
@@ -902,7 +1023,11 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * @param {MigrationReport} report
  * @param {AppModuleOptions} options
  */
-async function writeAppModule(project, report, { typescript, services, initializers }) {
+async function writeAppModule(
+  project,
+  report,
+  { typescript, services, initializers, configReaders },
+) {
   let root = project.directory;
   let oldFile = firstExisting(root, ["app/app.ts", "app/app.js"]);
   let oldSource = oldFile ? readFileSync(project.path(oldFile), "utf-8") : "";
@@ -918,6 +1043,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   lines.push(`import Application from "@ember/application";`);
+  if (configReaders.length > 0) lines.push(`import config from "#config";`);
 
   let deprecationWorkflow = firstExisting(root, [
     "app/deprecation-workflow.ts",
@@ -933,7 +1059,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   /** @type {Set<string>} */
-  let provided = new Set(["Application"]);
+  let provided = new Set(configReaders.length > 0 ? ["Application", "config"] : ["Application"]);
 
   if (deprecationWorkflow) {
     provided.add("importSync").add("isDevelopingApp").add("macroCondition");
@@ -968,11 +1094,27 @@ async function writeAppModule(project, report, { typescript, services, initializ
   /**
    * The app's own code keeps its config, which the new module gets from `#config`.
    */
-  for (let name of old.config) lines.push(`import ${name} from "#config";`);
+  for (let name of old.config) {
+    if (configReaders.length === 0 || name !== "config")
+      lines.push(`import ${name} from "#config";`);
+  }
 
   pushCode(lines, before);
 
-  lines.push("", "export default class App extends Application {", "  modules = {");
+  lines.push("");
+
+  if (configReaders.length > 0) {
+    lines.push(
+      "/**",
+      " * `./config/environment` is there because these addons look up the app's config as `config:environment`:",
+      ` * ${configReaders.join(", ")}.`,
+      " */",
+    );
+  }
+
+  lines.push("export default class App extends Application {", "  modules = {");
+
+  if (configReaders.length > 0) lines.push(`    "./config/environment": { default: config },`);
 
   // first, so that the app's own services of the same name win
   for (let service of services) {
@@ -1545,7 +1687,8 @@ async function rewriteImports(project, modulePrefix, name) {
   /**
    * `./config/environment` in app/router.js, for example.
    */
-  let relativeConfig = /(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\1/g;
+  let relativeConfig =
+    /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/(?:[\w.-]+\/)*config\/environment)(?:\.\w+)?\2/g;
   let relativeImport = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])(\.{1,2}\/[^"'\n]*)\2/g;
 
   for (let file of filesWithExtension(
@@ -1557,9 +1700,9 @@ async function rewriteImports(project, modulePrefix, name) {
     let source = readFileSync(path, "utf-8");
     let result = source
       .replace(config, "$1#config$1")
-      .replace(relativeConfig, (match, quote, specifier) =>
+      .replace(relativeConfig, (match, before, quote, specifier) =>
         posix.join(posix.dirname(file), specifier) === "app/config/environment"
-          ? `${quote}#config${quote}`
+          ? `${before}${quote}#config${quote}`
           : match,
       );
 
