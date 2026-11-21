@@ -1,5 +1,5 @@
 import { packageJson } from "ember-apply";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { join, posix } from "node:path";
 import semver from "semver";
@@ -388,7 +388,7 @@ export async function checkApp(project) {
  * Modules that the blueprints' tests/test-helper imports
  */
 const BLUEPRINT_TEST_HELPER_IMPORTS =
-  /^(@ember\/test-helpers|@embroider\/macros|@warp-drive\/ember\/install|ember-qunit|qunit|qunit-dom|.*\/app|.*\/config\/environment)$/;
+  /^(@ember\/test-helpers|@embroider\/macros|@warp-drive\/ember\/install|ember-qunit|qunit|qunit-dom|.*\/app(\.\w+)?|.*\/config\/environment|#config)$/;
 
 /**
  * @typedef {object} TestSetup
@@ -1515,6 +1515,19 @@ async function replaceViteConfig(project, report) {
 }
 
 /**
+ * @param {string} root
+ * @param {string} path relative to `root`, with or without an extension
+ * @returns {string | undefined} the file at the path, as a bundler would look it up, relative to `root`
+ */
+function resolvedFile(root, path) {
+  for (let suffix of ["", ".js", ".ts", ".gjs", ".gts", "/index.js", "/index.ts"]) {
+    let file = join(root, path + suffix);
+
+    if (existsSync(file) && !lstatSync(file).isDirectory()) return path + suffix;
+  }
+}
+
+/**
  * `<modulePrefix>/config/environment` is `#config` now.
  *
  * When the module prefix is not the package name,
@@ -1557,15 +1570,23 @@ async function rewriteImports(project, modulePrefix, name) {
     /**
      * The classic build gave tests/ the module names `<modulePrefix>/tests/...`,
      * so `../../utils/ajax` in tests/acceptance/ named app/utils/ajax.
-     * Now the path is a file path, and the package name maps to app/.
+     * A test reaches app/ through the `#app/*` subpath import instead of a relative path,
+     * with the file's extension, because `#app/*` maps to the files as they are.
      */
     if (file.startsWith("tests/")) {
       result = result.replace(relativeImport, (match, before, quote, specifier) => {
         let target = posix.join(posix.dirname(file), specifier);
 
-        return target.startsWith("tests/") || target.startsWith("../")
-          ? match
-          : `${before}${quote}${name}/${target}${quote}`;
+        if (target.startsWith("tests/") || target.startsWith("../")) return match;
+
+        let real = resolvedFile(project.directory, target);
+        let app = real
+          ? real.startsWith("app/")
+            ? real
+            : undefined
+          : resolvedFile(project.directory, `app/${target}`);
+
+        return app ? `${before}${quote}#${app}${quote}` : match;
       });
     }
 
