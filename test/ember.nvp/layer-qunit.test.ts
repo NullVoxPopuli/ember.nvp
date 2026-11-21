@@ -1,6 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { packageJson } from "ember-apply";
-import { generate, listFiles } from "#test-helpers";
+import { generate, listFiles, mktemp } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -140,24 +140,45 @@ describe("layer: qunit", () => {
       await installAndTest(project);
     });
 
-    it("tells npm that the app's qunit is the one for every package", async () => {
-      const project = await generate({ type: "app", layers: ["qunit"], packageManager: "npm" });
+    /**
+     * ember-data 5.9.1 still declares an optional peer on qunit 2.
+     */
+    async function withEmberData(packageManager: "npm" | "pnpm") {
+      const directory = await mktemp(`qunit-peers-${packageManager}`);
+
+      await mkdir(join(directory, "node_modules/ember-data"), { recursive: true });
+      await writeFile(
+        join(directory, "node_modules/ember-data/package.json"),
+        JSON.stringify({
+          name: "ember-data",
+          version: "5.9.1",
+          peerDependencies: { qunit: "^2.26.0", "@ember/test-helpers": "^5.1.0" },
+        }),
+      );
+
+      const project = await generate({ type: "app", layers: ["qunit"], packageManager, directory });
       dirs.push(project.directory);
 
-      const manifest = await packageJson.read(project.directory);
+      return (await packageJson.read(project.directory)).overrides;
+    }
 
-      expect(manifest.overrides).toMatchInlineSnapshot(`
+    it("tells npm that the app's version wins where an installed package has an older peer", async () => {
+      expect(await withEmberData("npm")).toMatchInlineSnapshot(`
         {
           "qunit": "$qunit",
         }
       `);
     });
 
-    it("leaves pnpm without the override", async () => {
-      const project = await generate({ type: "app", layers: ["qunit"] });
+    it("leaves npm without overrides when no installed package has an older peer", async () => {
+      const project = await generate({ type: "app", layers: ["qunit"], packageManager: "npm" });
       dirs.push(project.directory);
 
       expect((await packageJson.read(project.directory)).overrides).toBeUndefined();
+    });
+
+    it("leaves pnpm without overrides, because pnpm only warns", async () => {
+      expect(await withEmberData("pnpm")).toBeUndefined();
     });
   });
 
