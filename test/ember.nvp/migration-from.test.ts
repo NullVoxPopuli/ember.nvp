@@ -491,7 +491,7 @@ export default defineConfig({
     `);
   });
 
-  it("imports app modules by the package name where a test left tests/ with a relative path", async () => {
+  it("imports app modules through #app where a test reached app/ with a relative path", async () => {
     /**
      * From rust-lang/crates.io: tests/utils/license-test.js.
      */
@@ -514,9 +514,9 @@ export default defineConfig({
       ),
     }).toMatchInlineSnapshot(`
       {
-        "tests/components/rendered-html-test.gjs": "import RenderedHtml from '../../app/components/rendered-html.gjs';
+        "tests/components/rendered-html-test.gjs": "import RenderedHtml from '#app/components/rendered-html.gjs';
       ",
-        "tests/utils/license-test.js": "import { parseLicense } from 'my-app/utils/license';
+        "tests/utils/license-test.js": "import { parseLicense } from '#app/utils/license.js';
       import { setup } from '../helpers';
       ",
       }

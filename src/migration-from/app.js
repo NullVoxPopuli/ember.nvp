@@ -388,7 +388,7 @@ export async function checkApp(project) {
  * Modules that the blueprints' tests/test-helper imports
  */
 const BLUEPRINT_TEST_HELPER_IMPORTS =
-  /^(@ember\/test-helpers|@embroider\/macros|@warp-drive\/ember\/install|ember-qunit|qunit|qunit-dom|.*\/app|.*\/config\/environment)$/;
+  /^(@ember\/test-helpers|@embroider\/macros|@warp-drive\/ember\/install|ember-qunit|qunit|qunit-dom|.*\/app(\.\w+)?|.*\/config\/environment|#config)$/;
 
 /**
  * @typedef {object} TestSetup
@@ -1517,14 +1517,14 @@ async function replaceViteConfig(project, report) {
 /**
  * @param {string} root
  * @param {string} path relative to `root`, with or without an extension
- * @returns {boolean} a file is at the path, as a bundler would look it up
+ * @returns {string | undefined} the file at the path, as a bundler would look it up, relative to `root`
  */
-function resolvesTo(root, path) {
-  return ["", ".js", ".ts", ".gjs", ".gts", "/index.js", "/index.ts"].some((suffix) => {
+function resolvedFile(root, path) {
+  for (let suffix of ["", ".js", ".ts", ".gjs", ".gts", "/index.js", "/index.ts"]) {
     let file = join(root, path + suffix);
 
-    return existsSync(file) && !lstatSync(file).isDirectory();
-  });
+    if (existsSync(file) && !lstatSync(file).isDirectory()) return path + suffix;
+  }
 }
 
 /**
@@ -1570,22 +1570,23 @@ async function rewriteImports(project, modulePrefix, name) {
     /**
      * The classic build gave tests/ the module names `<modulePrefix>/tests/...`,
      * so `../../utils/ajax` in tests/acceptance/ named app/utils/ajax.
-     * Now the path is a file path, and the package name maps to app/.
-     * A path to a file that exists, such as `../../app/components/x.gjs`, stays.
+     * A test reaches app/ through the `#app/*` subpath import instead of a relative path,
+     * with the file's extension, because `#app/*` maps to the files as they are.
      */
     if (file.startsWith("tests/")) {
       result = result.replace(relativeImport, (match, before, quote, specifier) => {
         let target = posix.join(posix.dirname(file), specifier);
 
         if (target.startsWith("tests/") || target.startsWith("../")) return match;
-        if (
-          resolvesTo(project.directory, target) ||
-          !resolvesTo(project.directory, `app/${target}`)
-        ) {
-          return match;
-        }
 
-        return `${before}${quote}${name}/${target}${quote}`;
+        let real = resolvedFile(project.directory, target);
+        let app = real
+          ? real.startsWith("app/")
+            ? real
+            : undefined
+          : resolvedFile(project.directory, `app/${target}`);
+
+        return app ? `${before}${quote}#${app}${quote}` : match;
       });
     }
 
