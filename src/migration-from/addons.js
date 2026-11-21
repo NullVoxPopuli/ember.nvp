@@ -191,10 +191,18 @@ export function configReaders(directory, dependencies) {
 
     if (!location || !manifest?.keywords?.includes("ember-addon")) continue;
 
+    /**
+     * Only files: a folder can have a .js name, such as the highlight.js package.
+     */
     let reads = globSync("**/*.{js,mjs}", {
       cwd: location,
-      exclude: (name) => name === "node_modules",
-    }).some((file) => readFileSync(join(location, file), "utf-8").includes("config:environment"));
+      withFileTypes: true,
+      exclude: (entry) => entry.name === "node_modules",
+    })
+      .filter((entry) => entry.isFile())
+      .some((entry) =>
+        readFileSync(join(entry.parentPath, entry.name), "utf-8").includes("config:environment"),
+      );
 
     if (reads) readers.push(item.name);
 
