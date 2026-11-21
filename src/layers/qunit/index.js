@@ -112,6 +112,17 @@ export default {
       project.directory,
     );
 
+    /**
+     * Some packages that apps install with the qunit layer, such as ember-data, still have
+     * an optional peer on qunit 2. pnpm warns, but npm refuses to install, so npm gets told
+     * that the app's qunit is the one for every package.
+     */
+    if (project.packageManager === "npm") {
+      await packageJson.modify((json) => {
+        json.overrides = Object.assign({}, json.overrides, { qunit: "$qunit" });
+      }, project.directory);
+    }
+
     await packageJson.addScripts(
       {
         "build:test": "EMBER_ENV=test NODE_ENV=development vite build --mode development",

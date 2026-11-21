@@ -1,4 +1,5 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
+import { packageJson } from "ember-apply";
 import { generate, listFiles } from "#test-helpers";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
@@ -137,6 +138,26 @@ describe("layer: qunit", () => {
       dirs.push(project.directory);
 
       await installAndTest(project);
+    });
+
+    it("tells npm that the app's qunit is the one for every package", async () => {
+      const project = await generate({ type: "app", layers: ["qunit"], packageManager: "npm" });
+      dirs.push(project.directory);
+
+      const manifest = await packageJson.read(project.directory);
+
+      expect(manifest.overrides).toMatchInlineSnapshot(`
+        {
+          "qunit": "$qunit",
+        }
+      `);
+    });
+
+    it("leaves pnpm without the override", async () => {
+      const project = await generate({ type: "app", layers: ["qunit"] });
+      dirs.push(project.directory);
+
+      expect((await packageJson.read(project.directory)).overrides).toBeUndefined();
     });
   });
 
