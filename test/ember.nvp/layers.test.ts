@@ -23,6 +23,7 @@ describe("discoverLayers", () => {
         "readme",
         "renovate",
         "ssr",
+        "tailwind4",
         "typescript",
         "vitest",
       ]

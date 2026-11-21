@@ -265,6 +265,12 @@ Choose when pages render:
   The routes to render are in `vite.config.mjs`.
   `start` serves `dist` with `vite preview`, on `$PORT` (default 4200).
 
+### 🌬️ Tailwind CSS (optional, apps and extensions)
+
+Adds [Tailwind CSS 4](https://tailwindcss.com/) with its Vite plugin.
+`index.html` links `app/styles/app.css`, which imports Tailwind.
+Add custom CSS and `@theme` variables to that file.
+
 ### ⚡ Vitest (optional)
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)
