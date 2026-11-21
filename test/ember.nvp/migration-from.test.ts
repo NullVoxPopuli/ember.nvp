@@ -427,7 +427,6 @@ export default defineConfig({
        *   - https://ember-primitives.pages.dev/6-utils/createAsyncService.md
        */
       import Application from "@ember/application";
-      import config from "#config";
       import { importSync, isDevelopingApp, macroCondition } from "@embroider/macros";
       import PageTitleService from "ember-page-title/services/page-title";
 
@@ -454,13 +453,9 @@ export default defineConfig({
         importSync("./deprecation-workflow");
       }
 
-      /**
-       * \`./config/environment\` is there because addons look up the app's config as \`config:environment\`.
-       */
       export default class App extends Application {
         modules = {
           "./services/page-title": PageTitleService,
-          "./config/environment": { default: config },
           ...import.meta.glob("./router.*", { eager: true }),
           ...import.meta.glob("./routes/**/*", { eager: true }),
           ...import.meta.glob("./templates/**/*", { eager: true }),
@@ -886,6 +881,39 @@ module.exports = function (environment) {
     ).toMatchInlineSnapshot(`
       "import NotificationMessageComponent from "ember-cli-notifications/_app_/components/notification-message";
           "./components/notification-message": NotificationMessageComponent,"
+    `);
+  });
+
+  it("registers the config as config:environment only for addons that look it up", async () => {
+    /**
+     * From rust-lang/crates.io: ember-page-title's service reads the config from the owner.
+     */
+    let dir = await fixture("app-blueprint", {
+      "node_modules/ember-page-title/package.json": JSON.stringify({
+        name: "ember-page-title",
+        keywords: ["ember-addon"],
+        "ember-addon": { version: 2 },
+      }),
+      "node_modules/ember-page-title/dist/services/page-title.js":
+        "const config = owner.resolveRegistration('config:environment');\n",
+    });
+
+    await rm(join(dir, "app/app.ts"));
+
+    await migrate(dir, "app", []);
+
+    let app = await read(dir, "app/app.js");
+
+    expect(
+      app
+        .split("\n")
+        .filter((line) => /config|page-title/.test(line))
+        .join("\n"),
+    ).toMatchInlineSnapshot(`
+      "import config from "#config";
+       * \`./config/environment\` is there because these addons look up the app's config as \`config:environment\`:
+       * ember-page-title.
+          "./config/environment": { default: config },"
     `);
   });
 

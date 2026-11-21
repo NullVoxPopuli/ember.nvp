@@ -6,7 +6,7 @@ import semver from "semver";
 import { readJSON } from "#utils/fs.js";
 import { removeTypes } from "#utils/remove-types.js";
 import { getLatest } from "#utils/npm.js";
-import { appModulesIn, installedDependencies, v1AddonsIn } from "./addons.js";
+import { appModulesIn, configReaders, installedDependencies, v1AddonsIn } from "./addons.js";
 import { readBabelConfig } from "./babel.js";
 import { readEnvironmentSettings } from "./environment.js";
 import { addImports, carry } from "./carry-over.js";
@@ -834,6 +834,10 @@ export async function migrateApp(project, report, { indexHtml }) {
       .filter((module) => module.specifier)
       .concat(reexportedByName(root)),
     initializers,
+    configReaders: configReaders(root, {
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+    }),
   });
 
   await replaceBabelConfig(
@@ -1002,6 +1006,7 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * @property {boolean} typescript
  * @property {import('./addons.js').AppModule[]} services addon services to register
  * @property {boolean} initializers whether the app has initializers
+ * @property {string[]} configReaders the addons that look up the app's config as `config:environment`
  */
 
 /**
@@ -1009,6 +1014,7 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * - WarpDrive's reactivity, when the old app module installed it
  * - the deprecation workflow in development, when the app has one
  * - the services that addons provided through app-js
+ * - the app's config as `config:environment`, when addons look it up
  * - the app's folders that Ember looks up by name, beyond the base's
  * - the app's initializers
  * - the app's own top-level code, in its old order
@@ -1017,14 +1023,17 @@ const CONFIG_MODULE = /(^|\/)config\/environment$/;
  * @param {MigrationReport} report
  * @param {AppModuleOptions} options
  */
-async function writeAppModule(project, report, { typescript, services, initializers }) {
+async function writeAppModule(
+  project,
+  report,
+  { typescript, services, initializers, configReaders },
+) {
   let root = project.directory;
   let oldFile = firstExisting(root, ["app/app.ts", "app/app.js"]);
   let oldSource = oldFile ? readFileSync(project.path(oldFile), "utf-8") : "";
   let base = readFileSync(join(BASE_FILES, "app/app.ts"), "utf-8");
   let comment = base.slice(0, base.indexOf("import Application"));
   let baseEntries = /** @type {string} */ (/  modules = \{\n([\s\S]*?)\n  \};/.exec(base)?.[1]);
-  let classComment = /\n(\/\*\*[\s\S]*?\*\/)\nexport default class App/.exec(base)?.[1];
 
   /** @type {string[]} */
   let lines = [comment.trimEnd()];
@@ -1034,7 +1043,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   lines.push(`import Application from "@ember/application";`);
-  lines.push(`import config from "#config";`);
+  if (configReaders.length > 0) lines.push(`import config from "#config";`);
 
   let deprecationWorkflow = firstExisting(root, [
     "app/deprecation-workflow.ts",
@@ -1050,7 +1059,7 @@ async function writeAppModule(project, report, { typescript, services, initializ
   }
 
   /** @type {Set<string>} */
-  let provided = new Set(["Application", "config"]);
+  let provided = new Set(configReaders.length > 0 ? ["Application", "config"] : ["Application"]);
 
   if (deprecationWorkflow) {
     provided.add("importSync").add("isDevelopingApp").add("macroCondition");
@@ -1086,16 +1095,26 @@ async function writeAppModule(project, report, { typescript, services, initializ
    * The app's own code keeps its config, which the new module gets from `#config`.
    */
   for (let name of old.config) {
-    if (name !== "config") lines.push(`import ${name} from "#config";`);
+    if (configReaders.length === 0 || name !== "config")
+      lines.push(`import ${name} from "#config";`);
   }
 
   pushCode(lines, before);
 
   lines.push("");
 
-  if (classComment) lines.push(classComment);
+  if (configReaders.length > 0) {
+    lines.push(
+      "/**",
+      " * `./config/environment` is there because these addons look up the app's config as `config:environment`:",
+      ` * ${configReaders.join(", ")}.`,
+      " */",
+    );
+  }
 
   lines.push("export default class App extends Application {", "  modules = {");
+
+  if (configReaders.length > 0) lines.push(`    "./config/environment": { default: config },`);
 
   // first, so that the app's own services of the same name win
   for (let service of services) {
