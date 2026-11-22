@@ -202,6 +202,40 @@ describe("@ember/app-blueprint", () => {
     expect(manifest.devDependencies).toHaveProperty("@nullvoxpopuli/ember-vite");
   });
 
+  it("keeps Sass that Vite compiles, when the app installs sass", async () => {
+    let dir = await fixture("app-blueprint", {
+      "app/styles/app.scss": '@import "./base/colors";\n',
+      "app/styles/base/_colors.scss": "",
+    });
+    let html = await read(dir, "index.html");
+
+    await rm(join(dir, "app/styles/app.css"));
+    await writeFile(
+      join(dir, "index.html"),
+      html.replace("/@embroider/virtual/app.css", "/app/styles/app.scss"),
+    );
+    await packageJson.modify((json) => {
+      json.devDependencies.sass = "^1.94.2";
+    }, dir);
+
+    await migrate(dir, "app", []);
+
+    let links = (await read(dir, "index.html")).match(/<link\b[^>]*stylesheet[^>]*>/g);
+
+    expect(links).toMatchInlineSnapshot(`
+      [
+        "<link integrity="" rel="stylesheet" href="/app/styles/app.scss">",
+      ]
+    `);
+    expect((await packageJson.read(dir)).devDependencies).toHaveProperty("sass");
+  });
+
+  it("stops at Sass without a compiler that Vite uses", async () => {
+    let dir = await fixture("app-blueprint", { "app/styles/app.scss": "" });
+
+    expect(await unsupported(dir, "app")).toEqual(["Styles that an ember-cli addon compiles"]);
+  });
+
   it("stops at compat features, and changes nothing", async () => {
     let dir = await fixture("app-blueprint", {
       "app/components/greeting.hbs": "Hello",

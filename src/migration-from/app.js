@@ -172,6 +172,18 @@ const BASE_BABEL_PLUGINS = new Set([
 ]);
 
 /**
+ * The packages that Vite compiles each kind of stylesheet with, when the app installs one.
+ *
+ * @type {Record<string, string[]>}
+ */
+const STYLE_COMPILERS = {
+  scss: ["sass", "sass-embedded"],
+  sass: ["sass", "sass-embedded"],
+  less: ["less"],
+  styl: ["stylus"],
+};
+
+/**
  * Checks what every app needs, from either app blueprint.
  *
  * @param {Project} project
@@ -297,17 +309,19 @@ export async function checkApp(project) {
     });
   }
 
-  let styles = listFiles(root, "app/styles").filter((file) =>
-    /\.(scss|sass|less|styl)$/.test(file),
-  );
+  let styles = listFiles(root, "app/styles").filter((file) => {
+    let extension = /\.(scss|sass|less|styl)$/.exec(file)?.[1];
+
+    return extension && !STYLE_COMPILERS[extension]?.some((name) => dependencies[name]);
+  });
 
   if (styles.length > 0) {
     report.unsupported.push({
       title: "Styles that an ember-cli addon compiles",
       where: styles,
       action:
-        "Convert them to CSS.\n" +
-        "After the migration, Vite can compile Sass and Less again, when you install the compiler.",
+        "Convert them to CSS, or install the compiler that Vite uses for them, such as `sass`.\n" +
+        "Then link the entry stylesheet from index.html, such as `/app/styles/app.scss`.",
     });
   }
 
