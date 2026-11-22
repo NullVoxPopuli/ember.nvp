@@ -1,3 +1,6 @@
 pnpm-lock.yaml
 CHANGELOG.md
 dist
+
+# written with the single quotes that it configures
+src/layers/prettier/presets/ember/
