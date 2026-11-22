@@ -274,6 +274,16 @@ Choose one or more tools:
 - `scoped-css`: [ember-scoped-css](https://github.com/auditboard/ember-scoped-css).
   Styles in a `<style scoped>` block, or in a `.css` file next to a component, apply only to that component.
 
+### 🖼️ Icons (optional, apps and extensions)
+
+Choose one tool with `--icons.tool`:
+
+- `svg-jar` (default): [@svg-jar/plugin](https://github.com/svg-jar/plugin).
+  An imported `.svg` file is a component, and the build puts the icons into a sprite sheet.
+- `unplugin-icons`: [unplugin-icons](https://github.com/unplugin/unplugin-icons).
+  `import Check from "~icons/lucide/check"` gives an icon from an [Iconify](https://icones.js.org/) set.
+  Add the set to the dev dependencies first, for example `@iconify-json/lucide`.
+
 ### ⚡ Vitest (optional)
 
 Super experimental vitest setup using [ember-vitest](https://github.com/NullVoxPopuli/ember-vitest)

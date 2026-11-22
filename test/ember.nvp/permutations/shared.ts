@@ -30,13 +30,13 @@ const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   // publish checks: apps aren't published
   app: new Set(["publint", "are-the-types-wrong", "expect-type"]),
   // libraries have no Application to wire inspector support into, or to render on a server
-  // css: libraries build with tsdown, and the layer only knows Vite
-  library: new Set(["inspector-support", "ssr", "css"]),
+  // css, icons: libraries build with tsdown, and the layers only know Vite
+  library: new Set(["inspector-support", "ssr", "css", "icons"]),
   // publish checks: extensions aren't published (to npm)
   // ssr: an extension's pages are files in the browser, with no server
   extension: new Set(["publint", "are-the-types-wrong", "expect-type", "ssr"]),
   // same toolchain as libraries: no Application either
-  "custom-element": new Set(["inspector-support", "ssr", "css"]),
+  "custom-element": new Set(["inspector-support", "ssr", "css", "icons"]),
 };
 
 const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {

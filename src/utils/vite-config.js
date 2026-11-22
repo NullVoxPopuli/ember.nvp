@@ -1,7 +1,9 @@
 export const VITE_CONFIG = "vite.config.mjs";
 
-const EMBER_PLUGIN_IMPORT = /^import \{ ember \} from ["']@nullvoxpopuli\/ember-vite["'];?$/m;
-const EMBER_PLUGIN_CALL = /plugins:\s*\[\s*ember\(\)/;
+export const EMBER_PLUGIN_IMPORT =
+  /^import \{ ember \} from ["']@nullvoxpopuli\/ember-vite["'];?$/m;
+
+export const EMBER_PLUGIN_CALL = /plugins:\s*\[\s*ember\(\)/;
 
 /**
  * Adds a plugin right after `ember()`.

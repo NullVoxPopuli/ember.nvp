@@ -1,5 +1,5 @@
 import { editFile } from "#utils/fs.js";
-import { VITE_CONFIG, addVitePlugin, vitePluginReasons } from "./vite-config.js";
+import { VITE_CONFIG, addVitePlugin, vitePluginReasons } from "#utils/vite-config.js";
 
 export const deps = {
   "ember-scoped-css": "^3.5.2",

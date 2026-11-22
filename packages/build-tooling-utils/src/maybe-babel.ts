@@ -93,6 +93,18 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
        * ```
        */
       code: (string | RegExp)[];
+      /**
+       * Module ids that always go to babel.
+       * An id without a file extension goes to babel as a `.js` file.
+       *
+       * for example, the icon modules of unplugin-icons
+       * ```js
+       * {
+       *   ids: [/^~icons\//],
+       * }
+       * ```
+       */
+      ids?: RegExp[];
     };
   };
 };
@@ -114,32 +126,53 @@ export function maybeBabel(userOptions: Options = {}) {
       .join("|"),
   );
 
+  const ids = filter?.include?.ids ?? [];
+
   const maybeBabelFilter = [
     include(
-      and(
-        // is one of the babel-supported extensions
-        id(extensionRegExp),
-        or(
-          // always run gts and gjs through babel
-          id(/\.gts$/),
-          id(/\.gjs$/),
-          // imports one of the modules above
-          code(importsRegex),
-          // local app code using a decorator
-          // NOTE: maybeBabel requires that all libraries compile away their decorators
-          //
-          // TODO: what do we do when native decorators start shipping?
-          //     (ignore decorator transforming entirely?)
-          and(not(id(nodeModulesPattern)), code(decoratorRegex)),
-          // user provided additional opt-ins to the regex here
-          ...(filter?.include?.code?.map((x) => code(x)) ?? []),
+      or(
+        ...ids.map((pattern) => id(pattern)),
+        and(
+          // is one of the babel-supported extensions
+          id(extensionRegExp),
+          or(
+            // always run gts and gjs through babel
+            id(/\.gts$/),
+            id(/\.gjs$/),
+            // imports one of the modules above
+            code(importsRegex),
+            // local app code using a decorator
+            // NOTE: maybeBabel requires that all libraries compile away their decorators
+            //
+            // TODO: what do we do when native decorators start shipping?
+            //     (ignore decorator transforming entirely?)
+            and(not(id(nodeModulesPattern)), code(decoratorRegex)),
+            // user provided additional opt-ins to the regex here
+            ...(filter?.include?.code?.map((x) => code(x)) ?? []),
+          ),
         ),
       ),
     ),
   ];
 
-  // types are incorrect
-  (plugin.transform as { filter: unknown }).filter = maybeBabelFilter;
+  const transform = plugin.transform as {
+    filter: unknown;
+    handler: (this: unknown, code: string, id: string) => unknown;
+  };
+  const { handler } = transform;
+
+  transform.filter = maybeBabelFilter;
+
+  /**
+   * @rollup/plugin-babel skips an id without one of its extensions.
+   */
+  if (ids.length > 0) {
+    transform.handler = function (source, moduleId) {
+      const asJS = !extensionRegExp.test(moduleId) && ids.some((pattern) => pattern.test(moduleId));
+
+      return handler.call(this, source, asJS ? `${moduleId}.js` : moduleId);
+    };
+  }
 
   return {
     ...plugin,

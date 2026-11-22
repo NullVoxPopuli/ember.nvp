@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { applyFolderTo, editFile } from "#utils/fs.js";
-import { VITE_CONFIG, addVitePlugin, vitePluginReasons } from "./vite-config.js";
+import { VITE_CONFIG, addVitePlugin, vitePluginReasons } from "#utils/vite-config.js";
 
 export const deps = {
   tailwindcss: "^4.3.5",

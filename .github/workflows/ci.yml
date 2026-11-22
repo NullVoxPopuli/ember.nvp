@@ -76,10 +76,14 @@ jobs:
             args: test/ember.nvp/permutations/library-1.test.ts
           - name: library permutations 2/2
             args: test/ember.nvp/permutations/library-2.test.ts
-          - name: extension permutations 1/2
+          - name: extension permutations 1/4
             args: test/ember.nvp/permutations/extension-1.test.ts
-          - name: extension permutations 2/2
+          - name: extension permutations 2/4
             args: test/ember.nvp/permutations/extension-2.test.ts
+          - name: extension permutations 3/4
+            args: test/ember.nvp/permutations/extension-3.test.ts
+          - name: extension permutations 4/4
+            args: test/ember.nvp/permutations/extension-4.test.ts
           - name: custom-element permutations 1/2
             args: test/ember.nvp/permutations/custom-element-1.test.ts
           - name: custom-element permutations 2/2
