@@ -1,5 +1,7 @@
 import { extensions } from "@embroider/vite";
 import { interpreter, type TopLevelFilterExpression } from "@rolldown/pluginutils";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ConfigEnv, ConfigPluginContext, Plugin } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
@@ -116,10 +118,39 @@ afterEach(() => {
   restoreCwd = undefined;
 });
 
-function inPackageRoot() {
+function inDirectory(directory: string) {
   const previous = process.cwd();
-  process.chdir(PACKAGE_ROOT);
+  process.chdir(directory);
   restoreCwd = () => process.chdir(previous);
+}
+
+function inPackageRoot() {
+  inDirectory(PACKAGE_ROOT);
+}
+
+/**
+ * A project that depends on the libraries that need babel.
+ * It is inside this package, so babel resolves its plugins from here.
+ */
+function inProjectWithLibraries() {
+  const cache = join(PACKAGE_ROOT, "node_modules/.cache");
+  mkdirSync(cache, { recursive: true });
+
+  const directory = mkdtempSync(join(cache, "project-"));
+  const devDependencies = {
+    "ember-concurrency": "*",
+    "ember-scoped-css": "*",
+    "unplugin-icons": "*",
+  };
+
+  writeFileSync(join(directory, "package.json"), JSON.stringify({ devDependencies }));
+  inDirectory(directory);
+
+  const restore = restoreCwd!;
+  restoreCwd = () => {
+    restore();
+    rmSync(directory, { recursive: true, force: true });
+  };
 }
 
 describe("default babel plugins", () => {
@@ -191,21 +222,58 @@ describe("babel.include", () => {
       ),
     ).toBe(true);
   });
+});
 
-  it("leaves a module without an extension to oxc", () => {
-    expect(usesBabel({}, ICON, "~icons/lucide/check")).toBe(false);
-  });
+describe("libraries that need babel", () => {
+  function babelPerModule() {
+    const plugins = ember() as Plugin[];
+    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+    // @ts-expect-error maybeBabel sets the filter on the transform hook
+    const filter = babel.transform.filter as TopLevelFilterExpression[];
 
-  it("sends a module whose id matches whenId to babel", () => {
-    expect(
-      usesBabel({ babel: { include: { whenId: [/^~icons\//] } } }, ICON, "~icons/lucide/check"),
-    ).toBe(true);
-  });
+    return {
+      "ember-concurrency": interpreter(
+        filter,
+        `import { task } from "ember-concurrency";`,
+        "/app/components/a.js",
+      ),
+      "ember-scoped-css": interpreter(
+        filter,
+        `import { scopedClass } from "ember-scoped-css";`,
+        "/app/components/a.js",
+      ),
+      "unplugin-icons": interpreter(filter, ICON, "~icons/lucide/check"),
+    };
+  }
 
-  it("compiles the template of a module without an extension", async () => {
+  it("leaves their modules to oxc when the project does not depend on them", () => {
     inPackageRoot();
 
-    const plugins = ember({ babel: { include: { whenId: [/^~icons\//] } } }) as Plugin[];
+    expect(babelPerModule()).toMatchInlineSnapshot(`
+      {
+        "ember-concurrency": false,
+        "ember-scoped-css": false,
+        "unplugin-icons": false,
+      }
+    `);
+  });
+
+  it("sends their modules to babel when the project depends on them", () => {
+    inProjectWithLibraries();
+
+    expect(babelPerModule()).toMatchInlineSnapshot(`
+      {
+        "ember-concurrency": true,
+        "ember-scoped-css": true,
+        "unplugin-icons": true,
+      }
+    `);
+  });
+
+  it("compiles the template of an icon module, which has no extension", async () => {
+    inProjectWithLibraries();
+
+    const plugins = ember() as Plugin[];
     const config: any = {};
 
     // @ts-expect-error the first entry is the config plugin
@@ -215,7 +283,20 @@ describe("babel.include", () => {
     // @ts-expect-error the babel plugin has an object transform hook
     const result = await babel.transform.handler.call(CONTEXT, ICON, "~icons/lucide/check");
 
-    expect(result.code).not.toContain("@ember/template-compiler");
-    expect(result.code).toContain("createTemplateFactory");
+    expect(result.code).toMatchInlineSnapshot(`
+      "import { setComponentTemplate } from "@ember/component";
+      import { createTemplateFactory } from "@ember/template-factory";
+      import templateOnly from "@ember/component/template-only";
+      export default setComponentTemplate(createTemplateFactory(
+      /*
+        <svg ...attributes><path d='M20 6L9 17l-5-5'/></svg>
+      */
+      {
+        "id": null,
+        "block": "[[[11,\\"svg\\"],[17,1],[12],[10,\\"path\\"],[14,\\"d\\",\\"M20 6L9 17l-5-5\\"],[12],[13],[13]],[\\"&attrs\\"],[]]",
+        "moduleName": "(unknown template module)",
+        "isStrictMode": true
+      }), templateOnly());"
+    `);
   });
 });

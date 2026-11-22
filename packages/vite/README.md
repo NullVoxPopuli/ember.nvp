@@ -52,12 +52,13 @@ ember({
   babel: {
     parallel: false,
     include: {
-      whenImporting: ["ember-concurrency", "ember-intl/format-message"],
+      whenImporting: ["my-babel-only-library"],
       whenMatching: [/\bmyMacro\(/],
-      whenId: [/^~icons\//],
     },
   },
 });
 ```
 
 Each option is documented on its type.
+
+If the project depends on `ember-concurrency`, `ember-scoped-css` or `unplugin-icons`, babel compiles their modules with no option.

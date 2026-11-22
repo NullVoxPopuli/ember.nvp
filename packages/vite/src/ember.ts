@@ -1,6 +1,6 @@
 import { buildMacros } from "@embroider/macros/babel";
 import { ember as embroiderEmber, extensions, resolver, templateTag } from "@embroider/vite";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ConfigEnv, ConfigPluginContext, ResolvedConfig, UserConfig } from "vite";
 
@@ -130,30 +130,62 @@ function babelOptions(nvpConfig: Config): BabelOptions {
 }
 
 /**
- * Additional opt-ins beyond maybeBabel's built-in list.
+ * Libraries that ship code that still needs babel.
+ * Each one adds to the filter only when the project depends on it,
+ * so other projects do not pay for the check.
  *
- * These libraries ship code that still needs babel:
  * - ember-concurrency's decorators
  * - ember-scoped-css transforms
- * - ember-intl's formatMessage macro
+ * - unplugin-icons, whose icon modules compile with `template()`.
+ *   Their ids have no file extension, so only the id matches them.
+ */
+const LIBRARY_FILTERS: Record<string, { imports?: string[]; ids?: RegExp[] }> = {
+  "ember-concurrency": { imports: ["ember-concurrency"] },
+  "ember-scoped-css": { imports: ["ember-scoped-css"] },
+  "unplugin-icons": { ids: [/^~icons\//] },
+};
+
+function projectDependencies(): Set<string> {
+  const manifestPath = join(process.cwd(), "package.json");
+
+  if (!existsSync(manifestPath)) return new Set();
+
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+
+  return new Set(Object.keys({ ...manifest.dependencies, ...manifest.devDependencies }));
+}
+
+/**
+ * Additional opt-ins beyond maybeBabel's built-in list.
  *
- * The `initializeRuntimeMacrosConfig` runtime call must also be compiled away.
+ * - ember-intl's formatMessage macro
+ * - the `initializeRuntimeMacrosConfig` runtime call, which must compile away
  */
 function babelFilter(nvpConfig: Config) {
+  const imports = ["ember-intl/helpers/format-message"];
+  const ids: RegExp[] = [];
+  const dependencies = projectDependencies();
+
+  for (const [name, filter] of Object.entries(LIBRARY_FILTERS)) {
+    if (!dependencies.has(name)) continue;
+
+    for (const specifier of filter.imports ?? []) imports.push(specifier);
+    for (const pattern of filter.ids ?? []) ids.push(pattern);
+  }
+
+  for (const specifier of nvpConfig.babel?.include?.whenImporting ?? []) {
+    imports.push(specifier);
+  }
+
   return {
     include: {
-      imports: [
-        "ember-concurrency",
-        "ember-scoped-css",
-        "ember-intl/helpers/format-message",
-        ...(nvpConfig.babel?.include?.whenImporting ?? []),
-      ],
+      imports,
       code: [
         /\bintl\.formatMessage\b/,
         "initializeRuntimeMacrosConfig",
         ...(nvpConfig.babel?.include?.whenMatching ?? []),
       ] as (string | RegExp)[],
-      ids: nvpConfig.babel?.include?.whenId ?? [],
+      ids,
     },
   };
 }
@@ -187,7 +219,7 @@ interface Config {
        * if a file imports from anything in this array, use babel instead of
        * oxc for that file.
        *
-       * For example: ['ember-concurrency'],
+       * For example: ['my-babel-only-library'],
        */
       whenImporting?: (string | "ember-concurrency" | "ember-scoped-css")[];
 
@@ -202,18 +234,6 @@ interface Config {
        * For example: [/\.register\(/],
        */
       whenMatching?: (string | RegExp)[];
-
-      /**
-       * if a module's id matches any of these regular expressions,
-       * use babel instead of oxc for that module.
-       * An id without a file extension goes to babel as a `.js` file.
-       *
-       * Use this for virtual modules that need babel,
-       * such as the icons of unplugin-icons, which compile with `template()`.
-       *
-       * For example: [/^~icons\//],
-       */
-      whenId?: RegExp[];
     };
   };
   /**

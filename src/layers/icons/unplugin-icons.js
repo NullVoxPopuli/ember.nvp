@@ -1,10 +1,5 @@
 import { editFile } from "#utils/fs.js";
-import {
-  VITE_CONFIG,
-  addVitePlugin,
-  setEmberOptions,
-  vitePluginReasons,
-} from "#utils/vite-config.js";
+import { VITE_CONFIG, addVitePlugin, vitePluginReasons } from "#utils/vite-config.js";
 
 export const deps = {
   "unplugin-icons": "^24.0.0",
@@ -18,36 +13,17 @@ const PLUGIN = {
 };
 
 /**
- * An icon module compiles its template with `template()`.
- * Its id has no file extension, so ember() sends it to babel only with this option.
- * Without babel, the build ships the runtime template compiler.
- */
-const ICON_IDS = String.raw`/^~icons\//`;
-const EMBER_OPTIONS = `{ babel: { include: { whenId: [${ICON_IDS}] } } }`;
-
-/**
  * @param {import('#utils/project.js').Project} project
  */
 export async function run(project) {
-  await editFile(project, VITE_CONFIG, (code) =>
-    addVitePlugin(setEmberOptions(code, EMBER_OPTIONS), PLUGIN),
-  );
+  await editFile(project, VITE_CONFIG, (code) => addVitePlugin(code, PLUGIN));
 }
 
 /**
  * @param {import('#utils/project.js').Project} project
  */
 export async function reasons(project) {
-  let reasons = await vitePluginReasons(project, PLUGIN, "unplugin-icons/vite");
-  let code = (await project.read(VITE_CONFIG)) ?? "";
-
-  if (!code.includes(ICON_IDS)) {
-    reasons.push(
-      `${VITE_CONFIG} does not send ${ICON_IDS} to babel with ember()'s babel.include.whenId`,
-    );
-  }
-
-  return reasons;
+  return vitePluginReasons(project, PLUGIN, "unplugin-icons/vite");
 }
 
 export const readme = `### Icons

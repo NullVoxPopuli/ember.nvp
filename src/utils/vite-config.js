@@ -3,12 +3,7 @@ export const VITE_CONFIG = "vite.config.mjs";
 export const EMBER_PLUGIN_IMPORT =
   /^import \{ ember \} from ["']@nullvoxpopuli\/ember-vite["'];?$/m;
 
-/**
- * `ember()`, or `ember({ ... })` with options on the same line, first in the plugins.
- */
-export const EMBER_PLUGIN_CALL = /plugins:\s*\[\s*ember\((?:\{.*?\})?\)/;
-
-const EMBER_PLUGIN_CALL_WITHOUT_OPTIONS = /(plugins:\s*\[\s*)ember\(\)/;
+export const EMBER_PLUGIN_CALL = /plugins:\s*\[\s*ember\(\)/;
 
 /**
  * Adds a plugin right after `ember()`.
@@ -33,20 +28,6 @@ export function addVitePlugin(code, { importLine, call }) {
   }
 
   return code;
-}
-
-/**
- * Gives `ember()` its options.
- * Options of the user's own stay, and isSetup reports what is missing.
- *
- * @param {string} code
- * @param {string} options the options object as source
- */
-export function setEmberOptions(code, options) {
-  return code.replace(
-    EMBER_PLUGIN_CALL_WITHOUT_OPTIONS,
-    (_call, start) => `${start}ember(${options})`,
-  );
 }
 
 /**
