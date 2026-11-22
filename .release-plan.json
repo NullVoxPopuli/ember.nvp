@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "2.7.0",
-      "newVersion": "2.8.0",
+      "oldVersion": "2.8.0",
+      "newVersion": "2.9.0",
       "tagName": "latest",
       "constraints": [
         {
@@ -12,54 +12,20 @@
         },
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :house: Internal"
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-build-tooling-utils": {
-      "impact": "minor",
-      "oldVersion": "1.2.0",
-      "newVersion": "1.3.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/build-tooling-utils/package.json"
+      "oldVersion": "1.3.0"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "impact": "patch",
-      "oldVersion": "2.13.1",
-      "newVersion": "2.13.2",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        }
-      ],
-      "pkgJSONPath": "./packages/rolldown/package.json"
+      "oldVersion": "2.13.2"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "minor",
-      "oldVersion": "1.5.0",
-      "newVersion": "1.6.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        },
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "1.6.0"
     }
   },
-  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.8.0 (minor)\n* @nullvoxpopuli/ember-build-tooling-utils 1.3.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.13.2 (patch)\n* @nullvoxpopuli/ember-vite 1.6.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`, `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`\n  * [#221](https://github.com/NullVoxPopuli/ember.nvp/pull/221) Add an icons layer with svg-jar and unplugin-icons ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#219](https://github.com/NullVoxPopuli/ember.nvp/pull/219) Split the app permutations in CI 6 ways ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.9.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

@@ -2,6 +2,21 @@
 
 ## Release (2026-11-22)
 
+* ember.nvp 2.9.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-22)
+
 * ember.nvp 2.8.0 (minor)
 * @nullvoxpopuli/ember-build-tooling-utils 1.3.0 (minor)
 * @nullvoxpopuli/ember-rolldown 2.13.2 (patch)
