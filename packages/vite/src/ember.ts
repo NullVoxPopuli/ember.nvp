@@ -153,6 +153,7 @@ function babelFilter(nvpConfig: Config) {
         "initializeRuntimeMacrosConfig",
         ...(nvpConfig.babel?.include?.whenMatching ?? []),
       ] as (string | RegExp)[],
+      ids: nvpConfig.babel?.include?.whenId ?? [],
     },
   };
 }
@@ -201,6 +202,18 @@ interface Config {
        * For example: [/\.register\(/],
        */
       whenMatching?: (string | RegExp)[];
+
+      /**
+       * if a module's id matches any of these regular expressions,
+       * use babel instead of oxc for that module.
+       * An id without a file extension goes to babel as a `.js` file.
+       *
+       * Use this for virtual modules that need babel,
+       * such as the icons of unplugin-icons, which compile with `template()`.
+       *
+       * For example: [/^~icons\//],
+       */
+      whenId?: RegExp[];
     };
   };
   /**

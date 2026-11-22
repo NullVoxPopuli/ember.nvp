@@ -54,6 +54,7 @@ ember({
     include: {
       whenImporting: ["ember-concurrency", "ember-intl/format-message"],
       whenMatching: [/\bmyMacro\(/],
+      whenId: [/^~icons\//],
     },
   },
 });

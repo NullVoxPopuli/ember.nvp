@@ -17,6 +17,7 @@ describe("discoverLayers", () => {
         "expect-type",
         "git",
         "github-actions",
+        "icons",
         "inspector-support",
         "prettier",
         "publint",

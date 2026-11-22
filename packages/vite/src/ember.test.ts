@@ -109,20 +109,20 @@ async function compile(mode: string) {
   return result.code as string;
 }
 
+let restoreCwd: (() => void) | undefined;
+
+afterEach(() => {
+  restoreCwd?.();
+  restoreCwd = undefined;
+});
+
+function inPackageRoot() {
+  const previous = process.cwd();
+  process.chdir(PACKAGE_ROOT);
+  restoreCwd = () => process.chdir(previous);
+}
+
 describe("default babel plugins", () => {
-  let restoreCwd: (() => void) | undefined;
-
-  afterEach(() => {
-    restoreCwd?.();
-    restoreCwd = undefined;
-  });
-
-  function inPackageRoot() {
-    const previous = process.cwd();
-    process.chdir(PACKAGE_ROOT);
-    restoreCwd = () => process.chdir(previous);
-  }
-
   /**
    * vite sets NODE_ENV from the mode only after the config hooks run.
    * Under vitest, NODE_ENV is "test".
@@ -145,14 +145,26 @@ describe("default babel plugins", () => {
   });
 });
 
+/**
+ * The module that unplugin-icons gives for an icon, with `compiler: "ember"`.
+ */
+const ICON = [
+  `import { template } from "@ember/template-compiler";`,
+  `export default template("<svg ...attributes><path d='M20 6L9 17l-5-5'/></svg>");`,
+].join("\n");
+
 describe("babel.include", () => {
-  function usesBabel(options: Parameters<typeof ember>[0], source: string) {
+  function usesBabel(
+    options: Parameters<typeof ember>[0],
+    source: string,
+    moduleId = "/app/services/a.ts",
+  ) {
     const plugins = ember(options) as Plugin[];
     const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
     // @ts-expect-error maybeBabel sets the filter on the transform hook
     const filter = babel.transform.filter as TopLevelFilterExpression[];
 
-    return interpreter(filter, source, "/app/services/a.ts");
+    return interpreter(filter, source, moduleId);
   }
 
   const source = `owner.register(Key, Impl);`;
@@ -178,5 +190,32 @@ describe("babel.include", () => {
         `import { a } from "my-lib";`,
       ),
     ).toBe(true);
+  });
+
+  it("leaves a module without an extension to oxc", () => {
+    expect(usesBabel({}, ICON, "~icons/lucide/check")).toBe(false);
+  });
+
+  it("sends a module whose id matches whenId to babel", () => {
+    expect(
+      usesBabel({ babel: { include: { whenId: [/^~icons\//] } } }, ICON, "~icons/lucide/check"),
+    ).toBe(true);
+  });
+
+  it("compiles the template of a module without an extension", async () => {
+    inPackageRoot();
+
+    const plugins = ember({ babel: { include: { whenId: [/^~icons\//] } } }) as Plugin[];
+    const config: any = {};
+
+    // @ts-expect-error the first entry is the config plugin
+    await plugins[0].config.call(ROLLDOWN, config, { command: "build", mode: "production" });
+
+    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+    // @ts-expect-error the babel plugin has an object transform hook
+    const result = await babel.transform.handler.call(CONTEXT, ICON, "~icons/lucide/check");
+
+    expect(result.code).not.toContain("@ember/template-compiler");
+    expect(result.code).toContain("createTemplateFactory");
   });
 });

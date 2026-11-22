@@ -3,6 +3,7 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { applyFolderTo, editFile } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
+import { EMBER_PLUGIN_CALL, EMBER_PLUGIN_IMPORT, VITE_CONFIG } from "#utils/vite-config.js";
 
 const VITE_EMBER_SSR = { "vite-ember-ssr": "^0.7.0" };
 
@@ -99,9 +100,6 @@ const SSR_ENTRIES = ["app/app-ssr.ts", "app/app-ssr.js"];
 const HEAD_MARKER = "<!-- VITE_EMBER_SSR_HEAD -->";
 const BODY_MARKER = "<!-- VITE_EMBER_SSR_BODY -->";
 
-const VITE_CONFIG = "vite.config.mjs";
-const EMBER_PLUGIN_IMPORT = /^import \{ ember \} from ["']@nullvoxpopuli\/ember-vite["'];?$/m;
-const EMBER_PLUGIN_CALL = /plugins:\s*\[\s*ember\(\)/;
 const PLUGIN_IMPORT =
   /^import \{ (emberSsr|emberSsg) \} from ["']vite-ember-ssr\/vite-plugin["'];?\n/m;
 
