@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-11-22)
+
+* ember.nvp 2.7.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#217](https://github.com/NullVoxPopuli/ember.nvp/pull/217) Add CSS options ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#216](https://github.com/NullVoxPopuli/ember.nvp/pull/216) Read installed packages from the app's directory, not the stage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-21)
 
 * ember.nvp 2.6.0 (minor)

@@ -2,13 +2,17 @@
   "solution": {
     "ember.nvp": {
       "impact": "minor",
-      "oldVersion": "2.5.5",
-      "newVersion": "2.6.0",
+      "oldVersion": "2.6.0",
+      "newVersion": "2.7.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
@@ -17,21 +21,11 @@
       "oldVersion": "1.2.0"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "impact": "patch",
-      "oldVersion": "2.13.0",
-      "newVersion": "2.13.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./packages/rolldown/package.json"
+      "oldVersion": "2.13.1"
     },
     "@nullvoxpopuli/ember-vite": {
       "oldVersion": "1.5.0"
     }
   },
-  "description": "## Release (2026-11-21)\n\n* ember.nvp 2.6.0 (minor)\n* @nullvoxpopuli/ember-rolldown 2.13.1 (patch)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#117](https://github.com/NullVoxPopuli/ember.nvp/pull/117) Add tailwind4 layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-rolldown`\n  * [#214](https://github.com/NullVoxPopuli/ember.nvp/pull/214) rolldown: turn off constant inlining by default ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.7.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#217](https://github.com/NullVoxPopuli/ember.nvp/pull/217) Add CSS options ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#216](https://github.com/NullVoxPopuli/ember.nvp/pull/216) Read installed packages from the app's directory, not the stage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
