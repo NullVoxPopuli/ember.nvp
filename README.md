@@ -241,8 +241,15 @@ Choose a preset:
 Code formatting with:
 
 - GTS/GJS template support
-- Sensible defaults
 - Format scripts
+
+Choose a preset with `--prettier.preset`:
+
+- `nvp` (default): Prettier's defaults, with a print width of 100.
+- `default`: Prettier's defaults.
+- `ember`: the config of the official Ember blueprints, with single quotes in JS and TS.
+
+If you change the preset of an existing project, run `format` to reformat the files.
 
 ### 🧪 QUnit (optional)
 

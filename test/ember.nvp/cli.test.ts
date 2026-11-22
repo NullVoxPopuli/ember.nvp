@@ -75,6 +75,10 @@ const BASIC_HELP_OUTPUT = `
           --icons.tool <string>
           Which icon tool? [choices: "svg-jar", "unplugin-icons"] [default: "svg-jar"]
 
+      Layer: prettier
+          --prettier.preset <string>
+          Which Prettier config? [choices: "nvp", "default", "ember"] [default: "nvp"]
+
       Layer: ssr
           --ssr.mode <string>
           When do pages render? [choices: "server", "static"] [default: "server"]
@@ -307,7 +311,13 @@ test("a layer in both --layers and --skip-layers exits before writing anything",
 });
 
 test("with a TTY, --layers and the defaults are shown before the confirmation", async () => {
-  let { parent, path, args } = await newAppArgs("cli-layers-confirm", "--layers", "prettier");
+  let { parent, path, args } = await newAppArgs(
+    "cli-layers-confirm",
+    "--layers",
+    "prettier",
+    "--prettier.preset",
+    "nvp",
+  );
   let confirmation = "Do all the selections above look ok?";
 
   try {
@@ -367,6 +377,8 @@ test("in a project directory, asks to update first and defaults to the project's
   let args = [
     "--layers",
     "prettier",
+    "--prettier.preset",
+    "nvp",
     "--packageManager",
     "pnpm",
     "--confirm",
