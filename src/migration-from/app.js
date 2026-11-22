@@ -834,7 +834,10 @@ export async function migrateApp(project, report, { indexHtml }) {
       .filter((module) => module.specifier)
       .concat(reexportedByName(root)),
     initializers,
-    configReaders: configReaders(root, {
+    /**
+     * The stage has no node_modules. The app's own directory has them.
+     */
+    configReaders: configReaders(project.desires.path, {
       ...manifest.dependencies,
       ...manifest.devDependencies,
     }),

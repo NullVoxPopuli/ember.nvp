@@ -13,6 +13,7 @@ import {
   MigrationError,
 } from "#migration-from";
 import { Project } from "#utils/project.js";
+import { Stage } from "#utils/stage.js";
 import { generateProject } from "ember.nvp";
 import { listFiles } from "../../src/migration-from/files.js";
 import { cli, generate, layers, mktemp } from "#test-helpers";
@@ -910,13 +911,31 @@ module.exports = function (environment) {
       }),
       "node_modules/ember-page-title/dist/services/page-title.js":
         "const config = owner.resolveRegistration('config:environment');\n",
+      /**
+       * A folder with a .js name, as the highlight.js package has.
+       */
+      "node_modules/ember-page-title/dist/vendor.js/index.js": "export {};\n",
     });
 
     await rm(join(dir, "app/app.ts"));
 
-    await migrate(dir, "app", []);
+    /**
+     * As the CLI does: the layers run in a stage, which has no node_modules.
+     */
+    let stage = await Stage.create(dir);
+    let { name } = await packageJson.read(dir);
 
-    let app = await read(dir, "app/app.js");
+    await generateProject(
+      new Project(stage.directory, {
+        name,
+        type: "app",
+        path: dir,
+        layers: [],
+        packageManager: "pnpm",
+      }),
+    );
+
+    let app = await read(stage.directory, "app/app.js");
 
     expect(
       app

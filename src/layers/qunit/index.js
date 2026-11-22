@@ -116,9 +116,12 @@ export default {
      * An installed package can declare a peer range that the new versions do not satisfy,
      * such as ember-data's optional peer `qunit@^2`. pnpm warns, but npm stops the install,
      * so npm gets told that the app's version is the one for every package.
+     * The packages are in the app's own directory, because the stage has no node_modules.
      */
     let outdated =
-      project.packageManager === "npm" ? outdatedPeers(project.directory, devDependencies) : [];
+      project.packageManager === "npm"
+        ? outdatedPeers(project.desires.path ?? project.directory, devDependencies)
+        : [];
 
     if (outdated.length > 0) {
       await packageJson.modify((json) => {

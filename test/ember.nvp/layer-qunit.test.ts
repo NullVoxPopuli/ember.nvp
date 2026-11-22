@@ -1,6 +1,8 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { packageJson } from "ember-apply";
-import { generate, listFiles, mktemp } from "#test-helpers";
+import { generate, layers, listFiles, mktemp } from "#test-helpers";
+import { Project as ProjectClass } from "#utils/project.js";
+import { Stage } from "#utils/stage.js";
 import { writeLibrarySource } from "./library-src-fixtures.ts";
 import { execa } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -156,10 +158,23 @@ describe("layer: qunit", () => {
         }),
       );
 
-      const project = await generate({ type: "app", layers: ["qunit"], packageManager, directory });
-      dirs.push(project.directory);
+      /**
+       * As the CLI does: the layers run in a stage, which has no node_modules.
+       */
+      const stage = await Stage.create(directory);
+      dirs.push(directory, stage.directory);
 
-      return (await packageJson.read(project.directory)).overrides;
+      await generateProject(
+        new ProjectClass(stage.directory, {
+          name: "my-app",
+          type: "app",
+          path: directory,
+          layers: layers.filter((layer) => layer.name === "qunit"),
+          packageManager,
+        }),
+      );
+
+      return (await packageJson.read(stage.directory)).overrides;
     }
 
     it("tells npm that the app's version wins where an installed package has an older peer", async () => {
