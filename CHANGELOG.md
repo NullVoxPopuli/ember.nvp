@@ -2,6 +2,24 @@
 
 ## Release (2026-11-22)
 
+* ember.nvp 2.8.0 (minor)
+* @nullvoxpopuli/ember-build-tooling-utils 1.3.0 (minor)
+* @nullvoxpopuli/ember-rolldown 2.13.2 (patch)
+* @nullvoxpopuli/ember-vite 1.6.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`, `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`
+  * [#221](https://github.com/NullVoxPopuli/ember.nvp/pull/221) Add an icons layer with svg-jar and unplugin-icons ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#219](https://github.com/NullVoxPopuli/ember.nvp/pull/219) Split the app permutations in CI 6 ways ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-22)
+
 * ember.nvp 2.7.0 (minor)
 
 #### :rocket: Enhancement
