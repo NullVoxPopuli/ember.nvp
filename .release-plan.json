@@ -1,15 +1,11 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "minor",
-      "oldVersion": "2.8.0",
-      "newVersion": "2.9.0",
+      "impact": "patch",
+      "oldVersion": "2.9.0",
+      "newVersion": "2.9.1",
       "tagName": "latest",
       "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        },
         {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
@@ -27,5 +23,5 @@
       "oldVersion": "1.6.0"
     }
   },
-  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.9.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#222](https://github.com/NullVoxPopuli/ember.nvp/pull/222) Add a preset option to the Prettier layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.9.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#224](https://github.com/NullVoxPopuli/ember.nvp/pull/224) Keep Sass that Vite compiles when the app installs sass ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
