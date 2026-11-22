@@ -265,11 +265,14 @@ Choose when pages render:
   The routes to render are in `vite.config.mjs`.
   `start` serves `dist` with `vite preview`, on `$PORT` (default 4200).
 
-### 🌬️ Tailwind CSS (optional, apps and extensions)
+### 🎨 CSS (optional, apps and extensions)
 
-Adds [Tailwind CSS 4](https://tailwindcss.com/) with its Vite plugin.
-`index.html` links `app/styles/app.css`, which imports Tailwind.
-Add custom CSS and `@theme` variables to that file.
+Choose one or more tools:
+
+- `tailwind`: [Tailwind CSS 4](https://tailwindcss.com/) with its Vite plugin.
+  `index.html` links `app/styles/app.css`, which imports Tailwind.
+- `scoped-css`: [ember-scoped-css](https://github.com/auditboard/ember-scoped-css).
+  Styles in a `<style scoped>` block, or in a `.css` file next to a component, apply only to that component.
 
 ### ⚡ Vitest (optional)
 

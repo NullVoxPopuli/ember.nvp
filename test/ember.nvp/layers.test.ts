@@ -12,6 +12,7 @@ describe("discoverLayers", () => {
       [
         "agents-md",
         "are-the-types-wrong",
+        "css",
         "eslint-bundled",
         "expect-type",
         "git",
@@ -23,7 +24,6 @@ describe("discoverLayers", () => {
         "readme",
         "renovate",
         "ssr",
-        "tailwind4",
         "typescript",
         "vitest",
       ]
