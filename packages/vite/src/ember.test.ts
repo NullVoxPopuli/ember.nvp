@@ -139,6 +139,7 @@ function inProjectWithLibraries() {
   const directory = mkdtempSync(join(cache, "project-"));
   const devDependencies = {
     "ember-concurrency": "*",
+    "ember-intl": "*",
     "ember-scoped-css": "*",
     "unplugin-icons": "*",
   };
@@ -237,6 +238,16 @@ describe("libraries that need babel", () => {
         `import { task } from "ember-concurrency";`,
         "/app/components/a.js",
       ),
+      "ember-intl import": interpreter(
+        filter,
+        `import formatMessage from "ember-intl/helpers/format-message";`,
+        "/app/components/a.js",
+      ),
+      "ember-intl formatMessage": interpreter(
+        filter,
+        `export const title = this.intl.formatMessage("Hello");`,
+        "/app/components/a.js",
+      ),
       "ember-scoped-css": interpreter(
         filter,
         `import { scopedClass } from "ember-scoped-css";`,
@@ -252,6 +263,8 @@ describe("libraries that need babel", () => {
     expect(babelPerModule()).toMatchInlineSnapshot(`
       {
         "ember-concurrency": false,
+        "ember-intl formatMessage": false,
+        "ember-intl import": false,
         "ember-scoped-css": false,
         "unplugin-icons": false,
       }
@@ -264,6 +277,8 @@ describe("libraries that need babel", () => {
     expect(babelPerModule()).toMatchInlineSnapshot(`
       {
         "ember-concurrency": true,
+        "ember-intl formatMessage": true,
+        "ember-intl import": true,
         "ember-scoped-css": true,
         "unplugin-icons": true,
       }

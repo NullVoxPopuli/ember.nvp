@@ -135,12 +135,20 @@ function babelOptions(nvpConfig: Config): BabelOptions {
  * so other projects do not pay for the check.
  *
  * - ember-concurrency's decorators
+ * - ember-intl's formatMessage macro
  * - ember-scoped-css transforms
  * - unplugin-icons, whose icon modules compile with `template()`.
  *   Their ids have no file extension, so only the id matches them.
  */
-const LIBRARY_FILTERS: Record<string, { imports?: string[]; ids?: RegExp[] }> = {
+const LIBRARY_FILTERS: Record<
+  string,
+  { imports?: string[]; code?: (string | RegExp)[]; ids?: RegExp[] }
+> = {
   "ember-concurrency": { imports: ["ember-concurrency"] },
+  "ember-intl": {
+    imports: ["ember-intl/helpers/format-message"],
+    code: [/\bintl\.formatMessage\b/],
+  },
   "ember-scoped-css": { imports: ["ember-scoped-css"] },
   "unplugin-icons": { ids: [/^~icons\//] },
 };
@@ -157,12 +165,11 @@ function projectDependencies(): Set<string> {
 
 /**
  * Additional opt-ins beyond maybeBabel's built-in list.
- *
- * - ember-intl's formatMessage macro
- * - the `initializeRuntimeMacrosConfig` runtime call, which must compile away
+ * The `initializeRuntimeMacrosConfig` runtime call must compile away in every project.
  */
 function babelFilter(nvpConfig: Config) {
-  const imports = ["ember-intl/helpers/format-message"];
+  const imports: string[] = [];
+  const code: (string | RegExp)[] = ["initializeRuntimeMacrosConfig"];
   const ids: RegExp[] = [];
   const dependencies = projectDependencies();
 
@@ -170,6 +177,7 @@ function babelFilter(nvpConfig: Config) {
     if (!dependencies.has(name)) continue;
 
     for (const specifier of filter.imports ?? []) imports.push(specifier);
+    for (const pattern of filter.code ?? []) code.push(pattern);
     for (const pattern of filter.ids ?? []) ids.push(pattern);
   }
 
@@ -177,17 +185,11 @@ function babelFilter(nvpConfig: Config) {
     imports.push(specifier);
   }
 
-  return {
-    include: {
-      imports,
-      code: [
-        /\bintl\.formatMessage\b/,
-        "initializeRuntimeMacrosConfig",
-        ...(nvpConfig.babel?.include?.whenMatching ?? []),
-      ] as (string | RegExp)[],
-      ids,
-    },
-  };
+  for (const pattern of nvpConfig.babel?.include?.whenMatching ?? []) {
+    code.push(pattern);
+  }
+
+  return { include: { imports, code, ids } };
 }
 
 interface Config {

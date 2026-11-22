@@ -61,4 +61,4 @@ ember({
 
 Each option is documented on its type.
 
-If the project depends on `ember-concurrency`, `ember-scoped-css` or `unplugin-icons`, babel compiles their modules with no option.
+If the project depends on `ember-concurrency`, `ember-intl`, `ember-scoped-css` or `unplugin-icons`, babel compiles their modules with no option.
