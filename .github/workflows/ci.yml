@@ -60,10 +60,18 @@ jobs:
       fail-fast: false
       matrix:
         slice:
-          - name: app permutations 1/2
+          - name: app permutations 1/6
             args: test/ember.nvp/permutations/app-1.test.ts
-          - name: app permutations 2/2
+          - name: app permutations 2/6
             args: test/ember.nvp/permutations/app-2.test.ts
+          - name: app permutations 3/6
+            args: test/ember.nvp/permutations/app-3.test.ts
+          - name: app permutations 4/6
+            args: test/ember.nvp/permutations/app-4.test.ts
+          - name: app permutations 5/6
+            args: test/ember.nvp/permutations/app-5.test.ts
+          - name: app permutations 6/6
+            args: test/ember.nvp/permutations/app-6.test.ts
           - name: library permutations 1/2
             args: test/ember.nvp/permutations/library-1.test.ts
           - name: library permutations 2/2
