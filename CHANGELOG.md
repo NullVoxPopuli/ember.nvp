@@ -2,6 +2,26 @@
 
 ## Release (2026-11-23)
 
+* ember.nvp 2.11.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#230](https://github.com/NullVoxPopuli/ember.nvp/pull/230) Add a development server to the widget base ([@betocantu93](https://github.com/betocantu93))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#231](https://github.com/NullVoxPopuli/ember.nvp/pull/231) Migrate a legacy ESLint config with the eslint-bundled layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#232](https://github.com/NullVoxPopuli/ember.nvp/pull/232) Gate the permutation matrix on lint and the fast node tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 2
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+- Alberto Cantú Gómez ([@betocantu93](https://github.com/betocantu93))
+
+## Release (2026-11-23)
+
 * ember.nvp 2.10.0 (minor)
 
 #### :rocket: Enhancement
