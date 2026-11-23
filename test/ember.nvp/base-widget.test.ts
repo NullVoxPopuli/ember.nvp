@@ -4,6 +4,7 @@ import { globalNameFor } from "#bases/minimal-widget";
 import { execa } from "execa";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { stripVTControlCharacters } from "node:util";
 
 import type { Project } from "ember.nvp";
 
@@ -95,8 +96,13 @@ async function runGeneratedTests(project: Project, command: string, names: strin
 
   expect(test.exitCode).toBe(0);
 
+  /**
+   * CI sets FORCE_COLOR, which puts color codes inside the test names
+   */
+  let output = stripVTControlCharacters(test.stdout);
+
   for (let name of names) {
-    expect(test.stdout).toContain(name);
+    expect(output).toContain(name);
   }
 }
 
