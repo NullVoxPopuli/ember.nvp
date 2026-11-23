@@ -711,6 +711,49 @@ export function start() {
     expect(todo.map((finding) => finding.title)).not.toContain("Test setup of your own");
   });
 
+  it("imports the app's stylesheets that the old tests/index.html linked", async () => {
+    /**
+     * From emberobserver/client, after ember-upgrade, shortened.
+     */
+    let dir = await fixture("app-blueprint", {
+      "app/styles/app.css": "body { color: red; }\n",
+      "tests/index.html": `<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/@embroider/virtual/vendor.css">
+    <link rel="stylesheet" href="/app/styles/app.css">
+    <link rel="stylesheet" href="/@embroider/virtual/test-support.css">
+  </head>
+  <body>
+    <script type="module">import { start } from "./test-helper"; start();</script>
+  </body>
+</html>
+`,
+    });
+
+    let { name } = await packageJson.read(dir);
+
+    await generateProject(
+      new Project(dir, {
+        name,
+        type: "app",
+        path: dir,
+        layers: layers.filter((layer) => layer.name === "qunit"),
+        packageManager: "pnpm",
+      }),
+    );
+
+    let helper = await read(dir, "tests/test-helper.js");
+
+    expect(helper.slice(helper.indexOf("import config"), helper.indexOf("Object.assign")))
+      .toMatchInlineSnapshot(`
+      "import config from '#config';
+      import '../app/styles/app.css';
+
+      "
+    `);
+  });
+
   it("keeps the app's own settings from config/environment.js", async () => {
     /**
      * From rust-lang/crates.io.
@@ -867,6 +910,8 @@ module.exports = function (environment) {
 
         setTesting(true);
 
+        config['ember-cli-notifications'].autoClear = false;
+
         const { default: Application } = await import("#app/app.ts");
 
         await Promise.all(Object.values(tests).map((load) => load()));
@@ -880,8 +925,6 @@ module.exports = function (environment) {
         QUnit.testDone(() => console.groupEnd());
         QUnit.moduleDone(() => console.groupEnd());
         QUnit.testDone(resetOnerror);
-
-        config['ember-cli-notifications'].autoClear = false;
 
         qunitStart();
       }
