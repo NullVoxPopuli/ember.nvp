@@ -44,6 +44,17 @@ Ember apps can import the `Widget` component directly from the package root.
 pnpm install
 ```
 
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+It serves `index.html`, a page that mounts the widget, and reloads it when a file changes.
+`window.widget` is the mounted widget, so `widget.update({ step: 5 })` works from the console.
+The page and `vite.config.mjs` are only for development:
+the build does not read them, and the package does not include them.
+
 Build the distributable (JS + `.d.ts` into `dist/`):
 
 ```bash
@@ -63,6 +74,7 @@ pnpm start
   It returns `update`, to change the args, and `destroy`, to remove the widget.
 - `src/index.ts` is the public entry point.
   It exports `mount` and the component.
+- `index.html` is the development page that `pnpm dev` serves.
 - `dist/` is the built output that gets published (git-ignored).
 
 ### Styles

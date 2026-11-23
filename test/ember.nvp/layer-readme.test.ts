@@ -315,7 +315,18 @@ describe("layer: readme", () => {
         - Node.js >= 24
         - npm
 
-        ### Development & Building
+        ### Development
+
+        To start the development server:
+
+        \`\`\`sh
+        npm run dev
+        \`\`\`
+
+        It serves \`index.html\`, a page that mounts the widget, and reloads it when a file changes.
+        The page is only for development: the package does not include it.
+
+        ### Building
 
         To build the package:
 

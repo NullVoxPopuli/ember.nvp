@@ -19,17 +19,22 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "dev": "vite",
     "prepack": "tsdown",
     "start": "tsdown --watch"
   },
   "devDependencies": {
+    "@babel/plugin-transform-typescript": "^7.29.9",
     "@ember/library-tsconfig": "^3.0.0",
     "@glimmer/component": "^2.2.1",
     "@nullvoxpopuli/ember-rolldown": "workspace:*",
+    "@nullvoxpopuli/ember-vite": "workspace:*",
+    "babel-plugin-ember-template-compilation": "^4.0.1",
     "decorator-transforms": "^2.4.0",
     "ember-source": "~7.4.0",
     "tsdown": "^0.23.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": ">= 24"

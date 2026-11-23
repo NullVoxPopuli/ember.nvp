@@ -375,6 +375,9 @@ importers:
 
   src/bases/minimal-widget/files:
     devDependencies:
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.9
+        version: 7.29.9(@babel/core@7.29.7)
       '@ember/library-tsconfig':
         specifier: ^3.0.0
         version: 3.0.0
@@ -384,6 +387,12 @@ importers:
       '@nullvoxpopuli/ember-rolldown':
         specifier: workspace:*
         version: link:../../../../packages/rolldown
+      '@nullvoxpopuli/ember-vite':
+        specifier: workspace:*
+        version: link:../../../../packages/vite
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.1
+        version: 4.0.1
       decorator-transforms:
         specifier: ^2.4.0
         version: 2.4.0(@babel/core@7.29.7)
@@ -396,6 +405,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vite:
+        specifier: ^8.3.5
+        version: 8.3.5(@types/node@25.0.8)(esbuild@0.27.2)(jiti@2.7.0)(terser@5.46.0)
 
 packages:
 
