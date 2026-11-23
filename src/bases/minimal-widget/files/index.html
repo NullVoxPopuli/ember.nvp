@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>minimal-widget</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <!--
+      A page to develop the widget on.
+      `pnpm dev` serves it, and reloads it when a file changes.
+
+      It is not part of the package:
+      the build reads only src/, and the package publishes only dist/ and src/.
+    -->
+    <div id="widget"></div>
+
+    <script type="module">
+      import { mount } from "./src/index.ts";
+
+      // `widget` is on window, to call `widget.update({ step: 5 })` from the console.
+      window.widget = mount(document.querySelector("#widget"), { title: "Clicks", step: 2 });
+    </script>
+  </body>
+</html>

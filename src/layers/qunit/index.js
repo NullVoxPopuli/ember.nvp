@@ -1,8 +1,9 @@
-import { applyFolderTo } from "#utils/fs.js";
+import { applyFolderTo, editFile } from "#utils/fs.js";
 import { getLatest } from "#utils/npm.js";
 import { outdatedPeers } from "#utils/peers.js";
 import { hasConfiguredPlugin, prependPlugin, removeConfiguredPlugin } from "#utils/babel.js";
 import { addTsdownConfigProperty } from "#utils/tsdown-config.js";
+import { EMBER_PLUGIN_CALL, VITE_CONFIG } from "#utils/vite-config.js";
 import { packageJson, tsconfig } from "ember-apply";
 import { join } from "node:path";
 
@@ -102,6 +103,7 @@ export default {
     }
 
     if (isLibrary) {
+      await useTestBabelConfig(project);
       await syncTestBabelConfig(project, ts);
 
       if (ts) {
@@ -227,6 +229,24 @@ async function addSourceImports(project) {
     json.imports ||= {};
     json.imports["#src/*"] ||= "./src/*";
   }, project.directory);
+}
+
+/**
+ * A base can bring its own vite.config.mjs (the widget's, for its development server),
+ * and applyFolderTo keeps an existing file.
+ *
+ * The test build needs the test babel config, so this points the base's `ember()` at it.
+ * Any other config is the user's.
+ *
+ * @param {import('#utils/project.js').Project} project
+ */
+async function useTestBabelConfig(project) {
+  await editFile(project, VITE_CONFIG, (code) =>
+    code.replace(
+      EMBER_PLUGIN_CALL,
+      `plugins: [ember({ babel: { configFile: "./${TEST_BABEL_CONFIG}" } })`,
+    ),
+  );
 }
 
 /**

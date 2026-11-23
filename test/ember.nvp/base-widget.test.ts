@@ -1,8 +1,8 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
-import { generate, listFiles, mktemp } from "#test-helpers";
+import { freePort, generate, listFiles, mktemp, waitForServer } from "#test-helpers";
 import { globalNameFor } from "#bases/minimal-widget";
-import { execa } from "execa";
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { execa, type ResultPromise } from "execa";
+import { appendFile, mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { stripVTControlCharacters } from "node:util";
 
@@ -16,6 +16,7 @@ import type { Project } from "ember.nvp";
  * - build the generated project as-is
  * - run the widget in a real browser, through the vitest layer
  *   (from source, from the built module, and from the built global)
+ * - serve the development page, and reload it on a change
  */
 
 async function install(project: Project) {
@@ -107,6 +108,78 @@ async function runGeneratedTests(project: Project, command: string, names: strin
 }
 
 /**
+ * The paths that `npm pack` would put in the tarball
+ */
+async function packedFiles(project: Project) {
+  let result = await execa("npm pack --dry-run --json --ignore-scripts", {
+    cwd: project.directory,
+    shell: true,
+  });
+  let [pack] = JSON.parse(result.stdout) as [{ files: { path: string }[] }];
+
+  return pack.files.map((file) => file.path).sort();
+}
+
+/**
+ * Starts the `dev` script's Vite, without pnpm in between,
+ * so that kill() stops the server itself.
+ */
+async function startDevServer(project: Project) {
+  let port = await freePort();
+  let origin = `http://127.0.0.1:${port}`;
+  let serve = execa(
+    "node_modules/.bin/vite",
+    ["--port", String(port), "--strictPort", "--host", "127.0.0.1"],
+    {
+      cwd: project.directory,
+      all: true,
+    },
+  );
+
+  await waitForServer(origin, serve);
+
+  return { origin, serve };
+}
+
+/**
+ * Requests a module the way the page's import chain does,
+ * and returns its served (transformed) code.
+ */
+async function fetchModule(origin: string, path: string) {
+  let response = await fetch(`${origin}${path}`);
+
+  expect(response.status).toBe(200);
+
+  return response.text();
+}
+
+/**
+ * Resolves with the next message of Vite's HMR socket that has the given `type`.
+ *
+ * `onOpen` runs once the socket is connected, so a change it makes is not missed.
+ */
+function nextHmrMessage(origin: string, type: string, onOpen: () => Promise<void>) {
+  return new Promise<{ type: string; path?: string }>((resolve, reject) => {
+    let socket = new WebSocket(origin.replace(/^http/, "ws"), "vite-hmr");
+    let timer = setTimeout(() => {
+      socket.close();
+      reject(new Error(`no "${type}" message from the dev server`));
+    }, 30_000);
+
+    socket.addEventListener("open", () => onOpen().catch(reject));
+    socket.addEventListener("message", (event) => {
+      let message = JSON.parse(String(event.data));
+
+      if (message.type !== type) return;
+
+      clearTimeout(timer);
+      socket.close();
+      resolve(message);
+    });
+  });
+}
+
+/**
  * The default reporter prints no test names
  */
 const VITEST = "pnpm test --reporter=verbose";
@@ -155,11 +228,13 @@ describe("base: minimal-widget", () => {
         [
           ".gitignore",
           "README.md",
+          "index.html",
           "package.json",
           "src/index.js",
           "src/mount.js",
           "src/widget.gjs",
           "tsdown.config.js",
+          "vite.config.mjs",
         ]
       `);
     });
@@ -207,6 +282,13 @@ describe("base: minimal-widget", () => {
       `);
     });
 
+    it("points the development page at the JavaScript entry", async () => {
+      let html = (await project.read("index.html"))!;
+
+      expect(html).toContain(`import { mount } from "./src/index.js";`);
+      expect(html).toContain(`<title>my-widget</title>`);
+    });
+
     it("builds a self-contained module and a global", async () => {
       await install(project);
       await build(project);
@@ -234,6 +316,22 @@ describe("base: minimal-widget", () => {
       expect(code).not.toContain("EmberObject");
       expect(await project.read("dist/index.iife.js")).toMatch(/^var MyWidget=/);
     });
+
+    it("publishes no development files", async () => {
+      expect(await packedFiles(project)).toMatchInlineSnapshot(`
+        [
+          "README.md",
+          "dist/index.iife.js",
+          "dist/index.iife.js.map",
+          "dist/index.js",
+          "dist/index.js.map",
+          "package.json",
+          "src/index.js",
+          "src/mount.js",
+          "src/widget.gjs",
+        ]
+      `);
+    });
   });
 
   describe("TypeScript", () => {
@@ -254,12 +352,14 @@ describe("base: minimal-widget", () => {
         [
           ".gitignore",
           "README.md",
+          "index.html",
           "package.json",
           "src/index.ts",
           "src/mount.ts",
           "src/widget.gts",
           "tsconfig.json",
           "tsdown.config.js",
+          "vite.config.mjs",
         ]
       `);
     });
@@ -381,6 +481,68 @@ describe("base: minimal-widget", () => {
   });
 
   describe.each([
+    {
+      flavor: "TypeScript",
+      layers: ["typescript"],
+      entry: "/src/index.ts",
+      widget: "src/widget.gts",
+    },
+    { flavor: "JavaScript", layers: [], entry: "/src/index.js", widget: "src/widget.gjs" },
+  ])("development server ($flavor)", ({ layers, entry, widget }) => {
+    let project: Project;
+    let origin: string;
+    let serve: ResultPromise | undefined;
+
+    beforeAll(async () => {
+      project = await generate({ type: "widget", name: "my-widget", layers });
+      dirs.push(project.directory);
+      await install(project);
+      ({ origin, serve } = await startDevServer(project));
+    }, 300_000);
+
+    afterAll(() => {
+      serve?.kill();
+    });
+
+    it("has a dev script", async () => {
+      let manifest = JSON.parse((await project.read("package.json"))!);
+
+      expect(manifest.scripts.dev).toBe("vite");
+    });
+
+    it("serves the page, which mounts the widget", async () => {
+      let html = await (await fetch(origin)).text();
+
+      expect(html).toContain(`<title>my-widget</title>`);
+      expect(html).toContain(`<div id="widget"></div>`);
+
+      let page = await fetchModule(origin, "/index.html?html-proxy&index=0.js");
+
+      expect(page).toContain(`import { mount } from "${entry}";`);
+    });
+
+    it("compiles the component's template", async () => {
+      let index = await fetchModule(origin, entry);
+      let specifier = index.match(/from "(\/src\/widget\.g[jt]s[^"]*)"/)?.[1];
+
+      expect(specifier).toBeTruthy();
+
+      let code = await fetchModule(origin, specifier!);
+
+      expect(code).not.toContain("<template>");
+      expect(code).toContain("createTemplateFactory");
+    });
+
+    it("reloads the page when the widget changes", async () => {
+      let message = await nextHmrMessage(origin, "full-reload", () =>
+        appendFile(project.path(widget), "\n"),
+      );
+
+      expect(message.type).toBe("full-reload");
+    });
+  });
+
+  describe.each([
     { flavor: "TypeScript", layers: ["typescript", "qunit"], file: "mount-test.ts" },
     { flavor: "JavaScript", layers: ["qunit"], file: "mount-test.js" },
   ])("in a browser (qunit layer, $flavor)", ({ layers, file }) => {
@@ -393,6 +555,12 @@ describe("base: minimal-widget", () => {
 
     it("writes an example test", async () => {
       expect(await project.read(`tests/rendering/${file}`)).toBeTruthy();
+    });
+
+    it("builds the tests with the test babel config", async () => {
+      expect(await project.read("vite.config.mjs")).toContain(
+        `plugins: [ember({ babel: { configFile: "./config/test/babel.config.js" } })],`,
+      );
     });
 
     it("the example test passes", { timeout: 300_000 }, async () => {

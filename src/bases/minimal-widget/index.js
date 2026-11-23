@@ -27,6 +27,10 @@ const TEMPLATE_GLOBAL_NAME = "MinimalWidget";
  * - No testing framework
  * - No linting or formatting
  *
+ * Plus a development server (`dev` script): Vite serves `index.html`,
+ * a page that mounts the widget, and reloads it on every change.
+ * Neither the page nor `vite.config.mjs` is part of the build or of the package.
+ *
  * Testing, linting, formatting, etc. are opt-in via layers.
  *
  * @type {import('#types').Base}
@@ -42,6 +46,8 @@ export default {
   It returns \`update\`, to change the args, and \`destroy\`, to remove the widget.
 - \`src/index\` is the public entry point.
 - \`dist/\` is the build output, with ember bundled in. Do not edit it, because each build writes it again.
+- \`index.html\` is a page for development only. The \`dev\` script serves it with Vite (\`vite.config.mjs\`), and reloads it when a file changes.
+  To see a change in a browser, open that page. It is not published, and the build does not read it.
 
 The shadow root isolates the styles.
 Put the styles of the widget in the \`<style>\` element of \`src/widget\`.
@@ -133,7 +139,9 @@ async function updateName(project) {
     await replaceInFile(project, file, TEMPLATE_GLOBAL_NAME, globalName);
   }
 
-  await replaceInFile(project, "README.md", "minimal-widget", project.desires.name);
+  for (let file of ["README.md", "index.html"]) {
+    await replaceInFile(project, file, "minimal-widget", project.desires.name);
+  }
 }
 
 /**
@@ -170,6 +178,11 @@ async function makePublishable(project) {
  * - drop the tsconfig
  * - point the build at the emitted `.js` entry
  *   (declarations can't be produced without types)
+ * - point the development page at the `.js` entry
+ *
+ * `@babel/plugin-transform-typescript` stays:
+ * the development server's babel (from `@nullvoxpopuli/ember-vite`, with no babel config)
+ * names it for every project.
  *
  * @param {import('#utils/project.js').Project} project
  */
@@ -177,7 +190,7 @@ async function makeJavaScript(project) {
   if (await project.hasOrWantsLayer("typescript")) return;
 
   await packageJson.removeDevDependencies(
-    ["@babel/plugin-transform-typescript", "@ember/library-tsconfig", "typescript"],
+    ["@ember/library-tsconfig", "typescript"],
     project.directory,
   );
 
@@ -185,6 +198,7 @@ async function makeJavaScript(project) {
 
   await removeTypesExports(project);
   await pointBuildAtJavaScript(project);
+  await replaceInFile(project, "index.html", `from "./src/index.ts"`, `from "./src/index.js"`);
 }
 
 /**
