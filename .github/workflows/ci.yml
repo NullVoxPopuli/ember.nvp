@@ -51,10 +51,22 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm test:node packages/
 
+  check_layers:
+    name: "Node Tests (check-layer permutations)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: wyvox/action@v1
+      - run: |
+          git config --global user.name "ci"
+          git config --global user.email "non@none.none"
+          pnpm test:node test/ember.nvp/permutations/*-checks.test.ts
+
   node_tests:
     name: "Node Tests (${{ matrix.slice.name }})"
     # The matrix takes about 10 minutes per run. Skip it when a fast job fails.
-    needs: [lints, babel_8]
+    needs: [lints, babel_8, check_layers]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -94,8 +106,6 @@ jobs:
             args: test/ember.nvp/permutations/widget-1.test.ts
           - name: widget permutations 2/2
             args: test/ember.nvp/permutations/widget-2.test.ts
-          - name: check-layer permutations
-            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts test/ember.nvp/permutations/custom-element-checks.test.ts test/ember.nvp/permutations/widget-checks.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 
