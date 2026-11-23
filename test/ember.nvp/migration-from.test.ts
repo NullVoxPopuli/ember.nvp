@@ -743,13 +743,80 @@ export function start() {
       }),
     );
 
-    let helper = await read(dir, "tests/test-helper.js");
+    expect(await read(dir, "tests/test-helper.js")).toMatchInlineSnapshot(`
+      "import { getOwner } from '@ember/owner';
+      import {
+        currentRouteName,
+        currentURL,
+        getSettledState,
+        resetOnerror,
+        setApplication,
+        visit,
+      } from '@ember/test-helpers';
+      import { getPendingWaiterState } from '@ember/test-waiters';
+      import * as QUnit from 'qunit';
+      import { setup } from 'qunit-dom';
+      import { setupEmberOnerrorValidation, start as qunitStart } from 'ember-qunit';
+      import { setTesting } from '@embroider/macros';
 
-    expect(helper.slice(helper.indexOf("import config"), helper.indexOf("Object.assign")))
-      .toMatchInlineSnapshot(`
-      "import config from '#config';
+      import config from '#config';
       import '../app/styles/app.css';
 
+      Object.assign(window, {
+        visit,
+        getSettledState,
+        getPendingWaiterState,
+        currentURL,
+        currentRouteName,
+        getOwner,
+        snapshotTimers: (label) => {
+          console.debug(
+            label ?? 'snapshotTimers',
+            JSON.parse(
+              JSON.stringify({
+                settled: getSettledState(),
+                waiters: getPendingWaiterState(),
+              }),
+            ),
+          );
+        },
+      });
+
+      /**
+       * The test modules, in their traditional location and co-located with the app.
+       */
+      const tests = Object.assign(
+        import.meta.glob(['./**/*.{js,ts,gjs,gts}', '!./test-helper.*']),
+        import.meta.glob('./**/*-test.{js,ts,gjs,gts}', { base: '../app' }),
+      );
+
+      /**
+       * Addons such as ember-window-mock read \`isTesting()\` when their module loads,
+       * so the app and the tests load only after \`setTesting(true)\`.
+       */
+      export async function start() {
+        config.locationType = 'none';
+        config.APP.rootElement = '#ember-testing';
+        config.APP.autoboot = false;
+
+        setTesting(true);
+
+        const { default: Application } = await import('#app/app.js');
+
+        await Promise.all(Object.values(tests).map((load) => load()));
+
+        setApplication(Application.create(config.APP));
+        setup(QUnit.assert);
+        setupEmberOnerrorValidation();
+
+        QUnit.moduleStart(({ name }) => console.group(name));
+        QUnit.testStart(({ name }) => console.group(name));
+        QUnit.testDone(() => console.groupEnd());
+        QUnit.moduleDone(() => console.groupEnd());
+        QUnit.testDone(resetOnerror);
+
+        qunitStart();
+      }
       "
     `);
   });
@@ -849,7 +916,6 @@ module.exports = function (environment) {
         packageManager: "pnpm",
       }),
     );
-    let helper = await read(dir, "tests/test-helper.ts");
 
     expect(await read(dir, "app/config.ts")).toMatchInlineSnapshot(`
       "interface Config {
@@ -902,8 +968,57 @@ module.exports = function (environment) {
       export default ENV;
       "
     `);
-    expect(helper.slice(helper.indexOf("export async function start"))).toMatchInlineSnapshot(`
-      "export async function start() {
+    expect(await read(dir, "tests/test-helper.ts")).toMatchInlineSnapshot(`
+      "import { getOwner } from "@ember/owner";
+      import {
+        currentRouteName,
+        currentURL,
+        getSettledState,
+        resetOnerror,
+        setApplication,
+        visit,
+      } from "@ember/test-helpers";
+      import { getPendingWaiterState } from "@ember/test-waiters";
+      import * as QUnit from "qunit";
+      import { setup } from "qunit-dom";
+      import { setupEmberOnerrorValidation, start as qunitStart } from "ember-qunit";
+      import { setTesting } from "@embroider/macros";
+
+      import config from "#config";
+
+      Object.assign(window, {
+        visit,
+        getSettledState,
+        getPendingWaiterState,
+        currentURL,
+        currentRouteName,
+        getOwner,
+        snapshotTimers: (label?: string) => {
+          console.debug(
+            label ?? "snapshotTimers",
+            JSON.parse(
+              JSON.stringify({
+                settled: getSettledState(),
+                waiters: getPendingWaiterState(),
+              }),
+            ),
+          );
+        },
+      });
+
+      /**
+       * The test modules, in their traditional location and co-located with the app.
+       */
+      const tests = Object.assign(
+        import.meta.glob(["./**/*.{js,ts,gjs,gts}", "!./test-helper.*"]),
+        import.meta.glob("./**/*-test.{js,ts,gjs,gts}", { base: "../app" }),
+      );
+
+      /**
+       * Addons such as ember-window-mock read \`isTesting()\` when their module loads,
+       * so the app and the tests load only after \`setTesting(true)\`.
+       */
+      export async function start() {
         config.locationType = "none";
         config.APP.rootElement = "#ember-testing";
         config.APP.autoboot = false;
