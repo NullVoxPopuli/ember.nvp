@@ -26,7 +26,7 @@ import {
   stringValue,
   walk,
 } from "./javascript.js";
-import { removeToolingOfWantedLayers } from "./layers.js";
+import { hasLegacyEslintConfig, removeToolingOfWantedLayers } from "./layers.js";
 
 /**
  * @typedef {import('#types').Finding} Finding
@@ -403,6 +403,10 @@ export async function checkApp(project) {
 
   if (dependencies["@embroider/legacy-inspector-support"]) {
     report.layers.push("inspector-support");
+  }
+
+  if (hasLegacyEslintConfig(root)) {
+    report.layers.push("eslint-bundled");
   }
 
   return report;
