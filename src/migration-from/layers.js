@@ -72,6 +72,24 @@ const REPLACED = {
 };
 
 /**
+ * ESLint 9 reads only a flat config, so a project with a legacy config
+ * gets the eslint-bundled layer, which replaces it.
+ *
+ * @param {string} root
+ * @returns {boolean}
+ */
+export function hasLegacyEslintConfig(root) {
+  let files = REPLACED["eslint-bundled"]?.files ?? [];
+  let flat = files.filter((file) => file.startsWith("eslint.config."));
+  let legacy = files.filter((file) => file.startsWith(".eslintrc"));
+
+  return (
+    legacy.some((file) => existsSync(join(root, file))) &&
+    !flat.some((file) => existsSync(join(root, file)))
+  );
+}
+
+/**
  * @param {import('#utils/project.js').Project} project
  * @param {import('#types').MigrationReport} report
  */

@@ -256,6 +256,31 @@ describe("@ember/app-blueprint", () => {
     expect(existsSync(join(dir, "ember-cli-build.mjs"))).toBe(true);
   });
 
+  it("suggests the eslint-bundled layer for a legacy ESLint config", async () => {
+    let legacy = await fixture("classic-build-app-blueprint", {
+      ".eslintrc.js": "module.exports = { root: true };\n",
+    });
+    let flat = await fixture("classic-build-app-blueprint", {
+      ".eslintrc.js": "module.exports = { root: true };\n",
+      "eslint.config.mjs": "export default [];\n",
+    });
+
+    async function suggested(dir: string) {
+      let project = new Project(dir, {
+        name: "my-classic-app",
+        type: "app",
+        path: dir,
+        layers: [],
+        packageManager: "pnpm",
+      });
+
+      return (await checkMigration(project))?.report.layers;
+    }
+
+    expect(await suggested(legacy)).toContain("eslint-bundled");
+    expect(await suggested(flat)).not.toContain("eslint-bundled");
+  });
+
   it("reads the top level of node_modules, when there is one", async () => {
     let dir = await fixture("app-blueprint", {
       "node_modules/ember-cli-mirage/package.json": JSON.stringify({
