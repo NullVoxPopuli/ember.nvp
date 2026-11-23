@@ -419,7 +419,24 @@ const BLUEPRINT_TEST_HELPER_IMPORTS =
  * @property {string} file the old tests/test-helper
  * @property {string[]} imports the import declarations beyond the blueprints', as `await import()`
  * @property {string[]} statements the statements of `start()` that use those imports
+ * @property {string[]} [config] the test settings of config/environment.js, which modules can read when they load
+ * @property {string[]} [stylesheets] the app's stylesheets that the old tests/index.html linked
  */
+
+/**
+ * @param {string} root
+ * @returns {string[]} the app's own stylesheets that tests/index.html links, such as `/app/styles/app.scss`
+ */
+function testStylesheets(root) {
+  if (!existsSync(join(root, "tests/index.html"))) return [];
+
+  let html = readFileSync(join(root, "tests/index.html"), "utf-8");
+
+  return Array.from(
+    html.matchAll(/<link\b[^>]*\bhref="(\/app\/[^"]+\.(?:css|scss|sass|less))"/g),
+    (match) => /** @type {string} */ (match[1]),
+  );
+}
 
 /**
  * The app's own part of tests/test-helper, which the qunit layer's test-helper does not have.
@@ -528,14 +545,39 @@ async function writeTestHelper(project, report, setup, typescript) {
     return;
   }
 
-  let layer = readFileSync(QUNIT_TEST_HELPER, "utf-8");
-  let code = layer.replace(
-    "  qunitStart();",
-    setup.imports
-      .concat(setup.statements)
-      .map((line) => `  ${line}\n`)
-      .join("") + "\n  qunitStart();",
-  );
+  let code = readFileSync(QUNIT_TEST_HELPER, "utf-8");
+  let own = setup.imports.concat(setup.statements);
+
+  if (own.length > 0) {
+    code = code.replace(
+      "  qunitStart();",
+      own.map((line) => `  ${line}\n`).join("") + "\n  qunitStart();",
+    );
+  }
+
+  /**
+   * The test settings come before the app loads, because a module can read the config when it loads,
+   * such as `const PageSize = config.codeSearchPageSize;`.
+   */
+  if (setup.config?.length) {
+    code = code.replace(
+      "  const { default: Application }",
+      setup.config.map((line) => `  ${line}\n`).join("") + "\n  const { default: Application }",
+    );
+  }
+
+  /**
+   * Vite links a stylesheet that a module imports, as the old tests/index.html linked the app's styles.
+   */
+  let stylesheets = setup.stylesheets ?? [];
+
+  if (stylesheets.length > 0) {
+    code = code.replace(
+      'import config from "#config";\n',
+      (line) => line + stylesheets.map((href) => `import "..${href}";\n`).join(""),
+    );
+  }
+
   /**
    * The import carries the extension of the app module that the migration wrote.
    * package.json does not map `#app/*` yet, so nothing can look the file up.
@@ -871,12 +913,16 @@ export async function migrateApp(project, report, { indexHtml }) {
   /**
    * The qunit layer's test-helper sets the test config in start(), so the app's own test settings go there too.
    */
-  if (environment && environment.statements.test.length > 0) {
-    let statements = environment.statements.test.map((code) => code.replace(/\bENV\b/g, "config"));
+  let testConfig = (environment?.statements.test ?? []).map((code) =>
+    code.replace(/\bENV\b/g, "config"),
+  );
+  let stylesheets = testStylesheets(root);
 
-    testSetup = testSetup
-      ? { ...testSetup, statements: testSetup.statements.concat(statements) }
-      : { file: "config/environment.js", imports: [], statements };
+  if (testConfig.length > 0 || stylesheets.length > 0) {
+    testSetup = Object.assign(
+      testSetup ?? { file: "config/environment.js", imports: [], statements: [] },
+      { config: testConfig, stylesheets },
+    );
   }
 
   await remove(project, EMBER_CLI_BUILD);
