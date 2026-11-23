@@ -58,122 +58,57 @@ async function leadingImports(project: Project, file: string) {
 }
 
 /**
- * Drives the generated widget the way a host page would:
- * - mount it into an element
- * - click
- * - update the args
- * - destroy it
+ * The vitest layer writes `tests/rendering/mount-test`, which imports `mount` from the source.
+ * A second call swaps the import again.
  *
- * `from` is what provides `mount`:
- * - `src`: the source
+ * To test a build with the same tests, this swaps that import for:
  * - `dist`: the built ES module
  * - `global`: the built `<script>` file, which assigns a global
  */
-function widgetTests(ext: "ts" | "js", from: "src" | "dist" | "global", globalName = "") {
-  let ts = ext === "ts";
-  let setup = {
-    src: `import { mount } from "../src/index.${ext}";`,
-    dist: `import { mount } from "../dist/index.js";`,
-    global: `import code from "../dist/index.iife.js?raw";
+async function pointGeneratedTestAt(project: Project, from: "dist" | "global", globalName = "") {
+  let file = "tests/rendering/mount-test.ts";
+  let source = (await project.read(file))!;
+  let original = /^import { mount } from "[^"]+";$/m;
+  let replacement = {
+    dist: `import { mount } from "../../dist/index.js";`,
+    global: `import code from "../../dist/index.iife.js?raw";
 
 let script = document.createElement("script");
 script.textContent = code;
 document.head.appendChild(script);
 
-let { mount } = ${ts ? "(window as any)" : "window"}.${globalName};`,
+let { mount } = (window as any).${globalName};`,
   }[from];
 
-  return {
-    [`tests/${from}-widget-test.${ext}`]: `import { describe, test, expect, afterEach } from "vitest";
-import { renderSettled } from "@ember/renderer";
+  expect(source).toMatch(original);
 
-${setup}
-
-afterEach(() => {
-  document.body.innerHTML = "";
-});
-
-function host() {
-  let element = document.createElement("div");
-
-  document.body.appendChild(element);
-
-  return element;
+  await emit(project, { [file]: source.replace(original, replacement) });
 }
 
-function query(element${ts ? ": Element" : ""}, selector${ts ? ": string" : ""}) {
-  return element.shadowRoot?.querySelector(selector);
+/**
+ * vitest is configured with `passWithNoTests`, and testem exits 0 when the build leaves a test file out.
+ *
+ * So each run must also name the generated tests.
+ */
+async function runGeneratedTests(project: Project, command: string, names: string[]) {
+  let test = await execa(command, { cwd: project.directory, shell: true });
+
+  expect(test.exitCode).toBe(0);
+
+  for (let name of names) {
+    expect(test.stdout).toContain(name);
+  }
 }
 
-describe("mount (${from})", () => {
-  test("renders into a shadow root, with default args", async () => {
-    let element = host();
-
-    mount(element);
-    await renderSettled();
-
-    expect(element.children).toHaveLength(0);
-    expect(query(element, "h2")?.textContent).toBe("Count");
-    expect(query(element, "output")?.textContent).toBe("0");
-    expect(query(element, "button")?.textContent).toBe("+1");
-  });
-
-  test("counts clicks", async () => {
-    let element = host();
-
-    mount(element, { step: 2 });
-    await renderSettled();
-
-    ${ts ? '(query(element, "button") as HTMLButtonElement)' : 'query(element, "button")'}.click();
-    await renderSettled();
-    ${ts ? '(query(element, "button") as HTMLButtonElement)' : 'query(element, "button")'}.click();
-    await renderSettled();
-
-    expect(query(element, "output")?.textContent).toBe("4");
-  });
-
-  test("re-renders on update", async () => {
-    let element = host();
-    let widget = mount(element, { title: "Clicks" });
-
-    await renderSettled();
-
-    widget.update({ title: "Taps", step: 3 });
-    await renderSettled();
-
-    expect(query(element, "h2")?.textContent).toBe("Taps");
-    expect(query(element, "button")?.textContent).toBe("+3");
-  });
-
-  test("keeps the styles of the host page out", async () => {
-    let style = document.createElement("style");
-
-    style.textContent = "h2 { color: rgb(255, 0, 0); }";
-    document.body.appendChild(style);
-
-    let element = host();
-
-    mount(element);
-    await renderSettled();
-
-    expect(getComputedStyle(query(element, "h2")${ts ? "!" : ""}).color).not.toBe("rgb(255, 0, 0)");
-  });
-
-  test("removes the widget on destroy", async () => {
-    let element = host();
-    let widget = mount(element);
-
-    await renderSettled();
-
-    widget.destroy();
-    await renderSettled();
-
-    expect(element.shadowRoot?.childNodes).toHaveLength(0);
-  });
-});
-`,
-  };
-}
+/**
+ * The default reporter prints no test names
+ */
+const VITEST = "pnpm test --reporter=verbose";
+const VITEST_NAMES = ["mount > counts clicks", "mount > keeps the styles of the host page out"];
+const QUNIT_NAMES = [
+  "Rendering | mount: counts clicks",
+  "Rendering | mount: removes the widget on destroy",
+];
 
 describe("base: minimal-widget", () => {
   const dirs: string[] = [];
@@ -380,37 +315,35 @@ describe("base: minimal-widget", () => {
         dirs.push(project.directory);
       });
 
-      it("mounts, counts, updates, and isolates styles", { timeout: 300_000 }, async () => {
-        await emit(project, widgetTests("ts", "src"));
-        await install(project);
+      it("writes an example test", async () => {
+        expect(await listFiles(join(project.directory, "tests"))).toEqual([
+          "rendering/mount-test.ts",
+        ]);
+      });
 
-        let test = await execa("pnpm test", { cwd: project.directory, shell: true });
-        expect(test.exitCode).toBe(0);
+      it("the example test passes", { timeout: 300_000 }, async () => {
+        await install(project);
+        await runGeneratedTests(project, VITEST, VITEST_NAMES);
       });
 
       it(
-        "runs from the built package, with no ember on the page",
+        "the example test passes against the built package, with no ember on the page",
         { timeout: 300_000 },
         async () => {
           await build(project);
-          /**
-           * Only the dist specs: each copy of ember on the page is a separate renderer
-           */
-          await rm(join(project.directory, "tests"), { recursive: true, force: true });
-          await emit(project, widgetTests("ts", "dist"));
-
-          let test = await execa("pnpm test", { cwd: project.directory, shell: true });
-          expect(test.exitCode).toBe(0);
+          await pointGeneratedTestAt(project, "dist");
+          await runGeneratedTests(project, VITEST, VITEST_NAMES);
         },
       );
 
-      it("runs from the global build, loaded by a script tag", { timeout: 300_000 }, async () => {
-        await rm(join(project.directory, "tests"), { recursive: true, force: true });
-        await emit(project, widgetTests("ts", "global", "MyWidget"));
-
-        let test = await execa("pnpm test", { cwd: project.directory, shell: true });
-        expect(test.exitCode).toBe(0);
-      });
+      it(
+        "the example test passes against the global build, loaded by a script tag",
+        { timeout: 300_000 },
+        async () => {
+          await pointGeneratedTestAt(project, "global", "MyWidget");
+          await runGeneratedTests(project, VITEST, VITEST_NAMES);
+        },
+      );
     });
 
     describe("JavaScript", () => {
@@ -425,71 +358,40 @@ describe("base: minimal-widget", () => {
         dirs.push(project.directory);
       });
 
-      it("mounts, counts, updates, and isolates styles", { timeout: 300_000 }, async () => {
-        await emit(project, widgetTests("js", "src"));
-        await install(project);
+      it("writes an example test", async () => {
+        expect(await listFiles(join(project.directory, "tests"))).toEqual([
+          "rendering/mount-test.js",
+        ]);
+        expect(await project.read("tests/rendering/mount-test.js")).toContain(
+          `import { mount } from "../../src/index.js";`,
+        );
+      });
 
-        let test = await execa("pnpm test", { cwd: project.directory, shell: true });
-        expect(test.exitCode).toBe(0);
+      it("the example test passes", { timeout: 300_000 }, async () => {
+        await install(project);
+        await runGeneratedTests(project, VITEST, VITEST_NAMES);
       });
     });
   });
 
-  describe("in a browser (qunit layer)", () => {
+  describe.each([
+    { flavor: "TypeScript", layers: ["typescript", "qunit"], file: "mount-test.ts" },
+    { flavor: "JavaScript", layers: ["qunit"], file: "mount-test.js" },
+  ])("in a browser (qunit layer, $flavor)", ({ layers, file }) => {
     let project: Project;
 
     beforeAll(async () => {
-      project = await generate({
-        type: "widget",
-        name: "my-widget",
-        layers: ["typescript", "qunit"],
-      });
+      project = await generate({ type: "widget", name: "my-widget", layers });
       dirs.push(project.directory);
     });
 
-    it("mounts and updates", { timeout: 300_000 }, async () => {
-      await emit(project, {
-        "tests/rendering/mount-test.ts": `import { module, test } from "qunit";
-import { setupRenderingTest } from "ember-qunit";
-import { settled } from "@ember/test-helpers";
+    it("writes an example test", async () => {
+      expect(await project.read(`tests/rendering/${file}`)).toBeTruthy();
+    });
 
-import { mount } from "#src/index.ts";
-
-module("Rendering | mount", function (hooks) {
-  setupRenderingTest(hooks);
-
-  test("renders into a shadow root, and re-renders on update", async function (assert) {
-    let element = document.createElement("div");
-
-    document.querySelector("#ember-testing")!.appendChild(element);
-
-    let widget = mount(element, { title: "Clicks" });
-    let root = element.shadowRoot as unknown as Element;
-
-    await settled();
-
-    assert.dom("h2", root).hasText("Clicks");
-
-    widget.update({ step: 5 });
-    await settled();
-
-    assert.dom("button", root).hasText("+5");
-
-    widget.destroy();
-  });
-});
-`,
-      });
+    it("the example test passes", { timeout: 300_000 }, async () => {
       await install(project);
-
-      let test = await execa("pnpm test", { cwd: project.directory, shell: true });
-
-      expect(test.exitCode).toBe(0);
-      /**
-       * A test file that the build leaves out still exits 0
-       */
-      expect(test.stdout).toContain("ok 1 ");
-      expect(test.stdout).toContain("Rendering | mount: renders into a shadow root");
+      await runGeneratedTests(project, "pnpm test", QUNIT_NAMES);
     });
   });
 });

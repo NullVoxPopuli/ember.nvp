@@ -9,6 +9,7 @@ export default defineConfig({
     exclude: configDefaults.exclude.concat([
       "src/**/layers/*/files/**",
       "src/**/layers/*/library-files/**",
+      "src/**/layers/*/widget-files/**",
       "src/**/bases/*/files/**",
     ]),
   },
