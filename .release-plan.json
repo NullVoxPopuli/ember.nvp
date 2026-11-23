@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "2.9.0",
-      "newVersion": "2.9.1",
+      "oldVersion": "2.9.1",
+      "newVersion": "2.9.2",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "1.6.0"
     }
   },
-  "description": "## Release (2026-11-22)\n\n* ember.nvp 2.9.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#224](https://github.com/NullVoxPopuli/ember.nvp/pull/224) Keep Sass that Vite compiles when the app installs sass ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-23)\n\n* ember.nvp 2.9.2 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#226](https://github.com/NullVoxPopuli/ember.nvp/pull/226) Set the test config before the app loads, and keep the test stylesheets ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
