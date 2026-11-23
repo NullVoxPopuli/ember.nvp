@@ -278,6 +278,7 @@ describe("layer: readme", () => {
 
         An Ember component, packaged as a widget to embed in any page, created with \`ember.nvp\`.
         The built package contains ember, so the page that uses the widget needs nothing else.
+        It contains only the parts of ember that the widget imports.
 
         ## Usage
 

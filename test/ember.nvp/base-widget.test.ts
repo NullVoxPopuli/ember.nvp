@@ -283,6 +283,14 @@ describe("base: minimal-widget", () => {
        * Nothing is left for a consumer to resolve
        */
       expect(await leadingImports(project, "dist/index.js")).toEqual([]);
+
+      /**
+       * Only what the widget imports: no router, no classic object model
+       */
+      let code = (await project.read("dist/index.js"))!;
+
+      expect(code).not.toContain("router:main");
+      expect(code).not.toContain("EmberObject");
       expect(await project.read("dist/index.iife.js")).toMatch(/^var MyWidget=/);
     });
   });
@@ -424,6 +432,64 @@ describe("base: minimal-widget", () => {
         let test = await execa("pnpm test", { cwd: project.directory, shell: true });
         expect(test.exitCode).toBe(0);
       });
+    });
+  });
+
+  describe("in a browser (qunit layer)", () => {
+    let project: Project;
+
+    beforeAll(async () => {
+      project = await generate({
+        type: "widget",
+        name: "my-widget",
+        layers: ["typescript", "qunit"],
+      });
+      dirs.push(project.directory);
+    });
+
+    it("mounts and updates", { timeout: 300_000 }, async () => {
+      await emit(project, {
+        "tests/rendering/mount-test.ts": `import { module, test } from "qunit";
+import { setupRenderingTest } from "ember-qunit";
+import { settled } from "@ember/test-helpers";
+
+import { mount } from "#src/index.ts";
+
+module("Rendering | mount", function (hooks) {
+  setupRenderingTest(hooks);
+
+  test("renders into a shadow root, and re-renders on update", async function (assert) {
+    let element = document.createElement("div");
+
+    document.querySelector("#ember-testing")!.appendChild(element);
+
+    let widget = mount(element, { title: "Clicks" });
+    let root = element.shadowRoot as unknown as Element;
+
+    await settled();
+
+    assert.dom("h2", root).hasText("Clicks");
+
+    widget.update({ step: 5 });
+    await settled();
+
+    assert.dom("button", root).hasText("+5");
+
+    widget.destroy();
+  });
+});
+`,
+      });
+      await install(project);
+
+      let test = await execa("pnpm test", { cwd: project.directory, shell: true });
+
+      expect(test.exitCode).toBe(0);
+      /**
+       * A test file that the build leaves out still exits 0
+       */
+      expect(test.stdout).toContain("ok 1 ");
+      expect(test.stdout).toContain("Rendering | mount: renders into a shadow root");
     });
   });
 });

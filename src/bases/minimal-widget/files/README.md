@@ -7,6 +7,10 @@ and [tsdown](https://tsdown.dev/).
 `dist/` contains ember and every other dependency. The page that uses the widget
 needs nothing else.
 
+`dist/` contains only the code that the widget imports.
+The project is ES modules (`"type": "module"`), and ember marks its modules with side effects.
+So the build leaves out each part of ember that the widget does not use.
+
 ## Usage
 
 With a bundler, import `mount` and give it an element:
