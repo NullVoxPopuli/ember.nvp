@@ -68,7 +68,7 @@ You can run `ember.nvp` on top of an existing project to add layers to it.
 
 Run it inside the project. When the current directory has a `package.json`, the first question is what to do with it:
 
-- **update**: update the project in this directory. The name starts as the `package.json` name, and the type starts as the type that ember.nvp detects (app, library, browser extension, or custom element).
+- **update**: update the project in this directory. The name starts as the `package.json` name, and the type starts as the type that ember.nvp detects (app, library, browser extension, custom element, or widget).
 - **replace**: delete this directory and generate a new project in it.
 - **new**: generate a new project in another directory.
 

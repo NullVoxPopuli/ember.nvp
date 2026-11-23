@@ -28,7 +28,7 @@ async function fixture(files: Record<string, string>) {
 }
 
 describe("detectProjectType", () => {
-  const types: ProjectType[] = ["app", "library", "extension", "custom-element"];
+  const types: ProjectType[] = ["app", "library", "extension", "custom-element", "widget"];
 
   for (const type of types) {
     it(`detects a generated ${type}`, async () => {

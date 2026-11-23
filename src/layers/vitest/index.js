@@ -52,6 +52,10 @@ export default {
   async run(project) {
     await applyFolderTo(join(import.meta.dirname, "files"), project);
 
+    if (project.type === "widget") {
+      await applyFolderTo(join(import.meta.dirname, "widget-files"), project);
+    }
+
     await packageJson.addDevDependencies(await getLatest(depsFor(project)), project.directory);
 
     await packageJson.addScripts(scripts, project.directory);

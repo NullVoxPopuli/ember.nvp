@@ -97,6 +97,10 @@ export default {
 
     await applyFolderTo(join(import.meta.dirname, isLibrary ? "library-files" : "files"), project);
 
+    if (project.type === "widget") {
+      await applyFolderTo(join(import.meta.dirname, "widget-files"), project);
+    }
+
     if (isLibrary) {
       await syncTestBabelConfig(project, ts);
 

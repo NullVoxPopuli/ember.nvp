@@ -1,5 +1,5 @@
 /**
- * Libraries and custom elements share one toolchain:
+ * Libraries, custom elements, and widgets share one toolchain:
  * - built with tsdown
  * - no babel config
  * - published to npm
@@ -15,5 +15,5 @@
  * @returns {boolean}
  */
 export function isLibraryType(type) {
-  return type === "library" || type === "custom-element";
+  return type === "library" || type === "custom-element" || type === "widget";
 }

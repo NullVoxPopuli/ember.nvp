@@ -174,6 +174,7 @@ describe("agents-md layer, library", () => {
 describe.each([
   { type: "extension" as const, line: "- `public/manifest.json` is the extension manifest." },
   { type: "custom-element" as const, line: "- `src/element` is the custom element." },
+  { type: "widget" as const, line: "- `src/widget` is the root component of the widget." },
 ])("agents-md layer, $type", ({ type, line }) => {
   let project: Project;
 

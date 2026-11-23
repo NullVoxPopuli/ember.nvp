@@ -1,7 +1,7 @@
 import type { Validate } from "@clack/core";
 import { Project } from "./project.js";
 export type PackageManager = "pnpm" | "npm";
-export type ProjectType = "app" | "library" | "extension" | "custom-element";
+export type ProjectType = "app" | "library" | "extension" | "custom-element" | "widget";
 
 export type LayerOptionType = "text" | "number" | "select" | "confirm" | "multiselect";
 

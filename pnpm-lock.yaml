@@ -373,6 +373,30 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  src/bases/minimal-widget/files:
+    devDependencies:
+      '@ember/library-tsconfig':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@glimmer/component':
+        specifier: ^2.2.1
+        version: 2.2.1
+      '@nullvoxpopuli/ember-rolldown':
+        specifier: workspace:*
+        version: link:../../../../packages/rolldown
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.7)
+      ember-source:
+        specifier: ~7.4.0
+        version: 7.4.0(@glimmer/component@2.2.1)
+      tsdown:
+        specifier: ^0.23.5
+        version: 0.23.5(@volar/typescript@2.4.30(typescript@6.0.3))(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
 packages:
 
   '@asamuzakjp/css-color@3.2.0':

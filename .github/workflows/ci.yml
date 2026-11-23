@@ -88,8 +88,12 @@ jobs:
             args: test/ember.nvp/permutations/custom-element-1.test.ts
           - name: custom-element permutations 2/2
             args: test/ember.nvp/permutations/custom-element-2.test.ts
+          - name: widget permutations 1/2
+            args: test/ember.nvp/permutations/widget-1.test.ts
+          - name: widget permutations 2/2
+            args: test/ember.nvp/permutations/widget-2.test.ts
           - name: check-layer permutations
-            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts test/ember.nvp/permutations/custom-element-checks.test.ts
+            args: test/ember.nvp/permutations/app-checks.test.ts test/ember.nvp/permutations/library-checks.test.ts test/ember.nvp/permutations/extension-checks.test.ts test/ember.nvp/permutations/custom-element-checks.test.ts test/ember.nvp/permutations/widget-checks.test.ts
           - name: everything else
             args: --exclude 'test/ember.nvp/permutations/**'
 

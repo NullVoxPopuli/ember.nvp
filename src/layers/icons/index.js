@@ -21,7 +21,7 @@ const TOOLS = { "svg-jar": svgJar, "unplugin-icons": unpluginIcons };
 
 /**
  * Only apps and extensions build with Vite.
- * The library and custom-element bases build with tsdown.
+ * The library, custom-element, and widget bases build with tsdown.
  */
 const SUPPORTED_TYPES = new Set(["app", "extension"]);
 

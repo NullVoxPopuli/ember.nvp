@@ -1,0 +1,40 @@
+{
+  "name": "minimal-widget",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An Ember component, packaged as a widget to embed in any page",
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./global": "./dist/index.iife.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "prepack": "tsdown",
+    "start": "tsdown --watch"
+  },
+  "devDependencies": {
+    "@ember/library-tsconfig": "^3.0.0",
+    "@glimmer/component": "^2.2.1",
+    "@nullvoxpopuli/ember-rolldown": "workspace:*",
+    "decorator-transforms": "^2.4.0",
+    "ember-source": "~7.4.0",
+    "tsdown": "^0.23.5",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">= 24"
+  },
+  "ember": {
+    "edition": "octane"
+  }
+}

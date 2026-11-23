@@ -23,7 +23,7 @@ export const coreOptions = /** @type {const} */ ({
 
   type: {
     type: "string",
-    choices: ["app", "addon", "library", "extension", "custom-element"],
+    choices: ["app", "addon", "library", "extension", "custom-element", "widget"],
     description: "Type of project to generate",
   },
 
