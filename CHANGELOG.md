@@ -2,6 +2,17 @@
 
 ## Release (2026-11-23)
 
+* ember.nvp 2.10.0 (minor)
+
+#### :rocket: Enhancement
+* `ember.nvp`
+  * [#228](https://github.com/NullVoxPopuli/ember.nvp/pull/228) Add a widget project type ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-23)
+
 * ember.nvp 2.9.2 (patch)
 
 #### :bug: Bug Fix
