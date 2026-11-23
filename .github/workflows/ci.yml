@@ -53,6 +53,8 @@ jobs:
 
   node_tests:
     name: "Node Tests (${{ matrix.slice.name }})"
+    # The matrix takes about 10 minutes per run. Skip it when a fast job fails.
+    needs: [lints, babel_8]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
