@@ -16,11 +16,12 @@ const SUPPORTED = new Set([
   "web-extension",
   "custom-element",
   "web-component",
+  "widget",
 ]);
 
 /**
  * @param {string | undefined} selected
- * @returns {selected is "app" | "library" | "addon" | "extension" | "web-extension" | "custom-element" | "web-component"}
+ * @returns {selected is "app" | "library" | "addon" | "extension" | "web-extension" | "custom-element" | "web-component" | "widget"}
  */
 function isValid(selected) {
   if (!selected) return false;
@@ -68,6 +69,11 @@ export async function askProjectType(existingProject) {
         value: "custom-element",
         label: "custom element",
         hint: "an Ember component packaged as a web component, usable from any page",
+      },
+      {
+        value: "widget",
+        label: "widget",
+        hint: "an Ember component to embed in any page with one function call, or a script tag",
       },
     ],
   });

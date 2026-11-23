@@ -32,7 +32,7 @@ const BASIC_HELP_OUTPUT = `
           Target directory path for the project
 
           --type <string>
-          Type of project to generate [choices: "app", "addon", "library", "extension", "custom-element"]
+          Type of project to generate [choices: "app", "addon", "library", "extension", "custom-element", "widget"]
 
           --confirm <string>
           Bypass target confirmation step [choices: "yes", "no"]
@@ -56,7 +56,7 @@ const BASIC_HELP_OUTPUT = `
       agents-md
       git (outside a git repo)
       readme
-      typescript (for libraries and custom elements)
+      typescript (for libraries, custom elements, and widgets)
 
       For a new project, --layers adds to these. --skip-layers leaves one out.
 

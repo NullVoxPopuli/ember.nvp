@@ -14,8 +14,15 @@ const minimalApp = "minimal-app";
 const minimalAddon = "minimal-library";
 const minimalExtension = "minimal-extension";
 const minimalCustomElement = "minimal-custom-element";
+const minimalWidget = "minimal-widget";
 
-export const bases = [minimalApp, minimalAddon, minimalExtension, minimalCustomElement];
+export const bases = [
+  minimalApp,
+  minimalAddon,
+  minimalExtension,
+  minimalCustomElement,
+  minimalWidget,
+];
 
 export const layers = await discoverLayers();
 

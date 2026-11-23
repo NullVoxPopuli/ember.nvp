@@ -257,4 +257,72 @@ describe("layer: readme", () => {
       `);
     });
   });
+
+  describe("Widget project README generation", () => {
+    let project: Project;
+
+    beforeAll(async () => {
+      project = await generate({
+        directory: await mktemp("acme-widget"),
+        type: "widget",
+        name: "@acme/my-widget",
+        packageManager: "npm",
+        layers: ["readme"],
+      });
+      dirs.push(project.directory);
+    });
+
+    it("generates README.md with the global name", async () => {
+      expect(await project.read("README.md")).toMatchInlineSnapshot(`
+        "# @acme/my-widget
+
+        An Ember component, packaged as a widget to embed in any page, created with \`ember.nvp\`.
+        The built package contains ember, so the page that uses the widget needs nothing else.
+
+        ## Usage
+
+        With a bundler, import \`mount\` and give it an element:
+
+        \`\`\`js
+        import { mount } from "@acme/my-widget";
+
+        let widget = mount(document.querySelector("#widget"), { title: "Clicks", step: 2 });
+
+        widget.update({ step: 5 });
+        widget.destroy();
+        \`\`\`
+
+        Without a bundler, load the global build with a \`<script>\` tag.
+        It defines \`MyWidget\` on \`window\`:
+
+        \`\`\`html
+        <div id="widget"></div>
+
+        <script src="https://unpkg.com/@acme/my-widget/dist/index.iife.js"></script>
+        <script>
+          MyWidget.mount(document.querySelector("#widget"), { title: "Clicks" });
+        </script>
+        \`\`\`
+
+        The widget renders in a shadow root,
+        so the styles of the host page and of the widget stay apart.
+
+        ## Getting Started
+
+        ### Prerequisites
+
+        - Node.js >= 24
+        - npm
+
+        ### Development & Building
+
+        To build the package:
+
+        \`\`\`sh
+        npm run build
+        \`\`\`
+        "
+      `);
+    });
+  });
 });

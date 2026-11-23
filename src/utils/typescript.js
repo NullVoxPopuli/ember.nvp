@@ -10,6 +10,7 @@ const appBase = join(bases, "minimal-app/files");
 const extensionBase = join(bases, "minimal-extension/files");
 const libraryBase = join(bases, "minimal-library/files");
 const customElementBase = join(bases, "minimal-custom-element/files");
+const widgetBase = join(bases, "minimal-widget/files");
 
 /**
  * TypeScript 7 has no JavaScript API.
@@ -117,6 +118,11 @@ export async function addTSConfig(project) {
 
   if (project.type === "custom-element") {
     await cp(join(customElementBase, "tsconfig.json"), project.path("tsconfig.json"));
+    return;
+  }
+
+  if (project.type === "widget") {
+    await cp(join(widgetBase, "tsconfig.json"), project.path("tsconfig.json"));
   }
 }
 

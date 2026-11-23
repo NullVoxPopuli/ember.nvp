@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { formatLabel } from "#utils/cli.js";
 import { tagNameFor } from "#bases/minimal-custom-element";
+import { globalNameFor } from "#bases/minimal-widget";
 
 /**
  * @param {import('#utils/project.js').Project} project
@@ -166,6 +167,63 @@ ${project.runPrefix} build
 ${layerDocsMarkdown}`;
 }
 
+/**
+ * @param {import('#utils/project.js').Project} project
+ * @param {string} layerDocsMarkdown
+ */
+function widgetReadme(project, layerDocsMarkdown) {
+  let globalName = globalNameFor(project.name);
+
+  return `# ${project.name}
+
+An Ember component, packaged as a widget to embed in any page, created with \`ember.nvp\`.
+The built package contains ember, so the page that uses the widget needs nothing else.
+
+## Usage
+
+With a bundler, import \`mount\` and give it an element:
+
+\`\`\`js
+import { mount } from "${project.name}";
+
+let widget = mount(document.querySelector("#widget"), { title: "Clicks", step: 2 });
+
+widget.update({ step: 5 });
+widget.destroy();
+\`\`\`
+
+Without a bundler, load the global build with a \`<script>\` tag.
+It defines \`${globalName}\` on \`window\`:
+
+\`\`\`html
+<div id="widget"></div>
+
+<script src="https://unpkg.com/${project.name}/dist/index.iife.js"></script>
+<script>
+  ${globalName}.mount(document.querySelector("#widget"), { title: "Clicks" });
+</script>
+\`\`\`
+
+The widget renders in a shadow root,
+so the styles of the host page and of the widget stay apart.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 24
+- ${project.packageManager}
+
+### Development & Building
+
+To build the package:
+
+\`\`\`sh
+${project.runPrefix} build
+\`\`\`
+${layerDocsMarkdown}`;
+}
+
 export default {
   label: formatLabel("README.md", "generate project documentation"),
   hint: "project README",
@@ -211,6 +269,9 @@ export default {
         break;
       case "custom-element":
         content = customElementReadme(project, layerDocsMarkdown);
+        break;
+      case "widget":
+        content = widgetReadme(project, layerDocsMarkdown);
         break;
       default:
         content = appReadme(project, layerDocsMarkdown);

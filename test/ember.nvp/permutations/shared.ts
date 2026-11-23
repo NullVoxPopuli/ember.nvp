@@ -37,6 +37,7 @@ const NOT_YET_SUPPORTED: Record<ProjectType, Set<string>> = {
   extension: new Set(["publint", "are-the-types-wrong", "expect-type", "ssr"]),
   // same toolchain as libraries: no Application either
   "custom-element": new Set(["inspector-support", "ssr", "css", "icons"]),
+  widget: new Set(["inspector-support", "ssr", "css", "icons"]),
 };
 
 const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
@@ -44,6 +45,7 @@ const TYPE_FOR_BASE: Record<(typeof bases)[number], ProjectType> = {
   "minimal-library": "library",
   "minimal-extension": "extension",
   "minimal-custom-element": "custom-element",
+  "minimal-widget": "widget",
 };
 
 /**
