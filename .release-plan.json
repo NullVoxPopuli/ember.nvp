@@ -1,14 +1,14 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "minor",
-      "oldVersion": "2.10.0",
-      "newVersion": "2.11.0",
+      "impact": "major",
+      "oldVersion": "2.11.0",
+      "newVersion": "3.0.0",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
         },
         {
           "impact": "patch",
@@ -22,14 +22,56 @@
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-build-tooling-utils": {
-      "oldVersion": "1.3.0"
+      "impact": "major",
+      "oldVersion": "1.3.0",
+      "newVersion": "2.0.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        }
+      ],
+      "pkgJSONPath": "./packages/build-tooling-utils/package.json"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "oldVersion": "2.13.2"
+      "impact": "major",
+      "oldVersion": "2.13.2",
+      "newVersion": "3.0.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
+        },
+        {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        }
+      ],
+      "pkgJSONPath": "./packages/rolldown/package.json"
     },
     "@nullvoxpopuli/ember-vite": {
-      "oldVersion": "1.6.0"
+      "impact": "major",
+      "oldVersion": "1.6.0",
+      "newVersion": "2.0.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
+        },
+        {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        },
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        }
+      ],
+      "pkgJSONPath": "./packages/vite/package.json"
     }
   },
-  "description": "## Release (2026-11-23)\n\n* ember.nvp 2.11.0 (minor)\n\n#### :rocket: Enhancement\n* `ember.nvp`\n  * [#230](https://github.com/NullVoxPopuli/ember.nvp/pull/230) Add a development server to the widget base ([@betocantu93](https://github.com/betocantu93))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#231](https://github.com/NullVoxPopuli/ember.nvp/pull/231) Migrate a legacy ESLint config with the eslint-bundled layer ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#232](https://github.com/NullVoxPopuli/ember.nvp/pull/232) Gate the permutation matrix on lint and the fast node tests ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 2\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n- Alberto Cantú Gómez ([@betocantu93](https://github.com/betocantu93))\n"
+  "description": "## Release (2026-11-24)\n\n* ember.nvp 3.0.0 (major)\n* @nullvoxpopuli/ember-build-tooling-utils 2.0.0 (major)\n* @nullvoxpopuli/ember-rolldown 3.0.0 (major)\n* @nullvoxpopuli/ember-vite 2.0.0 (major)\n\n#### :boom: Breaking Change\n* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#236](https://github.com/NullVoxPopuli/ember.nvp/pull/236) Run maybeBabel on @rolldown/plugin-babel ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-vite`\n  * [#234](https://github.com/NullVoxPopuli/ember.nvp/pull/234) Run babel in worker threads when the app has a babel config file ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#237](https://github.com/NullVoxPopuli/ember.nvp/pull/237) Run format after lint:fix only when the project has a format script ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :house: Internal\n* `ember.nvp`\n  * [#238](https://github.com/NullVoxPopuli/ember.nvp/pull/238) Run 3 permutation slices per CI job, so vitest uses 3 workers ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

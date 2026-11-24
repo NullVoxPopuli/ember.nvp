@@ -1,5 +1,31 @@
 # Changelog
 
+## Release (2026-11-24)
+
+* ember.nvp 3.0.0 (major)
+* @nullvoxpopuli/ember-build-tooling-utils 2.0.0 (major)
+* @nullvoxpopuli/ember-rolldown 3.0.0 (major)
+* @nullvoxpopuli/ember-vite 2.0.0 (major)
+
+#### :boom: Breaking Change
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-rolldown`, `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#236](https://github.com/NullVoxPopuli/ember.nvp/pull/236) Run maybeBabel on @rolldown/plugin-babel ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-vite`
+  * [#234](https://github.com/NullVoxPopuli/ember.nvp/pull/234) Run babel in worker threads when the app has a babel config file ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#237](https://github.com/NullVoxPopuli/ember.nvp/pull/237) Run format after lint:fix only when the project has a format script ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :house: Internal
+* `ember.nvp`
+  * [#238](https://github.com/NullVoxPopuli/ember.nvp/pull/238) Run 3 permutation slices per CI job, so vitest uses 3 workers ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-23)
 
 * ember.nvp 2.11.0 (minor)
