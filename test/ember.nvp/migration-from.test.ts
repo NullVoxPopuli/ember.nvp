@@ -416,8 +416,6 @@ export default defineConfig({
           "@babel/plugin-transform-runtime",
           {
             absoluteRuntime: import.meta.dirname,
-            useESModules: true,
-            regenerator: false,
           },
         ], isProduction && [
           "babel-plugin-debug-macros",

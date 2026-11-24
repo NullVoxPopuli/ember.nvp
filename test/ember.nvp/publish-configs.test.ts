@@ -124,8 +124,8 @@ describe("publish configs", () => {
     // A library that writes its own babel config declares the plugins it uses.
     const manifest = JSON.parse((await project.read("package.json"))!);
 
-    manifest.devDependencies["@babel/core"] = "^7.28.10";
-    manifest.devDependencies["@babel/plugin-transform-typescript"] = "^7.28.10";
+    manifest.devDependencies["@babel/core"] = "^8.1.3";
+    manifest.devDependencies["@babel/plugin-transform-typescript"] = "^8.1.3";
     manifest.devDependencies["babel-plugin-ember-template-compilation"] = "^4.0.1";
 
     await writeFile(

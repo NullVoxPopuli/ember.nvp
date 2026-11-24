@@ -13,7 +13,7 @@ const sharedDeps = {
 const appDeps = {
   // Apps strip types via their own babel.config.js.
   // Libraries have no babel config: ember() handles type stripping.
-  "@babel/plugin-transform-typescript": "^7.28.5",
+  "@babel/plugin-transform-typescript": "^8.1.3",
   "@ember/app-tsconfig": "^2.0.0",
 };
 

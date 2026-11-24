@@ -38,7 +38,7 @@ const libraryDeps = {
 };
 const libraryTsDeps = {
   ...tsDeps,
-  "@babel/plugin-transform-typescript": "^7.28.5",
+  "@babel/plugin-transform-typescript": "^8.1.3",
 };
 
 const TEST_BABEL_CONFIG = "config/test/babel.config.js";
