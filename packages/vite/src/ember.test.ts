@@ -265,11 +265,14 @@ describe("babel.parallel", () => {
     `});`,
   ].join("\n");
 
-  async function compileWithConfigFile(options: Parameters<typeof ember>[0] = {}) {
+  async function compileWithConfigFile(
+    options: Parameters<typeof ember>[0] = {},
+    config = `export default { plugins: ["./thread-plugin.js"] };`,
+  ) {
     const directory = inProject({
       "package.json": `{ "type": "module" }`,
       "thread-plugin.js": THREAD_PLUGIN,
-      "babel.config.js": `export default { plugins: ["./thread-plugin.js"] };`,
+      "babel.config.js": config,
     });
 
     const plugins = ember(options) as Plugin[];
@@ -292,6 +295,19 @@ describe("babel.parallel", () => {
 
   it("runs babel in worker threads when the project has a babel config file", async () => {
     expect(await compileWithConfigFile()).toContain("worker thread");
+  });
+
+  /**
+   * @warp-drive/build-config finds its own folder with `typeof __dirname`,
+   * which Node sets to "." in an eval worker thread.
+   */
+  it("gives the config file's ES modules no __dirname in a worker thread", async () => {
+    const config = [
+      `if (typeof __dirname !== "undefined") throw new Error("__dirname is " + __dirname);`,
+      `export default { plugins: ["./thread-plugin.js"] };`,
+    ].join("\n");
+
+    expect(await compileWithConfigFile({}, config)).toContain("worker thread");
   });
 
   it("runs babel in the main thread when parallel is false", async () => {
