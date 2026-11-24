@@ -42,8 +42,13 @@ export async function maybeLintWithConcurrently(project) {
       let pm = project.packageManager;
 
       json.scripts.lint = `concurrently "${pm}:lint:*(!fix)" --names "lint:" --prefixColors auto`;
+      /**
+       * Only the prettier layer adds a format script.
+       */
+      let format = json.scripts.format ? ` && ${project.runPrefix} format` : "";
+
       json.scripts["lint:fix"] =
-        `concurrently "${pm}:lint:*:fix" --names "fix:" --prefixColors auto && ${project.runPrefix} format`;
+        `concurrently "${pm}:lint:*:fix" --names "fix:" --prefixColors auto${format}`;
 
       Object.assign(
         json.devDependencies,
