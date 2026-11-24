@@ -25,12 +25,6 @@ export interface BabelOptions {
    */
   bundle?: boolean;
   /**
-   * @deprecated has no effect.
-   * Babel helpers are inlined into each file,
-   * unless the babel config adds `@babel/plugin-transform-runtime`.
-   */
-  babelHelpers?: "bundled" | "runtime" | "inline" | "external";
-  /**
    * The babel config file to use.
    *
    * - `undefined`: auto-detect.
