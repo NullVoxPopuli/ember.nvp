@@ -1,3 +1,3 @@
 import { testPermutations } from "./shared.ts";
 
-testPermutations("minimal-app", { index: 2, total: 6 });
+testPermutations("minimal-app", { index: 2, total: 18 });
