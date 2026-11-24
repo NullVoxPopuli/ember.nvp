@@ -66,8 +66,7 @@ interface Config {
  *   and maps `.gts` / `.gjs` to `.ts` / `.js` so rolldown can understand them.
  *
  * - `emberBabel()`
- *   runs babel (template compilation, decorators, type stripping)
- *   with `babelHelpers: "bundled"`.
+ *   runs babel (template compilation, decorators, type stripping).
  *   Only the files that need it go through babel (via `maybeBabel`).
  *   Everything else stays on the fast native transform.
  *   The library's own `babel.config.js` is used when it exists.

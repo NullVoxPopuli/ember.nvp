@@ -30,7 +30,10 @@
   "dependencies": {
     "@babel/core": "^7.28.10 || ^8.0.0",
     "@rolldown/pluginutils": "^1.0.1",
-    "@rollup/plugin-babel": "^7.1.0"
+    "@rolldown/plugin-babel": "^0.3.1"
+  },
+  "peerDependencies": {
+    "rolldown": "^1.0.0"
   },
   "engines": {
     "node": ">= 24"

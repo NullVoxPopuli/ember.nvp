@@ -16,9 +16,9 @@
  *
  * This is shared between the vite (app) and rolldown/tsdown (library) meta-plugins.
  */
-import { and, code, id, include, not, or } from "@rolldown/pluginutils";
-import { babel } from "@rollup/plugin-babel";
-import type { RollupBabelInputPluginOptions } from "@rollup/plugin-babel";
+import { and, code, id, include, interpreter, not, or } from "@rolldown/pluginutils";
+import babel from "@rolldown/plugin-babel";
+import type { Plugin } from "rolldown";
 
 import { extensions } from "./extensions.ts";
 
@@ -65,7 +65,22 @@ const extensionRegExp = new RegExp(
     .join("|")})(\\?.*)?(#.*)?$`,
 );
 
-type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
+type RolldownBabelOptions = Parameters<typeof babel>[0];
+
+type Options = Omit<RolldownBabelOptions, "include" | "exclude" | "parallel" | "runtimeVersion"> & {
+  /**
+   * The babel config file to use, or `false` for none.
+   */
+  configFile?: string | false;
+  /**
+   * Transform files in worker threads.
+   * `true` uses one worker per CPU core, with a maximum of 4.
+   *
+   * Only options that can go to a worker thread allow this:
+   * a config file, and plugins given by name.
+   * With plugin functions, babel stays in the main thread.
+   */
+  parallel?: boolean | number;
   filter?: {
     include: {
       /**
@@ -95,7 +110,6 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
       code: (string | RegExp)[];
       /**
        * Module ids that always go to babel.
-       * An id without a file extension goes to babel as a `.js` file.
        *
        * for example, the icon modules of unplugin-icons
        * ```js
@@ -109,15 +123,91 @@ type Options = Omit<RollupBabelInputPluginOptions, "filter"> & {
   };
 };
 
-export function maybeBabel(userOptions: Options = {}) {
-  const { filter, ...options } = userOptions;
+/**
+ * The parts of `@rolldown/plugin-babel` that this wrapper calls.
+ */
+interface RolldownBabel {
+  config(this: unknown, ...args: unknown[]): unknown;
+  configResolved(this: unknown, ...args: unknown[]): void;
+  applyToEnvironment(this: unknown, ...args: unknown[]): boolean;
+  outputOptions(this: unknown, ...args: unknown[]): void;
+  transform: { handler(this: unknown, ...args: unknown[]): unknown };
+  closeBundle(this: unknown): unknown;
+  closeWatcher(this: unknown): unknown;
+}
 
-  const plugin = babel({
-    babelHelpers: "runtime",
-    extensions,
-    skipPreflightCheck: true,
-    ...options,
+function canClone(value: unknown) {
+  try {
+    structuredClone(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Turns the options of `maybeBabel` into the options of `@rolldown/plugin-babel`.
+ *
+ * - That plugin loads no babel config file,
+ *   so the config file becomes babel's `extends`.
+ *   Babel then loads it in each worker thread too.
+ * - Its default `include` and `exclude` skip `node_modules`,
+ *   and files without a js or ts extension.
+ *   The filter of `maybeBabel` already picks the files,
+ *   so babel takes every file that the filter gives it.
+ */
+function rolldownBabelOptions(options: Options): RolldownBabelOptions {
+  const { filter: _filter, configFile, parallel, ...babelOptions } = options;
+
+  const result: RolldownBabelOptions & { extends?: string } = {
+    include: [/^/],
+    exclude: [],
+    ...babelOptions,
+  };
+
+  if (configFile) {
+    result.extends = configFile;
+
+    /**
+     * Without plugins or presets in its options,
+     * `@rolldown/plugin-babel` turns itself off in vite,
+     * but the plugins of a config file are not in its options.
+     * This preset counts as one, and its filter matches no file,
+     * so babel never sees it.
+     */
+    result.presets = (result.presets ?? []).concat({
+      preset: () => ({}),
+      rolldown: { filter: { id: /(?!)/ } },
+    });
+  }
+
+  result.parallel = parallel && canClone(babelOptions) ? parallel : false;
+
+  return result;
+}
+
+export function maybeBabel(userOptions: Options = {}) {
+  const { filter } = userOptions;
+
+  let inner: RolldownBabel | undefined;
+
+  /**
+   * `@rolldown/plugin-babel` gives its plugin through a promise,
+   * and this plugin must exist right away, so it calls into that one.
+   * Vite and rolldown run an async hook before each sync hook that needs it.
+   */
+  const ready = babel(rolldownBabelOptions(userOptions)).then((plugin) => {
+    inner = plugin as unknown as RolldownBabel;
+
+    return inner;
   });
+
+  function loaded(): RolldownBabel {
+    if (!inner)
+      throw new Error("nullvoxpopuli:babel: a hook ran before @rolldown/plugin-babel loaded");
+
+    return inner;
+  }
 
   const importsRegex = new RegExp(
     babelRequiredImports
@@ -155,28 +245,54 @@ export function maybeBabel(userOptions: Options = {}) {
     ),
   ];
 
-  const transform = plugin.transform as {
-    filter: unknown;
-    handler: (this: unknown, code: string, id: string) => unknown;
-  };
-  const { handler } = transform;
-
-  transform.filter = maybeBabelFilter;
-
-  /**
-   * @rollup/plugin-babel skips an id without one of its extensions.
-   */
-  if (ids.length > 0) {
-    transform.handler = function (source, moduleId) {
-      const asJS = !extensionRegExp.test(moduleId) && ids.some((pattern) => pattern.test(moduleId));
-
-      return handler.call(this, source, asJS ? `${moduleId}.js` : moduleId);
-    };
-  }
-
   return {
-    ...plugin,
-    enforce: "pre",
     name: "nullvoxpopuli:babel",
-  } as ReturnType<typeof babel>;
+    enforce: "pre",
+
+    async config(this: unknown, ...args: unknown[]) {
+      return (await ready).config.apply(this, args);
+    },
+
+    async configResolved(this: unknown, ...args: unknown[]) {
+      (await ready).configResolved.apply(this, args);
+    },
+
+    applyToEnvironment(this: unknown, ...args: unknown[]) {
+      return loaded().applyToEnvironment.apply(this, args);
+    },
+
+    async buildStart() {
+      await ready;
+    },
+
+    outputOptions(this: unknown, ...args: unknown[]) {
+      loaded().outputOptions.apply(this, args);
+    },
+
+    transform: {
+      filter: maybeBabelFilter,
+      /**
+       * The vite dev server reads only the `id`, `code` and `moduleType` keys of a filter,
+       * so it sends every module here, and the handler checks the filter itself.
+       */
+      async handler(
+        this: unknown,
+        source: string,
+        moduleId: string,
+        meta?: { moduleType?: string },
+      ) {
+        if (!interpreter(maybeBabelFilter, source, moduleId, meta?.moduleType)) return;
+
+        return (await ready).transform.handler.call(this, source, moduleId, meta);
+      },
+    },
+
+    async closeBundle(this: unknown) {
+      return (await ready).closeBundle.call(this);
+    },
+
+    async closeWatcher(this: unknown) {
+      return (await ready).closeWatcher.call(this);
+    },
+  } as Plugin;
 }
