@@ -195,8 +195,12 @@ function babelFilter(nvpConfig: Config) {
 interface Config {
   babel?: {
     /**
-     * defaults to true.
      * when babel runs, do so in parallel across many cores.
+     *
+     * defaults to true when the project has a babel config file.
+     * Without one, babel stays in the main thread:
+     * the default plugins carry functions,
+     * and a worker thread cannot receive functions.
      */
     parallel?: false;
 
@@ -256,6 +260,7 @@ interface Config {
 export function ember(nvpConfig: Config = {}) {
   const babel = babelOptions(nvpConfig);
   const filter = babelFilter(nvpConfig);
+  const parallel = nvpConfig.babel?.parallel ?? babel.configFile !== false;
 
   /*
    * Plugins must be returned as top-level array entries,
@@ -317,7 +322,7 @@ export function ember(nvpConfig: Config = {}) {
           // Both must compile away here, with this app's template compiler.
           maybeBabel({
             ...babel,
-            parallel: nvpConfig.babel?.parallel,
+            parallel,
             filter,
           }),
         ];
@@ -328,7 +333,7 @@ export function ember(nvpConfig: Config = {}) {
     testHtml(),
     maybeBabel({
       ...babel,
-      parallel: nvpConfig.babel?.parallel,
+      parallel,
       filter,
     }),
   ];

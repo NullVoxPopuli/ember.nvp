@@ -129,22 +129,19 @@ function inPackageRoot() {
 }
 
 /**
- * A project that depends on the libraries that need babel.
+ * A project with these files.
  * It is inside this package, so babel resolves its plugins from here.
  */
-function inProjectWithLibraries() {
+function inProject(files: Record<string, string>) {
   const cache = join(PACKAGE_ROOT, "node_modules/.cache");
   mkdirSync(cache, { recursive: true });
 
   const directory = mkdtempSync(join(cache, "project-"));
-  const devDependencies = {
-    "ember-concurrency": "*",
-    "ember-intl": "*",
-    "ember-scoped-css": "*",
-    "unplugin-icons": "*",
-  };
 
-  writeFileSync(join(directory, "package.json"), JSON.stringify({ devDependencies }));
+  for (const [name, content] of Object.entries(files)) {
+    writeFileSync(join(directory, name), content);
+  }
+
   inDirectory(directory);
 
   const restore = restoreCwd!;
@@ -152,6 +149,22 @@ function inProjectWithLibraries() {
     restore();
     rmSync(directory, { recursive: true, force: true });
   };
+
+  return directory;
+}
+
+/**
+ * A project that depends on the libraries that need babel.
+ */
+function inProjectWithLibraries() {
+  const devDependencies = {
+    "ember-concurrency": "*",
+    "ember-intl": "*",
+    "ember-scoped-css": "*",
+    "unplugin-icons": "*",
+  };
+
+  inProject({ "package.json": JSON.stringify({ devDependencies }) });
 }
 
 describe("default babel plugins", () => {
@@ -174,6 +187,56 @@ describe("default babel plugins", () => {
 
     expect(code).not.toContain("development build");
     expect(code).toContain("other build");
+  });
+});
+
+describe("babel.parallel", () => {
+  /**
+   * A babel plugin that writes which thread compiled the file.
+   */
+  const THREAD_PLUGIN = [
+    `import { isMainThread } from "node:worker_threads";`,
+    `export default ({ types: t }) => ({`,
+    `  visitor: {`,
+    `    Program(path) {`,
+    `      const thread = isMainThread ? "main thread" : "worker thread";`,
+    `      path.unshiftContainer("body", t.expressionStatement(t.stringLiteral(thread)));`,
+    `    },`,
+    `  },`,
+    `});`,
+  ].join("\n");
+
+  async function compileWithConfigFile(options: Parameters<typeof ember>[0] = {}) {
+    const directory = inProject({
+      "package.json": `{ "type": "module" }`,
+      "thread-plugin.js": THREAD_PLUGIN,
+      "babel.config.js": `export default { plugins: ["./thread-plugin.js"] };`,
+    });
+
+    const plugins = ember(options) as Plugin[];
+    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+
+    try {
+      // @ts-expect-error the babel plugin has an object transform hook
+      const result = await babel.transform.handler.call(
+        CONTEXT,
+        `import { macroCondition } from "@embroider/macros";`,
+        join(directory, "app/a.js"),
+      );
+
+      return result.code as string;
+    } finally {
+      // @ts-expect-error the babel plugin ends its workers in closeBundle
+      await babel.closeBundle.call({ meta: { watchMode: false } });
+    }
+  }
+
+  it("runs babel in worker threads when the project has a babel config file", async () => {
+    expect(await compileWithConfigFile()).toContain("worker thread");
+  });
+
+  it("runs babel in the main thread when parallel is false", async () => {
+    expect(await compileWithConfigFile({ babel: { parallel: false } })).toContain("main thread");
   });
 });
 
