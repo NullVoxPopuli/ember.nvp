@@ -1,5 +1,6 @@
 import { buildMacros } from "@embroider/macros/babel";
 import { ember as embroiderEmber, extensions, resolver, templateTag } from "@embroider/vite";
+import type { PluginItem } from "@babel/core";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { ConfigEnv, ConfigPluginContext, ResolvedConfig, UserConfig } from "vite";
@@ -64,7 +65,7 @@ function absolutePath(relativePath: string) {
  * `buildMacros` reads NODE_ENV, but vite sets NODE_ENV
  * only after the config hooks run.
  */
-function defaultBabelPlugins(mode: string) {
+function defaultBabelPlugins(mode: string): PluginItem[] {
   const macros = buildMacros({
     configure(config) {
       if (isDev(mode)) {
