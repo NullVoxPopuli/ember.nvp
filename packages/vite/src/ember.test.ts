@@ -95,6 +95,20 @@ const CONTEXT = {
 };
 
 /**
+ * The babel plugin, after the hooks that rolldown runs before a transform.
+ */
+async function startedBabel(plugins: Plugin[]) {
+  const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel")!;
+
+  // @ts-expect-error the babel plugin has function hooks
+  await babel.buildStart.call(CONTEXT);
+  // @ts-expect-error the babel plugin has function hooks
+  babel.outputOptions.call({ meta: {} }, {});
+
+  return babel;
+}
+
+/**
  * Runs the config hook, then the babel plugin, the way vite does.
  */
 async function compile(mode: string) {
@@ -104,7 +118,7 @@ async function compile(mode: string) {
   // @ts-expect-error the first entry is the config plugin
   await plugins[0].config.call(ROLLDOWN, config, { command: "build", mode });
 
-  const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+  const babel = await startedBabel(plugins);
   // @ts-expect-error the babel plugin has an object transform hook
   const result = await babel.transform.handler.call(CONTEXT, DEV_CHECK, `${PACKAGE_ROOT}app.js`);
 
@@ -190,6 +204,51 @@ describe("default babel plugins", () => {
   });
 });
 
+describe("babel config file", () => {
+  /**
+   * The plugins of a config file are not in the options of `@rolldown/plugin-babel`,
+   * and without plugins in its options, that plugin turns itself off in vite.
+   */
+  it("keeps babel on in each vite environment", async () => {
+    inProject({
+      "package.json": `{ "type": "module" }`,
+      "babel.config.js": `export default { plugins: [] };`,
+    });
+
+    const plugins = ember() as Plugin[];
+    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel")!;
+
+    // @ts-expect-error the babel plugin has function hooks
+    await babel.configResolved.call(CONTEXT, {});
+
+    // @ts-expect-error the babel plugin has function hooks
+    expect(babel.applyToEnvironment.call(CONTEXT, { name: "client" })).toBe(true);
+  });
+});
+
+describe("babel filter in the dev server", () => {
+  /**
+   * The vite dev server ignores a filter made of filter expressions,
+   * so it gives the babel plugin every module, also the styles of index.html.
+   */
+  it("leaves a module outside the filter to oxc", async () => {
+    inPackageRoot();
+
+    const plugins = ember() as Plugin[];
+
+    // @ts-expect-error the first entry is the config plugin
+    await plugins[0].config.call(ROLLDOWN, {}, { command: "serve", mode: "development" });
+
+    const babel = await startedBabel(plugins);
+    const styles = `${PACKAGE_ROOT}index.html?html-proxy&direct&index=0.css`;
+
+    // @ts-expect-error the babel plugin has an object transform hook
+    const result = await babel.transform.handler.call(CONTEXT, `:root { color: red; }`, styles);
+
+    expect(result).toBeUndefined();
+  });
+});
+
 describe("babel.parallel", () => {
   /**
    * A babel plugin that writes which thread compiled the file.
@@ -214,7 +273,7 @@ describe("babel.parallel", () => {
     });
 
     const plugins = ember(options) as Plugin[];
-    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+    const babel = await startedBabel(plugins);
 
     try {
       // @ts-expect-error the babel plugin has an object transform hook
@@ -357,7 +416,7 @@ describe("libraries that need babel", () => {
     // @ts-expect-error the first entry is the config plugin
     await plugins[0].config.call(ROLLDOWN, config, { command: "build", mode: "production" });
 
-    const babel = plugins.find((plugin) => plugin.name === "nullvoxpopuli:babel");
+    const babel = await startedBabel(plugins);
     // @ts-expect-error the babel plugin has an object transform hook
     const result = await babel.transform.handler.call(CONTEXT, ICON, "~icons/lucide/check");
 

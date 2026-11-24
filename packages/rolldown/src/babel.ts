@@ -24,7 +24,6 @@ export interface BabelOptions {
    * Only applies without a babel config file.
    */
   bundle?: boolean;
-  babelHelpers?: "bundled" | "runtime" | "inline" | "external";
   /**
    * The babel config file to use.
    *
@@ -205,13 +204,12 @@ function defaultPlugins(templateTransforms?: Transform[], bundle = false): Plugi
  * Without one, `defaultPlugins` covers templates, decorators, and TypeScript,
  * so no config file is required.
  *
- * Libraries default to `babelHelpers: "bundled"`, so the emitted output is self-contained.
+ * Babel helpers are inlined, so the emitted output is self-contained.
  */
 export function emberBabel(options: BabelOptions = {}): Plugin {
   const configFile = options.configFile === undefined ? detectConfigFile() : options.configFile;
 
   const shared = {
-    babelHelpers: options.babelHelpers ?? "bundled",
     filter: options.filter,
   };
 
@@ -228,7 +226,7 @@ export function emberBabel(options: BabelOptions = {}): Plugin {
       ...shared,
       configFile,
       plugins: options.plugins ?? [],
-    }) as unknown as Plugin;
+    });
   }
 
   return maybeBabel({
@@ -236,9 +234,8 @@ export function emberBabel(options: BabelOptions = {}): Plugin {
     // No config file (or the caller opted out).
     // Don't let babel go looking for one: we provide the whole plugin list inline.
     configFile: false,
-    babelrc: false,
     plugins: defaultPlugins(options.templateTransforms, options.bundle).concat(
       options.plugins ?? [],
     ),
-  }) as unknown as Plugin;
+  });
 }

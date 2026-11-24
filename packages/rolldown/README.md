@@ -224,7 +224,7 @@ module graph. Without it, the bundled CSS is emitted but nothing loads it.
   [content-tag](https://github.com/embroider-build/content-tag) and maps
   `.gts` / `.gjs` to `.ts` / `.js` so rolldown understands them. It also
   rewrites `.gts` specifiers in emitted `.d.ts` files.
-- **`emberBabel()`** runs babel with `babelHelpers: "bundled"`, but only on the
+- **`emberBabel()`** runs babel, but only on the
   files that need it (template-tag, decorators, template imports). Everything
   else stays on rolldown's fast native (oxc) transform. It uses your
   `babel.publish.config.*` (root or `config/`) in preference to your
@@ -237,7 +237,6 @@ ember({
   bundle: false,
   babel: {
     configFile: "./babel.config.js",
-    babelHelpers: "bundled",
     plugins: [],
     templateTransforms: [],
     filter: { include: { imports: ["ember-concurrency"], code: [] } },

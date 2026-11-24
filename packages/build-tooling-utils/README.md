@@ -4,7 +4,7 @@ Shared build tooling for the `@nullvoxpopuli` ember meta-plugins
 ([`@nullvoxpopuli/ember-vite`](../vite) and
 [`@nullvoxpopuli/ember-rolldown`](../rolldown)).
 
-It has no `vite` or `rolldown` dependency, so both meta-plugins can use it.
+It takes `rolldown` as a peer dependency, and works in vite and in rolldown.
 
 Requires node 24+. This package ships TypeScript source, so type-checking
 needs TypeScript 6+ with `lib` covering `es2025` (for example `esnext`).
@@ -23,8 +23,18 @@ A babel plugin that runs **only** on the files that need babel:
 Everything else uses the bundler's native (oxc) transform, which keeps the
 build fast.
 
-`options` extends `@rollup/plugin-babel`'s options, plus a `filter.include`
-(`imports` / `code`) to opt additional files in.
+It runs [`@rolldown/plugin-babel`](https://npmx.dev/package/@rolldown/plugin-babel).
+
+`options` takes babel's options, plus:
+
+- `configFile`: the babel config file to use, or `false` for none.
+- `parallel`: run babel in worker threads.
+  It applies only when every option can go to a worker thread:
+  a config file, and plugins given by name.
+- `filter.include` (`imports` / `code` / `ids`) to opt additional files in.
+
+Babel helpers are inlined into each file,
+unless the babel config adds `@babel/plugin-transform-runtime`.
 
 ### `extensions`
 

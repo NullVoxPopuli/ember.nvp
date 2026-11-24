@@ -93,8 +93,6 @@ type BabelOptions =
   | { configFile: string }
   | {
       configFile: false;
-      babelrc: false;
-      babelHelpers: "inline";
       plugins: ReturnType<typeof defaultBabelPlugins>;
     };
 
@@ -104,8 +102,7 @@ type BabelOptions =
  *
  * Without one (libraries), `defaultBabelPlugins` covers TypeScript, templates, macros, and decorators,
  * so no config file is required.
- *
- * Helpers are inlined in that case:
+ * Babel helpers are inlined in that case:
  * projects without a babel config don't carry `@babel/runtime`.
  */
 function babelOptions(nvpConfig: Config): BabelOptions {
@@ -123,8 +120,6 @@ function babelOptions(nvpConfig: Config): BabelOptions {
    */
   return {
     configFile: false,
-    babelrc: false,
-    babelHelpers: "inline",
     plugins: [],
   };
 }
