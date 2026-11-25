@@ -1,7 +1,7 @@
 import { extensions } from "@embroider/vite";
 import { interpreter, type TopLevelFilterExpression } from "@rolldown/pluginutils";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ConfigEnv, ConfigPluginContext, Plugin } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
@@ -153,6 +153,7 @@ function inProject(files: Record<string, string>) {
   const directory = mkdtempSync(join(cache, "project-"));
 
   for (const [name, content] of Object.entries(files)) {
+    mkdirSync(dirname(join(directory, name)), { recursive: true });
     writeFileSync(join(directory, name), content);
   }
 
@@ -265,12 +266,21 @@ describe("babel.parallel", () => {
     `});`,
   ].join("\n");
 
-  async function compileWithConfigFile(options: Parameters<typeof ember>[0] = {}) {
-    const directory = inProject({
-      "package.json": `{ "type": "module" }`,
-      "thread-plugin.js": THREAD_PLUGIN,
-      "babel.config.js": `export default { plugins: ["./thread-plugin.js"] };`,
-    });
+  async function compileWithConfigFile(
+    options: Parameters<typeof ember>[0] = {},
+    config = `export default { plugins: ["./thread-plugin.js"] };`,
+    files: Record<string, string> = {},
+  ) {
+    const directory = inProject(
+      Object.assign(
+        {
+          "package.json": `{ "type": "module" }`,
+          "thread-plugin.js": THREAD_PLUGIN,
+          "babel.config.js": config,
+        },
+        files,
+      ),
+    );
 
     const plugins = ember(options) as Plugin[];
     const babel = await startedBabel(plugins);
@@ -292,6 +302,43 @@ describe("babel.parallel", () => {
 
   it("runs babel in worker threads when the project has a babel config file", async () => {
     expect(await compileWithConfigFile()).toContain("worker thread");
+  });
+
+  /**
+   * `@warp-drive/build-config` before 5.9 finds its own folder with `typeof __dirname`,
+   * which Node sets to "." in an eval worker thread.
+   * See https://github.com/warp-drive-data/warp-drive/pull/10926.
+   */
+  function buildConfig(version: string) {
+    return {
+      "node_modules/@warp-drive/build-config/package.json": JSON.stringify({
+        name: "@warp-drive/build-config",
+        version,
+        type: "module",
+        exports: { ".": "./index.js" },
+      }),
+      "node_modules/@warp-drive/build-config/index.js": [
+        `if (typeof __dirname !== "undefined") throw new Error("__dirname is " + __dirname);`,
+        `export const setConfig = () => {};`,
+      ].join("\n"),
+    };
+  }
+
+  const CONFIG_WITH_WARP_DRIVE = [
+    `import "@warp-drive/build-config";`,
+    `export default { plugins: ["./thread-plugin.js"] };`,
+  ].join("\n");
+
+  it("gives @warp-drive/build-config before 5.9 no __dirname in a worker thread", async () => {
+    expect(await compileWithConfigFile({}, CONFIG_WITH_WARP_DRIVE, buildConfig("5.8.2"))).toContain(
+      "worker thread",
+    );
+    expect(existsSync("node_modules/.cache/nullvoxpopuli-babel")).toBe(true);
+  });
+
+  it("loads the config file directly without @warp-drive/build-config before 5.9", async () => {
+    expect(await compileWithConfigFile()).toContain("worker thread");
+    expect(existsSync("node_modules/.cache/nullvoxpopuli-babel")).toBe(false);
   });
 
   it("runs babel in the main thread when parallel is false", async () => {
