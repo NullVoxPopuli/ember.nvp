@@ -17,7 +17,8 @@
  * This is shared between the vite (app) and rolldown/tsdown (library) meta-plugins.
  */
 import { createHash } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 
 import { and, code, id, include, interpreter, not, or } from "@rolldown/pluginutils";
@@ -149,11 +150,67 @@ function canClone(value: unknown) {
   }
 }
 
+const BUILD_CONFIG = "@warp-drive/build-config";
+
+/**
+ * The packages through which an app gets `@warp-drive/build-config`.
+ * With pnpm, it is usually not a direct dependency of the app.
+ */
+const WARP_DRIVE_PACKAGES = [BUILD_CONFIG, "@warp-drive/core", "ember-data", "@ember-data/store"];
+
+/**
+ * @param entry a file of the package
+ * @returns the version in the package's own package.json
+ */
+function versionOf(entry: string, name: string) {
+  for (
+    let directory = dirname(entry);
+    directory !== dirname(directory);
+    directory = dirname(directory)
+  ) {
+    const file = join(directory, "package.json");
+
+    if (!existsSync(file)) continue;
+
+    const manifest = JSON.parse(readFileSync(file, "utf8"));
+
+    if (manifest.name === name) return manifest.version as string;
+  }
+}
+
+/**
+ * `@warp-drive/build-config` before 5.9 finds its own folder with `typeof __dirname`,
+ * which is wrong in an eval worker thread.
+ * WarpDrive fixed it in https://github.com/warp-drive-data/warp-drive/pull/10926.
+ */
+function hasDirnameCheck(configFile: string) {
+  const fromApp = createRequire(resolve(configFile));
+
+  for (const name of WARP_DRIVE_PACKAGES) {
+    try {
+      const host = fromApp.resolve(name);
+      const entry = name === BUILD_CONFIG ? host : createRequire(host).resolve(BUILD_CONFIG);
+      const version = versionOf(entry, BUILD_CONFIG);
+
+      if (!version) continue;
+
+      const [major = 0, minor = 0] = version.split(".").map(Number);
+
+      return major < 5 || (major === 5 && minor < 9);
+    } catch {
+      continue;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Node gives the code of an `eval` worker thread, such as the workers of `@rolldown/plugin-babel`,
  * a global `__dirname` of "." and a global `__filename` of "[worker eval]".
- * An ES module that checks `typeof __dirname`, such as `@warp-drive/build-config`, then reads files
- * relative to the working directory, and the build fails.
+ * `@warp-drive/build-config` before 5.9 checks `typeof __dirname` in its ES module build,
+ * then reads `../package.json` from the working directory, and the build fails.
+ * See https://github.com/warp-drive-data/warp-drive/pull/10926.
  *
  * Babel loads `extends` before anything else in its options, so the worker loads this file first.
  * It removes those globals, and then extends the config file, so that babel resolves
@@ -206,7 +263,8 @@ function rolldownBabelOptions(options: Options): RolldownBabelOptions {
   const workers = parallel && canClone(babelOptions) ? parallel : false;
 
   if (configFile) {
-    result.extends = workers ? workerConfigFile(configFile) : configFile;
+    result.extends =
+      workers && hasDirnameCheck(configFile) ? workerConfigFile(configFile) : configFile;
 
     /**
      * Without plugins or presets in its options,
