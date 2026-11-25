@@ -1,5 +1,23 @@
 # Changelog
 
+## Release (2026-11-25)
+
+* ember.nvp 3.1.0 (minor)
+* @nullvoxpopuli/ember-build-tooling-utils 2.0.1 (patch)
+* @nullvoxpopuli/ember-rolldown 3.0.1 (patch)
+* @nullvoxpopuli/ember-vite 2.1.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#239](https://github.com/NullVoxPopuli/ember.nvp/pull/239) Generate projects on Babel 8 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`
+  * [#241](https://github.com/NullVoxPopuli/ember.nvp/pull/241) Remove the eval globals for @warp-drive/build-config before 5.9 in babel workers ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-24)
 
 * ember.nvp 3.0.0 (major)
