@@ -1820,6 +1820,40 @@ async function rewriteImports(project, modulePrefix, name) {
 }
 
 /**
+ * The base's babel.config.js is written for the Babel major of the base,
+ * and a Babel plugin stops on a core of another major.
+ * So when the app is on an older Babel, each of its `@babel/*` packages moves to the base's major.
+ *
+ * @param {{ dependencies?: Record<string, string>, devDependencies?: Record<string, string> }} manifest
+ * @returns {Record<string, string>} the new range of each `@babel/*` package of the app, by name
+ */
+export function babelUpdates(manifest) {
+  let base =
+    BASE_MANIFEST.devDependencies["@babel/core"] ?? BASE_MANIFEST.dependencies?.["@babel/core"];
+  let major = base && semver.validRange(base) ? semver.minVersion(base)?.major : undefined;
+  /** @type {Record<string, string>} */
+  let updates = {};
+
+  if (major === undefined) return updates;
+
+  for (let [name, range] of Object.entries(
+    Object.assign({}, manifest.dependencies, manifest.devDependencies),
+  )) {
+    if (!name.startsWith("@babel/") || !semver.validRange(range)) continue;
+
+    let current = semver.minVersion(range)?.major;
+
+    if (current === undefined || current >= major) continue;
+
+    updates[name] = String(
+      BASE_MANIFEST.devDependencies[name] ?? BASE_MANIFEST.dependencies?.[name] ?? `^${major}.0.0`,
+    );
+  }
+
+  return updates;
+}
+
+/**
  * Brings the base's scripts, subpath imports, exports, and dependencies,
  * and removes the ember-cli toolchain.
  *
@@ -1849,6 +1883,13 @@ async function usePackageJsonOfBase(project, { initializers }) {
   for (let [name, range] of Object.entries(BASE_MANIFEST.devDependencies)) {
     if (!manifest.dependencies?.[name] && !manifest.devDependencies?.[name])
       devDependencies[name] = String(range);
+  }
+
+  let babel = babelUpdates(manifest);
+
+  for (let [name, range] of Object.entries(babel)) {
+    if (manifest.dependencies?.[name]) dependencies[name] = range;
+    else devDependencies[name] = range;
   }
 
   await packageJson.addDependencies(await getLatest(dependencies), root);
