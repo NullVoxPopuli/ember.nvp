@@ -43,7 +43,6 @@
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@babel/core": "^7.28.10 || ^8.0.0",
     "@babel/plugin-transform-typescript": "^7.28.10 || ^8.0.0",
     "@embroider/core": "^4.6.9",
     "@jridgewell/remapping": "^2.3.5",
@@ -58,6 +57,7 @@
     "node": ">= 24"
   },
   "peerDependencies": {
+    "@babel/core": "^7.28.10 || ^8.0.0",
     "tsdown": ">= 0.22.0",
     "typescript": ">= 5.5"
   },
@@ -70,6 +70,7 @@
     }
   },
   "devDependencies": {
+    "@babel/core": "^7.28.10 || ^8.0.0",
     "@jridgewell/trace-mapping": "^0.3.31",
     "@tsdown/css": "^0.22.13",
     "rolldown": "^1.2.0",

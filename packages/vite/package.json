@@ -25,7 +25,6 @@
   },
   "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "@babel/core": "^7.28.10 || ^8.0.0",
     "@embroider/core": "^4.6.9",
     "@embroider/macros": "^1.21.3",
     "@embroider/vite": "^1.7.15",
@@ -35,6 +34,7 @@
     "node": ">= 24"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.10 || ^8.0.0",
     "@babel/plugin-transform-typescript": "^7.28.10 || ^8.0.0",
     "@rolldown/pluginutils": "^1.0.1",
     "babel-plugin-ember-template-compilation": "^4.0.1",
@@ -42,5 +42,8 @@
     "rolldown": "^1.1.2",
     "typescript": "^6.0.3",
     "vite": "^8.0.14"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.28.10 || ^8.0.0"
   }
 }
