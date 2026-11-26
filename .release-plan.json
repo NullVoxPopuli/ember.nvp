@@ -1,65 +1,27 @@
 {
   "solution": {
     "ember.nvp": {
-      "impact": "minor",
-      "oldVersion": "3.0.0",
-      "newVersion": "3.1.0",
+      "impact": "patch",
+      "oldVersion": "3.1.0",
+      "newVersion": "3.1.1",
       "tagName": "latest",
       "constraints": [
         {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
+          "impact": "patch",
+          "reason": "Appears in changelog section :bug: Bug Fix"
         }
       ],
       "pkgJSONPath": "./package.json"
     },
     "@nullvoxpopuli/ember-build-tooling-utils": {
-      "impact": "patch",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.0.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./packages/build-tooling-utils/package.json"
+      "oldVersion": "2.0.1"
     },
     "@nullvoxpopuli/ember-rolldown": {
-      "impact": "patch",
-      "oldVersion": "3.0.0",
-      "newVersion": "3.0.1",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        }
-      ],
-      "pkgJSONPath": "./packages/rolldown/package.json"
+      "oldVersion": "3.0.1"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "minor",
-      "oldVersion": "2.0.0",
-      "newVersion": "2.1.0",
-      "tagName": "latest",
-      "constraints": [
-        {
-          "impact": "minor",
-          "reason": "Appears in changelog section :rocket: Enhancement"
-        },
-        {
-          "impact": "patch",
-          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
-        },
-        {
-          "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
-        }
-      ],
-      "pkgJSONPath": "./packages/vite/package.json"
+      "oldVersion": "2.1.0"
     }
   },
-  "description": "## Release (2026-11-25)\n\n* ember.nvp 3.1.0 (minor)\n* @nullvoxpopuli/ember-build-tooling-utils 2.0.1 (patch)\n* @nullvoxpopuli/ember-rolldown 3.0.1 (patch)\n* @nullvoxpopuli/ember-vite 2.1.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#239](https://github.com/NullVoxPopuli/ember.nvp/pull/239) Generate projects on Babel 8 ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`\n  * [#241](https://github.com/NullVoxPopuli/ember.nvp/pull/241) Remove the eval globals for @warp-drive/build-config before 5.9 in babel workers ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-26)\n\n* ember.nvp 3.1.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#243](https://github.com/NullVoxPopuli/ember.nvp/pull/243) Replace the testem.cjs of a migrated app with the qunit layer's config ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
