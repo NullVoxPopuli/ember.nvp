@@ -26,7 +26,11 @@ import {
   stringValue,
   walk,
 } from "./javascript.js";
-import { hasLegacyEslintConfig, removeToolingOfWantedLayers } from "./layers.js";
+import {
+  changedTestemFlags,
+  hasLegacyEslintConfig,
+  removeToolingOfWantedLayers,
+} from "./layers.js";
 
 /**
  * @typedef {import('#types').Finding} Finding
@@ -182,6 +186,11 @@ const STYLE_COMPILERS = {
   less: ["less"],
   styl: ["stylus"],
 };
+
+/**
+ * The testem configs of the older app blueprints
+ */
+const TESTEM_CONFIGS = ["testem.js", "testem.cjs"];
 
 /**
  * Checks what every app needs, from either app blueprint.
@@ -408,6 +417,11 @@ export async function checkApp(project) {
   if (hasLegacyEslintConfig(root)) {
     report.layers.push("eslint-bundled");
   }
+
+  let testem = firstExisting(root, TESTEM_CONFIGS);
+  let flags = testem ? changedTestemFlags(root, testem, "app") : undefined;
+
+  if (flags) report.todo.push(flags);
 
   return report;
 }
@@ -940,8 +954,9 @@ export async function migrateApp(project, report, { indexHtml }) {
     "config/environment.js",
     "config/optional-features.json",
     "config/targets.js",
-    // the qunit layer brings its own test setup. testem.cjs already works with it.
+    // the qunit layer writes a testem config that serves the build in dist/
     "testem.js",
+    "testem.cjs",
     "tests/index.html",
     "tests/test-helper.js",
     "tests/test-helper.ts",

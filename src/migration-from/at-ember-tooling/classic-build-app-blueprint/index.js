@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { checkApp, migrateApp } from "../../app.js";
 import { EMBER_CLI_BUILD } from "../../ember-cli-build.js";
 import { firstExisting, listFiles, remove } from "../../files.js";
-import { changedTestemFlags } from "../../layers.js";
 
 /**
  * Compiler options of the blueprint's tsconfig.json.
@@ -58,10 +57,6 @@ export default {
         action: "Move proxies and mocks to `server` in vite.config.mjs. Vite does not run server/.",
       });
     }
-
-    let testem = changedTestemFlags(root, "testem.js", "app");
-
-    if (testem) report.todo.push(testem);
 
     let config = await blueprintTsconfig(root);
     let custom = Object.keys(config?.compilerOptions ?? {}).filter(

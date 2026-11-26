@@ -1304,6 +1304,33 @@ describe("testem configs", () => {
       "--disable-software-rasterizer: only in testem.cjs",
     ]);
   });
+
+  it("replaces the testem.cjs of an app with the one that serves dist/", async () => {
+    let dir = await fixture("app-blueprint", {
+      "testem.cjs": `module.exports = {
+  test_page: 'tests/index.html?hidepassed&nolint',
+  launch_in_ci: ['Chrome'],
+  browser_args: { Chrome: { ci: ['--headless', '--use-gl=angle'] } },
+};
+`,
+    });
+    let project = new Project(dir, {
+      name: "my-app",
+      type: "app",
+      path: dir,
+      layers: [],
+      packageManager: "pnpm",
+    });
+
+    let todo = (await checkMigration(project))?.report.todo ?? [];
+    let flags = todo.find((finding) => finding.title.startsWith("Browser flags"));
+
+    expect(flags?.where).toContain("--use-gl=angle: only in the old testem.cjs");
+
+    await migrate(dir, "app", ["typescript", "qunit"]);
+
+    expect(await read(dir, "testem.cjs")).toContain(`cwd: "dist",`);
+  });
 });
 
 describe("@ember-tooling/classic-build-addon-blueprint", () => {

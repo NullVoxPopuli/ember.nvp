@@ -144,20 +144,25 @@ const QUNIT_TESTEM = {
  * @param {string} root
  * @param {string} file the old testem config, which the qunit layer's config replaces
  * @param {"app" | "library"} kind
- * @returns {import('#types').Finding | undefined} undefined when both configs pass the same flags
+ * @returns {import('#types').Finding | undefined} undefined when both configs pass the same flags, or the old one passes none
  */
 export function changedTestemFlags(root, file, kind) {
   if (!existsSync(join(root, file))) return;
 
   let old = browserFlags(readFileSync(join(root, file), "utf-8"));
+
+  if (old.size === 0) return;
+
   let current = browserFlags(readFileSync(QUNIT_TESTEM[kind], "utf-8"));
   let target = kind === "library" ? "config/test/testem.cjs" : "testem.cjs";
 
   /** @type {string[]} */
   let where = [];
 
+  let oldName = file === target ? `the old ${file}` : file;
+
   for (let flag of old) {
-    if (!current.has(flag)) where.push(`${flag}: only in ${file}`);
+    if (!current.has(flag)) where.push(`${flag}: only in ${oldName}`);
   }
 
   for (let flag of current) {
