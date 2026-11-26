@@ -2,8 +2,8 @@
   "solution": {
     "ember.nvp": {
       "impact": "patch",
-      "oldVersion": "3.1.0",
-      "newVersion": "3.1.1",
+      "oldVersion": "3.1.1",
+      "newVersion": "3.1.2",
       "tagName": "latest",
       "constraints": [
         {
@@ -23,5 +23,5 @@
       "oldVersion": "2.1.0"
     }
   },
-  "description": "## Release (2026-11-26)\n\n* ember.nvp 3.1.1 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#243](https://github.com/NullVoxPopuli/ember.nvp/pull/243) Replace the testem.cjs of a migrated app with the qunit layer's config ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
+  "description": "## Release (2026-11-26)\n\n* ember.nvp 3.1.2 (patch)\n\n#### :bug: Bug Fix\n* `ember.nvp`\n  * [#245](https://github.com/NullVoxPopuli/ember.nvp/pull/245) Move the Babel packages of a migrated app to the base's Babel major ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }

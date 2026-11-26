@@ -2,6 +2,17 @@
 
 ## Release (2026-11-26)
 
+* ember.nvp 3.1.2 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#245](https://github.com/NullVoxPopuli/ember.nvp/pull/245) Move the Babel packages of a migrated app to the base's Babel major ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-26)
+
 * ember.nvp 3.1.1 (patch)
 
 #### :bug: Bug Fix
