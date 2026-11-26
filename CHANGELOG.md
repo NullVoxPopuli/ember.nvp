@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-11-26)
+
+* ember.nvp 3.1.1 (patch)
+
+#### :bug: Bug Fix
+* `ember.nvp`
+  * [#243](https://github.com/NullVoxPopuli/ember.nvp/pull/243) Replace the testem.cjs of a migrated app with the qunit layer's config ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
 ## Release (2026-11-25)
 
 * ember.nvp 3.1.0 (minor)
