@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { rm } from "node:fs/promises";
 import { stripVTControlCharacters } from "node:util";
 import { packageJson } from "ember-apply";
+import semver from "semver";
 import {
   checkMigration,
   detectMigration,
@@ -200,6 +201,36 @@ describe("@ember/app-blueprint", () => {
     expect(manifest.devDependencies).not.toHaveProperty("ember-cli");
     expect(manifest.devDependencies).not.toHaveProperty("@embroider/compat");
     expect(manifest.devDependencies).toHaveProperty("@nullvoxpopuli/ember-vite");
+  });
+
+  it("moves the Babel packages of the app to the Babel major of the base", async () => {
+    let manifest = JSON.parse(appBlueprint["package.json"]!);
+
+    Object.assign(manifest.devDependencies, {
+      "@babel/core": "^7.29.0",
+      "@babel/plugin-proposal-decorators": "^7.29.0",
+      "@babel/plugin-transform-runtime": "^7.29.0",
+    });
+
+    let dir = await fixture("app-blueprint", { "package.json": JSON.stringify(manifest) });
+
+    await migrate(dir, "app", ["typescript", "qunit"]);
+
+    let { devDependencies } = await packageJson.read(dir);
+
+    expect(
+      [
+        "@babel/core",
+        "@babel/plugin-proposal-decorators",
+        "@babel/plugin-transform-runtime",
+        "@babel/plugin-transform-typescript",
+      ].map((name) => [name, semver.minVersion(devDependencies[name])?.major]),
+    ).toEqual([
+      ["@babel/core", 8],
+      ["@babel/plugin-proposal-decorators", 8],
+      ["@babel/plugin-transform-runtime", 8],
+      ["@babel/plugin-transform-typescript", 8],
+    ]);
   });
 
   it("keeps Sass that Vite compiles, when the app installs sass", async () => {
