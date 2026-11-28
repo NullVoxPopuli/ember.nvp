@@ -10,11 +10,15 @@
       "oldVersion": "3.0.1"
     },
     "@nullvoxpopuli/ember-vite": {
-      "impact": "patch",
-      "oldVersion": "2.1.0",
-      "newVersion": "2.1.1",
+      "impact": "minor",
+      "oldVersion": "2.1.1",
+      "newVersion": "2.2.0",
       "tagName": "latest",
       "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        },
         {
           "impact": "patch",
           "reason": "Appears in changelog section :bug: Bug Fix"
@@ -23,5 +27,5 @@
       "pkgJSONPath": "./packages/vite/package.json"
     }
   },
-  "description": "## Release (2026-11-28)\n\n* @nullvoxpopuli/ember-vite 2.1.1 (patch)\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`\n  * [#248](https://github.com/NullVoxPopuli/ember.nvp/pull/248) Let the project's vite config win over the plugin's defaults ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 1\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n"
+  "description": "## Release (2026-11-28)\n\n* @nullvoxpopuli/ember-vite 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-vite`\n  * [#251](https://github.com/NullVoxPopuli/ember.nvp/pull/251) Run babel on QUnit assertions when the project uses ember-qunit-nice-errors ([@aklkv](https://github.com/aklkv))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`\n  * [#249](https://github.com/NullVoxPopuli/ember.nvp/pull/249) Say how to use a babel config that isn't babel.config.js ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 1\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n"
 }
