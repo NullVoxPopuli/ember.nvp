@@ -3,7 +3,7 @@ import { interpreter, type TopLevelFilterExpression } from "@rolldown/pluginutil
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ConfigEnv, ConfigPluginContext, Plugin } from "vite";
+import { resolveConfig, type ConfigEnv, type ConfigPluginContext, type Plugin } from "vite";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ember } from "./ember.ts";
@@ -73,6 +73,96 @@ describe("ember", () => {
 
     expect(config.build.rolldownOptions.moduleTypes).toEqual({ ".ts": "js" });
     expect(config.optimizeDeps.rolldownOptions.resolve.extensions).toEqual(extensions);
+  });
+});
+
+describe("the project's own vite config", () => {
+  it("keeps the project's build settings, and the defaults fill in the rest", async () => {
+    const config = await configure(
+      { command: "build", mode: "production" },
+      {
+        build: {
+          sourcemap: "hidden",
+          rolldownOptions: { output: { strictExecutionOrder: false } },
+        },
+      },
+    );
+
+    expect(config.build.sourcemap).toBe("hidden");
+    expect(config.build.rolldownOptions.output.strictExecutionOrder).toBe(false);
+    // Not the terser that @embroider/vite picks when the project sets no minifier.
+    expect(config.build.minify).toBe("oxc");
+    expect(config.build.rolldownOptions.output.minify).toBe(true);
+  });
+
+  it("keeps the project's build settings in development mode", async () => {
+    const config = await configure(
+      { command: "build", mode: "development" },
+      { build: { sourcemap: false, rolldownOptions: { output: { codeSplitting: false } } } },
+    );
+
+    expect(config.build.sourcemap).toBe(false);
+    expect(config.build.rolldownOptions.output.codeSplitting).toBe(false);
+    expect(config.build.minify).toBe(false);
+  });
+
+  it("keeps the project's optimization settings", async () => {
+    const config = await configure(
+      { command: "build", mode: "production" },
+      { build: { rolldownOptions: { optimization: { pifeForModuleWrappers: false } } } },
+    );
+
+    expect(config.build.rolldownOptions.optimization.pifeForModuleWrappers).toBe(false);
+    expect(config.build.rolldownOptions.optimization.inlineConst).toEqual({
+      mode: "smart",
+      pass: 3,
+    });
+  });
+
+  it("uses the default for a setting the project leaves undefined", async () => {
+    const config = await configure(
+      { command: "build", mode: "production" },
+      { build: { sourcemap: undefined } },
+    );
+
+    expect(config.build.sourcemap).toBe(true);
+  });
+
+  /**
+   * Vite gives the config hooks a `build.rollupOptions` accessor for `build.rolldownOptions`,
+   * which the plain objects of `configure()` don't have.
+   */
+  it("keeps what the config hooks put in build.rolldownOptions, through vite", async () => {
+    const config = await resolveConfig(
+      {
+        configFile: false,
+        logLevel: "silent",
+        plugins: [ember()],
+        build: { sourcemap: "hidden" },
+      },
+      "build",
+      "production",
+    );
+
+    expect(config.build.sourcemap).toBe("hidden");
+    expect(config.build.rolldownOptions.moduleTypes).toEqual({ ".ts": "js" });
+    expect(config.build.rolldownOptions.output).toMatchObject({ strictExecutionOrder: true });
+  });
+
+  it("runs the project's optimizeDeps plugins before its own", async () => {
+    const config = await configure(
+      { command: "serve", mode: "development" },
+      { optimizeDeps: { rolldownOptions: { plugins: [{ name: "project-plugin" }] } } },
+    );
+
+    expect(
+      config.optimizeDeps.rolldownOptions.plugins.map((plugin: Plugin) => plugin.name),
+    ).toEqual([
+      "project-plugin",
+      "embroider-resolver",
+      "embroider-template-tag",
+      "nullvoxpopuli:babel",
+    ]);
   });
 });
 

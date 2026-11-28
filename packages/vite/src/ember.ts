@@ -271,6 +271,8 @@ export function ember(nvpConfig: Config = {}) {
       // no compat
       name: "ember:nullvoxpopuli",
       async config(this: ConfigPluginContext, viteConfig: any, env: ConfigEnv) {
+        const project = projectConfig(viteConfig);
+
         /**
          * The hook reads the rolldown version from the plugin context,
          * and takes its esbuild path without it.
@@ -309,8 +311,10 @@ export function ember(nvpConfig: Config = {}) {
         viteConfig.optimizeDeps.rolldownOptions.tsconfig = true;
 
         applyConfig(viteConfig, env, nvpConfig);
+        keepProjectConfig(viteConfig, project);
 
         viteConfig.optimizeDeps.rolldownOptions.plugins = [
+          ...project.optimizeDepsPlugins,
           resolver({ rolldown: true }),
           templateTag(),
 
@@ -333,6 +337,53 @@ export function ember(nvpConfig: Config = {}) {
       filter,
     }),
   ];
+}
+
+/**
+ * What the project's own vite config sets, before any config hook changes it.
+ *
+ * What the config hooks here and in `@embroider/vite` set in `build`,
+ * `build.rolldownOptions.output` and `build.rolldownOptions.optimization` are defaults:
+ * a project that sets one, such as `build.sourcemap: "hidden"`
+ * or `build.rolldownOptions.output.strictExecutionOrder: false`, keeps its value.
+ * The project's own optimizeDeps plugins run before the ones this plugin adds.
+ */
+function projectConfig(viteConfig: UserConfig) {
+  const build = viteConfig.build ?? {};
+  const output = build.rolldownOptions?.output;
+  const optimizeDepsPlugins = viteConfig.optimizeDeps?.rolldownOptions?.plugins;
+
+  return {
+    /**
+     * Vite 8 makes `build.rollupOptions` an accessor for `build.rolldownOptions`.
+     * Neither is put back: that would replace the object the config hooks fill in.
+     */
+    build: setValues(build, ["rolldownOptions", "rollupOptions"]),
+    output: Array.isArray(output) ? {} : setValues(output),
+    optimization: setValues(build.rolldownOptions?.optimization),
+    optimizeDepsPlugins: Array.isArray(optimizeDepsPlugins) ? [...optimizeDepsPlugins] : [],
+  };
+}
+
+/**
+ * The entries that have a value.
+ * A project that sets `sourcemap: undefined` gets the default, as if it had not set it.
+ */
+function setValues(object: object | undefined, skip: string[] = []) {
+  return Object.fromEntries(
+    Object.entries(object ?? {}).filter(
+      ([key, value]) => value !== undefined && !skip.includes(key),
+    ),
+  );
+}
+
+function keepProjectConfig(viteConfig: UserConfig, project: ReturnType<typeof projectConfig>) {
+  Object.assign(viteConfig.build!, project.build);
+
+  const { output, optimization } = viteConfig.build!.rolldownOptions ?? {};
+
+  if (output && !Array.isArray(output)) Object.assign(output, project.output);
+  if (optimization) Object.assign(optimization, project.optimization);
 }
 
 /**
