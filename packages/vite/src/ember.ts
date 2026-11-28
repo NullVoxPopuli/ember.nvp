@@ -271,6 +271,10 @@ export function ember(nvpConfig: Config = {}) {
       // no compat
       name: "ember:nullvoxpopuli",
       async config(this: ConfigPluginContext, viteConfig: any, env: ConfigEnv) {
+        /**
+         * Read before the config hooks below write their defaults into `viteConfig`,
+         * and put back over them after `applyConfig`.
+         */
         const project = projectConfig(viteConfig);
 
         /**
