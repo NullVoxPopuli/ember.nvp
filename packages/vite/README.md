@@ -61,4 +61,8 @@ ember({
 
 Each option is documented on its type.
 
+What this plugin sets in `build`, `build.rolldownOptions.output` and `build.rolldownOptions.optimization`
+are defaults: a setting there in your own vite config wins,
+for example `build.sourcemap: "hidden"` or `build.rolldownOptions.output.strictExecutionOrder: false`.
+
 If the project depends on `ember-concurrency`, `ember-intl`, `ember-scoped-css` or `unplugin-icons`, babel compiles their modules with no option.
