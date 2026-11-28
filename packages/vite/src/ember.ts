@@ -98,6 +98,27 @@ type BabelOptions =
     };
 
 /**
+ * Other names babel loads a project config from.
+ */
+const OTHER_BABEL_CONFIGS = [
+  "babel.config.mjs",
+  "babel.config.cjs",
+  "babel.config.cts",
+  "babel.config.json",
+];
+
+/**
+ * A v2 addon. Its babel config is for publishing, so vite keeps the default plugins.
+ */
+function isLibrary(): boolean {
+  const manifestPath = join(process.cwd(), "package.json");
+
+  if (!existsSync(manifestPath)) return false;
+
+  return JSON.parse(readFileSync(manifestPath, "utf-8"))["ember-addon"]?.type === "addon";
+}
+
+/**
  * The project's babel config wins when it exists.
  * `babel.configFile` selects which one (e.g. a test-only `config/test/babel.config.js`).
  *
@@ -105,6 +126,9 @@ type BabelOptions =
  * so no config file is required.
  * Babel helpers are inlined in that case:
  * projects without a babel config don't carry `@babel/runtime`.
+ *
+ * An app whose config has another name would otherwise get the defaults without noticing,
+ * so that is an error.
  */
 function babelOptions(nvpConfig: Config): BabelOptions {
   const configFile = resolve(
@@ -113,6 +137,17 @@ function babelOptions(nvpConfig: Config): BabelOptions {
 
   if (existsSync(configFile)) {
     return { configFile };
+  }
+
+  if (!nvpConfig.babel?.configFile && !isLibrary()) {
+    const otherConfig = OTHER_BABEL_CONFIGS.find((name) => existsSync(join(process.cwd(), name)));
+
+    if (otherConfig) {
+      throw new Error(
+        `@nullvoxpopuli/ember-vite reads babel.config.js, but this project has ${otherConfig}. ` +
+          `Pass \`ember({ babel: { configFile: "./${otherConfig}" } })\` to use it.`,
+      );
+    }
   }
 
   /**
