@@ -2,6 +2,20 @@
 
 ## Release (2026-11-28)
 
+* ember.nvp 3.2.0 (minor)
+* @nullvoxpopuli/ember-build-tooling-utils 2.1.0 (minor)
+* @nullvoxpopuli/ember-rolldown 3.0.2 (patch)
+* @nullvoxpopuli/ember-vite 2.3.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`, `ember.nvp`
+  * [#242](https://github.com/NullVoxPopuli/ember.nvp/pull/242) Remove the babel worker __dirname shim ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+#### Committers: 1
+- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))
+
+## Release (2026-11-28)
+
 * @nullvoxpopuli/ember-vite 2.2.0 (minor)
 
 #### :rocket: Enhancement

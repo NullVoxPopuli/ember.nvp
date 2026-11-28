@@ -1,31 +1,61 @@
 {
   "solution": {
     "ember.nvp": {
-      "oldVersion": "3.1.2"
-    },
-    "@nullvoxpopuli/ember-build-tooling-utils": {
-      "oldVersion": "2.0.1"
-    },
-    "@nullvoxpopuli/ember-rolldown": {
-      "oldVersion": "3.0.1"
-    },
-    "@nullvoxpopuli/ember-vite": {
       "impact": "minor",
-      "oldVersion": "2.1.1",
-      "newVersion": "2.2.0",
+      "oldVersion": "3.1.2",
+      "newVersion": "3.2.0",
       "tagName": "latest",
       "constraints": [
         {
           "impact": "minor",
           "reason": "Appears in changelog section :rocket: Enhancement"
-        },
+        }
+      ],
+      "pkgJSONPath": "./package.json"
+    },
+    "@nullvoxpopuli/ember-build-tooling-utils": {
+      "impact": "minor",
+      "oldVersion": "2.0.1",
+      "newVersion": "2.1.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
+        }
+      ],
+      "pkgJSONPath": "./packages/build-tooling-utils/package.json"
+    },
+    "@nullvoxpopuli/ember-rolldown": {
+      "impact": "patch",
+      "oldVersion": "3.0.1",
+      "newVersion": "3.0.2",
+      "tagName": "latest",
+      "constraints": [
         {
           "impact": "patch",
-          "reason": "Appears in changelog section :bug: Bug Fix"
+          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
+        }
+      ],
+      "pkgJSONPath": "./packages/rolldown/package.json"
+    },
+    "@nullvoxpopuli/ember-vite": {
+      "impact": "minor",
+      "oldVersion": "2.2.0",
+      "newVersion": "2.3.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "patch",
+          "reason": "Has dependency `workspace:*` on @nullvoxpopuli/ember-build-tooling-utils"
+        },
+        {
+          "impact": "minor",
+          "reason": "Appears in changelog section :rocket: Enhancement"
         }
       ],
       "pkgJSONPath": "./packages/vite/package.json"
     }
   },
-  "description": "## Release (2026-11-28)\n\n* @nullvoxpopuli/ember-vite 2.2.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-vite`\n  * [#251](https://github.com/NullVoxPopuli/ember.nvp/pull/251) Run babel on QUnit assertions when the project uses ember-qunit-nice-errors ([@aklkv](https://github.com/aklkv))\n\n#### :bug: Bug Fix\n* `@nullvoxpopuli/ember-vite`\n  * [#249](https://github.com/NullVoxPopuli/ember.nvp/pull/249) Say how to use a babel config that isn't babel.config.js ([@aklkv](https://github.com/aklkv))\n\n#### Committers: 1\n- Alexey Kulakov ([@aklkv](https://github.com/aklkv))\n"
+  "description": "## Release (2026-11-28)\n\n* ember.nvp 3.2.0 (minor)\n* @nullvoxpopuli/ember-build-tooling-utils 2.1.0 (minor)\n* @nullvoxpopuli/ember-rolldown 3.0.2 (patch)\n* @nullvoxpopuli/ember-vite 2.3.0 (minor)\n\n#### :rocket: Enhancement\n* `@nullvoxpopuli/ember-build-tooling-utils`, `@nullvoxpopuli/ember-vite`, `ember.nvp`\n  * [#242](https://github.com/NullVoxPopuli/ember.nvp/pull/242) Remove the babel worker __dirname shim ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n\n#### Committers: 1\n- @NullVoxPopuli's reduced-access machine account for AI usage ([@NullVoxPopuli-ai-agent](https://github.com/NullVoxPopuli-ai-agent))\n"
 }
