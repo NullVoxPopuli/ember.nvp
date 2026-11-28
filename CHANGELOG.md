@@ -2,6 +2,21 @@
 
 ## Release (2026-11-28)
 
+* @nullvoxpopuli/ember-vite 2.2.0 (minor)
+
+#### :rocket: Enhancement
+* `@nullvoxpopuli/ember-vite`
+  * [#251](https://github.com/NullVoxPopuli/ember.nvp/pull/251) Run babel on QUnit assertions when the project uses ember-qunit-nice-errors ([@aklkv](https://github.com/aklkv))
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-vite`
+  * [#249](https://github.com/NullVoxPopuli/ember.nvp/pull/249) Say how to use a babel config that isn't babel.config.js ([@aklkv](https://github.com/aklkv))
+
+#### Committers: 1
+- Alexey Kulakov ([@aklkv](https://github.com/aklkv))
+
+## Release (2026-11-28)
+
 * @nullvoxpopuli/ember-vite 2.1.1 (patch)
 
 #### :bug: Bug Fix
