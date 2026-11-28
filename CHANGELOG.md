@@ -1,5 +1,16 @@
 # Changelog
 
+## Release (2026-11-28)
+
+* @nullvoxpopuli/ember-vite 2.1.1 (patch)
+
+#### :bug: Bug Fix
+* `@nullvoxpopuli/ember-vite`
+  * [#248](https://github.com/NullVoxPopuli/ember.nvp/pull/248) Let the project's vite config win over the plugin's defaults ([@aklkv](https://github.com/aklkv))
+
+#### Committers: 1
+- Alexey Kulakov ([@aklkv](https://github.com/aklkv))
+
 ## Release (2026-11-26)
 
 * ember.nvp 3.1.2 (patch)
