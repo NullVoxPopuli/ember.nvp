@@ -315,6 +315,73 @@ describe("babel config file", () => {
     // @ts-expect-error the babel plugin has function hooks
     expect(babel.applyToEnvironment.call(CONTEXT, { name: "client" })).toBe(true);
   });
+
+  it.each(["babel.config.mjs", "babel.config.cjs", "babel.config.cts", "babel.config.json"])(
+    "says how to use %s instead of ignoring it",
+    (name) => {
+      inProject({ "package.json": `{ "type": "module" }`, [name]: "{}" });
+
+      expect(() => ember()).toThrow(
+        `@nullvoxpopuli/ember-vite reads babel.config.js, but this project has ${name}. ` +
+          `Pass \`ember({ babel: { configFile: "./${name}" } })\` to use it.`,
+      );
+    },
+  );
+
+  it("keeps the default plugins for a library, whose babel config is for publishing", () => {
+    inProject({
+      "package.json": `{ "type": "module", "ember-addon": { "version": 2, "type": "addon" } }`,
+      "babel.config.cjs": "module.exports = {};",
+    });
+
+    expect(() => ember()).not.toThrow();
+  });
+
+  it("uses babel.config.js when another config sits next to it", () => {
+    inProject({
+      "package.json": `{ "type": "module" }`,
+      "babel.config.js": "export default { plugins: [] };",
+      "babel.config.cjs": "module.exports = {};",
+    });
+
+    expect(() => ember()).not.toThrow();
+  });
+
+  const MARKER_PLUGIN = [
+    `export default ({ types: t }) => ({`,
+    `  visitor: {`,
+    `    Program(path) {`,
+    `      path.unshiftContainer("body", t.expressionStatement(t.stringLiteral("from the config file")));`,
+    `    },`,
+    `  },`,
+    `});`,
+  ].join("\n");
+
+  it("uses the config that babel.configFile names", async () => {
+    const directory = inProject({
+      "package.json": `{ "type": "module" }`,
+      "marker-plugin.js": MARKER_PLUGIN,
+      "babel.config.mjs": `export default { plugins: ["./marker-plugin.js"] };`,
+    });
+
+    const babel = await startedBabel(
+      ember({ babel: { configFile: "./babel.config.mjs" } }) as Plugin[],
+    );
+
+    try {
+      // @ts-expect-error the babel plugin has an object transform hook
+      const result = await babel.transform.handler.call(
+        CONTEXT,
+        `import { macroCondition } from "@embroider/macros";`,
+        join(directory, "app/a.js"),
+      );
+
+      expect(result.code).toContain("from the config file");
+    } finally {
+      // @ts-expect-error the babel plugin ends its workers in closeBundle
+      await babel.closeBundle.call({ meta: { watchMode: false } });
+    }
+  });
 });
 
 describe("babel filter in the dev server", () => {

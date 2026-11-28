@@ -35,7 +35,7 @@ Then:
 ## Requirements
 
 - `type=module` in your ember app
-- babel config must be named `babel.config.js`
+- babel config must be named `babel.config.js`, or passed as `babel.configFile`
 - `@embroider/vite` is up to date~ish
 
 ## Configuration
