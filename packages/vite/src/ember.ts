@@ -132,6 +132,7 @@ function babelOptions(nvpConfig: Config): BabelOptions {
  *
  * - ember-concurrency's decorators
  * - ember-intl's formatMessage macro
+ * - ember-qunit-nice-errors, which adds a message to each QUnit assertion
  * - ember-scoped-css transforms
  * - unplugin-icons, whose icon modules compile with `template()`.
  *   Their ids have no file extension, so only the id matches them.
@@ -145,6 +146,7 @@ const LIBRARY_FILTERS: Record<
     imports: ["ember-intl/helpers/format-message"],
     code: [/\bintl\.formatMessage\b/],
   },
+  "ember-qunit-nice-errors": { code: [/\bassert\.[a-zA-Z]+\(/] },
   "ember-scoped-css": { imports: ["ember-scoped-css"] },
   "unplugin-icons": { ids: [/^~icons\//] },
 };

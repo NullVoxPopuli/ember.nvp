@@ -265,6 +265,7 @@ function inProjectWithLibraries() {
   const devDependencies = {
     "ember-concurrency": "*",
     "ember-intl": "*",
+    "ember-qunit-nice-errors": "*",
     "ember-scoped-css": "*",
     "unplugin-icons": "*",
   };
@@ -507,6 +508,11 @@ describe("libraries that need babel", () => {
         `export const title = this.intl.formatMessage("Hello");`,
         "/app/components/a.js",
       ),
+      "ember-qunit-nice-errors": interpreter(
+        filter,
+        `test("it works", (assert) => assert.ok(true));`,
+        "/tests/unit/a-test.js",
+      ),
       "ember-scoped-css": interpreter(
         filter,
         `import { scopedClass } from "ember-scoped-css";`,
@@ -524,6 +530,7 @@ describe("libraries that need babel", () => {
         "ember-concurrency": false,
         "ember-intl formatMessage": false,
         "ember-intl import": false,
+        "ember-qunit-nice-errors": false,
         "ember-scoped-css": false,
         "unplugin-icons": false,
       }
@@ -538,6 +545,7 @@ describe("libraries that need babel", () => {
         "ember-concurrency": true,
         "ember-intl formatMessage": true,
         "ember-intl import": true,
+        "ember-qunit-nice-errors": true,
         "ember-scoped-css": true,
         "unplugin-icons": true,
       }
