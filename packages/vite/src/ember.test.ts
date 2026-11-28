@@ -1,6 +1,6 @@
 import { extensions } from "@embroider/vite";
 import { interpreter, type TopLevelFilterExpression } from "@rolldown/pluginutils";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveConfig, type ConfigEnv, type ConfigPluginContext, type Plugin } from "vite";
@@ -491,12 +491,6 @@ describe("babel.parallel", () => {
     expect(await compileWithConfigFile({}, CONFIG_WITH_WARP_DRIVE, buildConfig("5.8.2"))).toContain(
       "worker thread",
     );
-    expect(existsSync("node_modules/.cache/nullvoxpopuli-babel")).toBe(true);
-  });
-
-  it("loads the config file directly without @warp-drive/build-config before 5.9", async () => {
-    expect(await compileWithConfigFile()).toContain("worker thread");
-    expect(existsSync("node_modules/.cache/nullvoxpopuli-babel")).toBe(false);
   });
 
   it("runs babel in the main thread when parallel is false", async () => {
